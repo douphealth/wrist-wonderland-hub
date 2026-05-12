@@ -340,7 +340,7 @@ function WatchMatchResult() {
 
                 <div className="flex flex-wrap gap-3">
                   <a
-                    href={amazonSearchUrl(primary.watch.brand, primary.watch.model)}
+                    href={amazonURL(primary.watch)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all"
@@ -349,6 +349,17 @@ function WatchMatchResult() {
                     Check Price on Amazon
                     <ExternalLink className="w-3 h-3" />
                   </a>
+                  {primary.watch.reviewPath && (
+                    <a
+                      href={gutfURL(primary.watch.reviewPath)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 border border-primary/30 hover:bg-primary/10 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary transition-all"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Read Full Review
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
