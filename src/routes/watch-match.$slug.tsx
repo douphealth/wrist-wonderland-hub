@@ -145,6 +145,57 @@ function WatchMatchResult() {
   const { slug } = Route.useParams();
   const { d } = Route.useSearch();
   const [copied, setCopied] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const autoOpenedRef = useRef(false);
+
+  // Hydrate subscribed flag and auto-open the EmailGate after a soft dwell
+  // (10s) on first visit. We never re-open for users who've already opted in
+  // or dismissed the modal in this session.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (hasSubscribed()) {
+      setSubscribed(true);
+      return;
+    }
+    const dismissed = sessionStorage.getItem("wm_gate_dismissed_v1");
+    if (dismissed) return;
+    const t = window.setTimeout(() => {
+      if (autoOpenedRef.current) return;
+      autoOpenedRef.current = true;
+      setGateOpen(true);
+    }, 10000);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  // Exit-intent: pointer leaving the top of the viewport (desktop only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (subscribed) return;
+    if (sessionStorage.getItem("wm_gate_dismissed_v1")) return;
+    const onLeave = (e: MouseEvent) => {
+      if (e.clientY > 0) return;
+      if (autoOpenedRef.current) return;
+      autoOpenedRef.current = true;
+      setGateOpen(true);
+    };
+    document.addEventListener("mouseout", onLeave);
+    return () => document.removeEventListener("mouseout", onLeave);
+  }, [subscribed]);
+
+  const closeGate = useCallback(() => {
+    setGateOpen(false);
+    try {
+      sessionStorage.setItem("wm_gate_dismissed_v1", "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const onUnlock = useCallback(() => {
+    setSubscribed(true);
+    setGateOpen(false);
+  }, []);
 
   const answers: QuizAnswers | null = useMemo(() => {
     if (d) {
