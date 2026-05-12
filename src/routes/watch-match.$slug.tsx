@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { z } from "zod";
 import {
@@ -10,8 +12,9 @@ import {
 import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
-import { amazonURL, gutfURL } from "@/lib/amazon";
+import { amazonURL, amazonImage, gutfURL } from "@/lib/amazon";
 import { pickGuides } from "@/lib/featured-guides";
+import { getRelevantGutfPosts } from "@/lib/gearuptofit-posts.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -179,6 +182,28 @@ function WatchMatchResult() {
 
   const primary = setup.primary;
 
+  // Build live keyword set from the user's answers + top match — used to pull
+  // the most relevant published guides from gearuptofit.com via the WP REST API.
+  const liveKeywords = useMemo(() => {
+    const kws = new Set<string>();
+    kws.add(primary.watch.brand.toLowerCase());
+    kws.add(answers.primaryUse);
+    if (answers.form === "band") kws.add("fitness tracker");
+    if (answers.form === "sportwatch") kws.add("sports watch");
+    if (answers.form === "smartwatch") kws.add("smartwatch");
+    if (answers.features.includes("ecg")) kws.add("ECG");
+    if (answers.features.includes("swim")) kws.add("swimming");
+    return Array.from(kws).slice(0, 5);
+  }, [answers, primary]);
+
+  const fetchLivePosts = useServerFn(getRelevantGutfPosts);
+  const livePostsQuery = useQuery({
+    queryKey: ["gutf-posts", liveKeywords.join("|")],
+    queryFn: () => fetchLivePosts({ data: { keywords: liveKeywords, limit: 6 } }),
+    staleTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <div className="min-h-screen pb-16 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
@@ -318,8 +343,20 @@ function WatchMatchResult() {
 
             <div className="md:flex md:gap-6 md:items-start">
               <div className="md:w-2/5 mb-5 md:mb-0">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden">
-                  <WatchIcon className="w-32 h-32 text-primary/40" strokeWidth={1} />
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden p-6">
+                  {amazonImage(primary.watch, 500) ? (
+                    <img
+                      src={amazonImage(primary.watch, 500)}
+                      alt={`${primary.watch.brand} ${primary.watch.model} on Amazon`}
+                      loading="lazy"
+                      className="max-h-full max-w-full object-contain drop-shadow-2xl"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <WatchIcon className="w-32 h-32 text-primary/40" strokeWidth={1} />
+                  )}
                 </div>
               </div>
               <div className="flex-1">
@@ -447,6 +484,19 @@ function WatchMatchResult() {
                 >
                   #{idx + 1}
                 </div>
+                <div className="hidden sm:flex w-14 h-14 rounded-lg bg-background/50 border border-border/40 items-center justify-center flex-shrink-0 overflow-hidden p-1.5">
+                  {amazonImage(s.watch, 160) ? (
+                    <img
+                      src={amazonImage(s.watch, 160)}
+                      alt={`${s.watch.brand} ${s.watch.model}`}
+                      loading="lazy"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+                    />
+                  ) : (
+                    <WatchIcon className="w-6 h-6 text-primary/40" strokeWidth={1.5} />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm md:text-base truncate">
                     {s.watch.brand} {s.watch.model}
@@ -455,11 +505,16 @@ function WatchMatchResult() {
                     ${s.watch.priceUSD} · {s.watch.batteryDays}d battery · {s.watch.display}
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex-shrink-0">
                   <div className="text-lg font-bold text-gradient tabular-nums">{s.matchPercent}%</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Match
-                  </div>
+                  <a
+                    href={amazonURL(s.watch)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] uppercase tracking-widest text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Buy <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
                 </div>
               </div>
             ))}
@@ -500,6 +555,64 @@ function WatchMatchResult() {
               </a>
             ))}
           </div>
+        </motion.div>
+
+        {/* Live posts pulled from gearuptofit.com WP REST API */}
+        <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+                Latest From GearUpToFit
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Live feed — fresh reviews and guides matched to your answers.
+              </p>
+            </div>
+          </div>
+          {livePostsQuery.isLoading && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-28 rounded-xl border border-border/40 bg-card/20 animate-pulse" />
+              ))}
+            </div>
+          )}
+          {livePostsQuery.data?.error && (
+            <p className="text-sm text-muted-foreground">{livePostsQuery.data.error}</p>
+          )}
+          {livePostsQuery.data?.posts && livePostsQuery.data.posts.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {livePostsQuery.data.posts.map((p) => (
+                <a
+                  key={p.id}
+                  href={p.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex gap-3 p-3 rounded-xl border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                >
+                  {p.image && (
+                    <img
+                      src={p.image}
+                      alt=""
+                      loading="lazy"
+                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-border/30"
+                      onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-sm leading-snug mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                      {p.excerpt}
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* FAQ */}
