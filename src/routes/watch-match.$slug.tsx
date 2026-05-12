@@ -741,6 +741,20 @@ function RotationCard({
         </div>
         <div className="text-lg font-bold text-gradient tabular-nums">{item.matchPercent}%</div>
       </div>
+      <div className="aspect-[16/9] rounded-xl border border-border/40 overflow-hidden mb-3 relative">
+        <img
+          src={categoryImage(item.watch)}
+          alt={`${item.watch.brand} ${item.watch.model}`}
+          loading="lazy"
+          width={896}
+          height={896}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+        <span className="absolute bottom-2 left-2 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
+          {item.watch.brand}
+        </span>
+      </div>
       <div className="font-bold text-base md:text-lg mb-1">
         {item.watch.brand} {item.watch.model}
       </div>
