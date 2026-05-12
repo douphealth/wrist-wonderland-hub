@@ -588,7 +588,7 @@ RewriteRule ^_build/(.*)$ https://wrist-wonderland-hub.lovable.app/_build/$1 [P,
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
-              The 8-email sequence
+              Pre-purchase sequence (8 emails · 21 days)
             </h2>
           </div>
           <div className="space-y-4">
@@ -629,6 +629,204 @@ RewriteRule ^_build/(.*)$ https://wrist-wonderland-hub.lovable.app/_build/$1 [P,
                 </div>
               </motion.article>
             ))}
+          </div>
+        </section>
+
+        {/* Lifecycle / post-purchase */}
+        <section className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Layers className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              Post-purchase lifecycle (4 emails · 12 months)
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Triggered when the Brevo goal <code className="text-primary">amazon_click</code> fires
+            (or contact self-reports a purchase via reply to email 6). Drives activation,
+            accessory revenue, UGC, and the natural 12-month re-engagement window.
+          </p>
+          <div className="space-y-4">
+            {lifecycleEmails.map((e, i) => (
+              <motion.article
+                key={`lc-${i}`}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                className="glass rounded-2xl p-5 md:p-6 space-y-3"
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <Badge className="border-primary/25 bg-primary/10 text-primary uppercase tracking-widest text-[10px]">
+                    Lifecycle {i + 1}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+                    <Timer className="w-3.5 h-3.5" />
+                    {e.day}
+                  </span>
+                </div>
+                <h3 className="text-lg md:text-xl font-bold leading-snug">{e.subject}</h3>
+                <p className="text-xs text-muted-foreground italic">Preheader: {e.preheader}</p>
+                <p className="text-xs text-primary/80">Goal: {e.goal}</p>
+                <pre className="whitespace-pre-wrap text-sm text-foreground/90 leading-relaxed bg-card/40 border border-border/40 rounded-lg p-4 font-sans">
+                  {e.body}
+                </pre>
+                <div className="text-xs text-muted-foreground">
+                  <strong className="text-primary">CTA:</strong> {e.cta} →{" "}
+                  <code className="text-primary/80">{e.url}</code>
+                </div>
+                <div className="text-xs text-muted-foreground border-t border-border/40 pt-3">
+                  <strong className="text-primary">Brevo rule:</strong> {e.brevoRule}
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        {/* Segmentation matrix */}
+        <section className="glass rounded-2xl p-5 md:p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <GitBranch className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              Segmentation matrix
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Brevo dynamic content blocks branch on <code className="text-primary">PHONE_OS</code>,{" "}
+            <code className="text-primary">PRIMARY_USE</code> and{" "}
+            <code className="text-primary">BUDGET_BAND</code>. Each segment swaps the hero recommendation
+            and the email-2 platform reframe.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs md:text-sm border-collapse">
+              <thead>
+                <tr className="text-left text-primary/80 uppercase tracking-wider text-[10px]">
+                  <th className="border-b border-border/40 py-2 pr-3">Segment</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Hero pick</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Swap-ins</th>
+                  <th className="border-b border-border/40 py-2">Cadence override</th>
+                </tr>
+              </thead>
+              <tbody>
+                {segmentationMatrix.map((s, i) => (
+                  <tr key={i} className="align-top">
+                    <td className="border-b border-border/20 py-2 pr-3 font-medium">{s.segment}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-primary">{s.primary}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-muted-foreground">{s.swap.join(" · ")}</td>
+                    <td className="border-b border-border/20 py-2 text-muted-foreground">{s.cadence}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* KPI benchmarks */}
+        <section className="glass rounded-2xl p-5 md:p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              KPI targets &amp; alert floors
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs md:text-sm border-collapse">
+              <thead>
+                <tr className="text-left text-primary/80 uppercase tracking-wider text-[10px]">
+                  <th className="border-b border-border/40 py-2 pr-3">Metric</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Target</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Alert floor</th>
+                  <th className="border-b border-border/40 py-2">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {kpiBenchmarks.map((k, i) => (
+                  <tr key={i} className="align-top">
+                    <td className="border-b border-border/20 py-2 pr-3 font-medium">{k.metric}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-primary">{k.target}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-destructive/90">{k.floor}</td>
+                    <td className="border-b border-border/20 py-2 text-muted-foreground">{k.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* A/B tests */}
+        <section className="glass rounded-2xl p-5 md:p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Beaker className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              A/B test backlog (run sequentially)
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {abTests.map((t) => (
+              <div key={t.id} className="rounded-xl border border-border/40 bg-card/40 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-primary/15 text-primary border-primary/25 text-[10px] uppercase tracking-widest">
+                    {t.id}
+                  </Badge>
+                  <span className="text-sm font-bold">{t.element}</span>
+                </div>
+                <div className="text-xs text-muted-foreground leading-relaxed">
+                  <div><strong className="text-primary/80">A:</strong> {t.a}</div>
+                  <div><strong className="text-primary/80">B:</strong> {t.b}</div>
+                </div>
+                <div className="text-[11px] text-muted-foreground border-t border-border/30 pt-2">
+                  <Target className="inline w-3 h-3 mr-1 text-primary" />
+                  {t.winnerMetric} · {t.traffic}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Deliverability + GDPR */}
+        <section className="grid md:grid-cols-2 gap-5">
+          <div className="glass rounded-2xl p-5 md:p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg md:text-xl font-bold uppercase tracking-tight">
+                Deliverability checklist
+              </h2>
+            </div>
+            <ul className="space-y-2.5">
+              {deliverabilityChecklist.map((d, i) => (
+                <li key={i} className="flex gap-2 text-xs md:text-sm text-muted-foreground leading-relaxed">
+                  <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="glass rounded-2xl p-5 md:p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg md:text-xl font-bold uppercase tracking-tight">
+                GDPR &amp; consent
+              </h2>
+            </div>
+            <ul className="space-y-2.5">
+              {gdprChecklist.map((d, i) => (
+                <li key={i} className="flex gap-2 text-xs md:text-sm text-muted-foreground leading-relaxed">
+                  <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </div>
