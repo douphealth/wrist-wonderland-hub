@@ -124,25 +124,12 @@ async function resolveProduct(
         signal: ctrl.signal,
       }).finally(() => clearTimeout(t));
       if (res.ok) {
-        const data = (await res.json()) as {
-          organic_results?: Array<{
-            asin?: string;
-            title?: string;
-            link?: string;
-            thumbnail?: string;
-            sponsored?: boolean;
-          }>;
-        };
-        // Prefer first non-sponsored result whose title actually mentions the brand.
-        const brandLower = brand.toLowerCase();
-        const candidates = (data.organic_results ?? []).filter(
-          (r) => r.asin && (r.title?.toLowerCase().includes(brandLower) ?? false),
-        );
-        const pick = candidates.find((r) => !r.sponsored) ?? candidates[0];
+        const data = (await res.json()) as { organic_results?: SerpApiResult[] };
+        const pick = pickBest(data.organic_results, brand, model);
         if (pick?.asin) {
           const product: AmazonProduct = {
             url: dpUrl(pick.asin),
-            image: sanitizeImage(pick.thumbnail),
+            image: sanitizeImage(pick.thumbnail ?? pick.image),
             asin: pick.asin,
             title: pick.title ?? null,
             source: "serpapi",
