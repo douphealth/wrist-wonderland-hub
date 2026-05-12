@@ -155,8 +155,8 @@ export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
       if (s.budget === 1) reasons.push("Fits your budget perfectly");
       return {
         watch: w,
-        score: Math.min(score, 0.995),
-        matchPercent: Math.round(Math.min(score, 0.995) * 100),
+        score: Math.min(score, 0.99),
+        matchPercent: Math.min(99, Math.round(Math.min(score, 0.99) * 100)),
         reasons,
       };
     })
