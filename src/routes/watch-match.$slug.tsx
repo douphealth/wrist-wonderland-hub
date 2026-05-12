@@ -435,6 +435,23 @@ function WatchMatchResult() {
                 <Download className="w-4 h-4 mr-2 group-hover:animate-bounce" />
                 Download PDF Report
               </Button>
+              {!subscribed && (
+                <Button
+                  onClick={() => setGateOpen(true)}
+                  variant="outline"
+                  size="lg"
+                  className="h-12 px-6 md:px-8 rounded-xl text-sm font-bold uppercase tracking-wider border-primary/40 hover:border-primary hover:bg-primary/10"
+                >
+                  <Mail className="w-4 h-4 mr-2 text-primary" />
+                  Email me my report + 8-day series
+                </Button>
+              )}
+              {subscribed && (
+                <p className="inline-flex items-center gap-1.5 text-[11px] text-primary uppercase tracking-widest">
+                  <CheckCircle className="w-3 h-3" />
+                  Day-0 email sent · 7 more on the way
+                </p>
+              )}
               <p className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-widest">
                 <ShieldCheck className="w-3 h-3 text-primary" />
                 Database verified · {WATCH_DB_LAST_UPDATED}
