@@ -488,6 +488,26 @@ export const watchDatabase: Watch[] = [
     imageURL: "https://m.media-amazon.com/images/I/51CtR%2BquteL._AC_SL1500_.jpg"
   },
   {
+    id: "fitbit-air",
+    brand: "Fitbit",
+    model: "Air",
+    year: 2025,
+    category: "band",
+    priceUSD: 129,
+    batteryDays: 10,
+    caseSizeMM: 36,
+    weightGrams: 22,
+    display: "AMOLED",
+    waterRating: "5ATM",
+    features: ["spo2", "amoled"],
+    bestFor: ["everyday", "health"],
+    phones: ["both"],
+    style: ["minimal"],
+    highlight: "Fitbit's newest lightweight band — focused wellness tracking with a crisp AMOLED display.",
+    asin: "B0GTMTZF3V",
+    imageURL: "https://m.media-amazon.com/images/I/71dV40OwhgL._AC_SL1500_.jpg"
+  },
+  {
     id: "xiaomi-smart-band-9",
     brand: "Xiaomi",
     model: "Smart Band 9",
