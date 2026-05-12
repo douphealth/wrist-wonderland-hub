@@ -98,7 +98,7 @@ export const watchDatabase: Watch[] = [
     style: ["minimal", "sporty"],
     highlight: "Best-value Apple Watch — core fitness, calls and Apple Pay without the ECG/SpO2 premium.",
     asin: "B0DGJ736JM",
-    imageURL: "https://m.media-amazon.com/images/I/61eE8SSyPWL._AC_SL1500_.jpg"
+    imageURL: "https://m.media-amazon.com/images/I/61ZTaGRrabL._AC_SL1500_.jpg"
   },
   {
     id: "samsung-galaxy-watch-7",
@@ -203,7 +203,7 @@ export const watchDatabase: Watch[] = [
     highlight: "Best AMOLED running watch — full-color maps, training readiness and 23-day everyday battery.",
     asin: "B0BS1XZY7T",
     reviewPath: "review/garmin-forerunner-965-review",
-    imageURL: "https://m.media-amazon.com/images/I/716+0qoy3HL._AC_SL1500_.jpg"
+    imageURL: "https://m.media-amazon.com/images/I/61H3akJEMML._AC_SL1500_.jpg"
   },
   {
     id: "garmin-forerunner-265",
@@ -304,6 +304,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged"],
     highlight: "40-day adventure beast — offline global maps, dual-frequency GPS, titanium bezel.",
+    asin: "B0D12865TW",
+    imageURL: "https://m.media-amazon.com/images/I/61osqSpRCuL._AC_SL1500_.jpg"
   },
   {
     id: "polar-vantage-v3",
@@ -343,6 +345,66 @@ export const watchDatabase: Watch[] = [
     style: ["rugged", "sporty"],
     highlight: "Finnish-built dual-frequency GPS with offline maps — rotating crown UI feels great.",
     imageURL: "https://m.media-amazon.com/images/I/71ceqlfJBaL._AC_SL1500_.jpg"
+  },
+  {
+    id: "suunto-vertical",
+    brand: "Suunto",
+    model: "Vertical",
+    year: 2023,
+    category: "sportwatch",
+    priceUSD: 629,
+    batteryDays: 30,
+    caseSizeMM: 49,
+    weightGrams: 74,
+    display: "AMOLED",
+    waterRating: "10ATM",
+    features: ["gps", "spo2", "amoled", "maps", "swim"],
+    bestFor: ["outdoor", "multisport", "running"],
+    phones: ["both"],
+    style: ["rugged", "sporty"],
+    highlight: "Adventure-class Suunto — offline topo maps, dual-band GPS and up to 60-day solar battery.",
+    asin: "B0C11JCHBX",
+    imageURL: "https://m.media-amazon.com/images/I/71-clzLBKlL._AC_SL1500_.jpg"
+  },
+  {
+    id: "garmin-enduro-3",
+    brand: "Garmin",
+    model: "Enduro 3",
+    year: 2024,
+    category: "sportwatch",
+    priceUSD: 899,
+    batteryDays: 36,
+    caseSizeMM: 51,
+    weightGrams: 63,
+    display: "MIP",
+    waterRating: "10ATM",
+    features: ["gps", "spo2", "music", "maps", "swim"],
+    bestFor: ["outdoor", "multisport", "running"],
+    phones: ["both"],
+    style: ["rugged", "sporty"],
+    highlight: "Ultra-runner's solar-charged tank — up to 90-day battery, full-color maps and titanium bezel.",
+    asin: "B0DD5N9G17",
+    imageURL: "https://m.media-amazon.com/images/I/71UvX-zVsAL._AC_SL1500_.jpg"
+  },
+  {
+    id: "garmin-lily-2-active",
+    brand: "Garmin",
+    model: "Lily 2 Active",
+    year: 2024,
+    category: "smartwatch",
+    priceUSD: 299,
+    batteryDays: 9,
+    caseSizeMM: 38,
+    weightGrams: 29,
+    display: "LCD",
+    waterRating: "5ATM",
+    features: ["gps", "spo2", "swim"],
+    bestFor: ["everyday", "gym", "health"],
+    phones: ["both"],
+    style: ["minimal", "luxury"],
+    highlight: "Stylish small-wrist Garmin — built-in GPS, sleep coach and feminine patterned lens.",
+    asin: "B0DGVV6T6H",
+    imageURL: "https://m.media-amazon.com/images/I/513KovBBrXL._AC_SL1500_.jpg"
   },
   {
     id: "amazfit-t-rex-3",
