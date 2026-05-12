@@ -67,6 +67,12 @@ const searchSchema = z.object({
  * fully-qualified URLs — relative asset paths are silently ignored.
  */
 const OG_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+const PUBLIC_APP_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+
+function publicWatchMatchURL(slug: string, data?: string): string {
+  const query = data ? `?d=${encodeURIComponent(data)}` : "";
+  return `${PUBLIC_APP_ORIGIN}/watch-match/${encodeURIComponent(slug)}${query}`;
+}
 
 function ogImageForSlug(slug: string): string {
   // Slug shape: `${primaryUse}-${phone}-${form}-${style}` (see generateSlug).
@@ -209,6 +215,7 @@ function WatchMatchResult() {
   const rec = useMemo(() => (answers ? generateRecommendation(answers) : null), [answers]);
   const setup = useMemo(() => (answers ? buildSetup(answers) : null), [answers]);
   const top = useMemo(() => (answers ? scoreWatches(answers).slice(0, 5) : []), [answers]);
+  const publicReportURL = useMemo(() => publicWatchMatchURL(slug, d), [d, slug]);
 
   const radarData = useMemo(() => {
     if (!answers) return [];
@@ -247,7 +254,7 @@ function WatchMatchResult() {
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(publicReportURL);
       setCopied(true);
       toast.success("Link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
@@ -916,7 +923,7 @@ function WatchMatchResult() {
         category={rec.profile.category}
         phoneOS={answers.phone}
         batteryPref={answers.battery}
-        watchMatchURL={typeof window !== "undefined" ? window.location.href : undefined}
+        watchMatchURL={publicReportURL}
         source="quiz_gate"
       />
     </div>
