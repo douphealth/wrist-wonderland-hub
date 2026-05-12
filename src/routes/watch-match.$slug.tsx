@@ -783,11 +783,15 @@ function RotationCard({
   subtitle,
   item,
   icon,
+  imageUrl,
+  buyUrl,
 }: {
   title: string;
   subtitle: string;
   item: ReturnType<typeof scoreWatches>[number];
   icon: string;
+  imageUrl?: string;
+  buyUrl?: string;
 }) {
   return (
     <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-6 hover:border-primary/30 transition-all">
@@ -801,12 +805,15 @@ function RotationCard({
       </div>
       <div className="aspect-[16/9] rounded-xl border border-border/40 overflow-hidden mb-3 relative">
         <img
-          src={categoryImage(item.watch)}
+          src={imageUrl || categoryImage(item.watch)}
           alt={`${item.watch.brand} ${item.watch.model}`}
           loading="lazy"
           width={896}
           height={896}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-3"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = categoryImage(item.watch);
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
         <span className="absolute bottom-2 left-2 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
@@ -821,7 +828,7 @@ function RotationCard({
       </div>
       <p className="text-sm text-foreground/80 mb-4 leading-relaxed line-clamp-3">{item.watch.highlight}</p>
       <a
-        href={amazonURL(item.watch)}
+        href={buyUrl || amazonURL(item.watch)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
