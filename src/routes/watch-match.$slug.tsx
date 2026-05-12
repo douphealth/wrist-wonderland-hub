@@ -10,6 +10,8 @@ import {
 import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
+import { amazonURL, gutfURL } from "@/lib/amazon";
+import { pickGuides } from "@/lib/featured-guides";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,6 +42,7 @@ import {
   Target,
   Watch as WatchIcon,
   Zap,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -76,11 +79,6 @@ const fadeUp = {
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-50px" },
 };
-
-function amazonSearchUrl(brand: string, model: string) {
-  const q = encodeURIComponent(`${brand} ${model}`);
-  return `https://www.amazon.com/s?k=${q}&tag=gearuptofit-20`;
-}
 
 function WatchMatchResult() {
   const { slug } = Route.useParams();
