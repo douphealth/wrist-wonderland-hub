@@ -16,6 +16,18 @@ export interface AmazonProduct {
   source: "serpapi" | "fallback" | "search";
 }
 
+type SerpApiResult = {
+  asin?: string;
+  title?: string;
+  link?: string;
+  thumbnail?: string;
+  image?: string;
+  sponsored?: boolean;
+  rating?: number;
+  reviews?: number;
+  price?: { raw?: string; value?: number } | string;
+};
+
 const TTL_MS = 60 * 60 * 1000; // 1h
 const cache = new Map<string, { ts: number; product: AmazonProduct }>();
 
@@ -26,6 +38,49 @@ function searchUrl(brand: string, model: string): string {
 
 function dpUrl(asin: string): string {
   return `https://www.amazon.com/dp/${asin}?tag=${AMAZON_TAG}`;
+}
+
+function normalize(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function modelTokens(model: string): string[] {
+  return normalize(model)
+    .split(" ")
+    .filter((t) => t.length > 1 && !new Set(["watch", "smartwatch", "gps", "lte", "gen", "edition"]).has(t));
+}
+
+function scoreResult(result: SerpApiResult, brand: string, model: string): number {
+  const title = normalize(result.title ?? "");
+  const brandText = normalize(brand);
+  const tokens = modelTokens(model);
+  let score = 0;
+  if (!result.asin || !title) return -100;
+  if (title.includes(brandText)) score += 45;
+  else score -= 35;
+  const matched = tokens.filter((t) => title.includes(t)).length;
+  score += matched * 18;
+  if (matched === tokens.length && tokens.length > 0) score += 25;
+  if (result.thumbnail || result.image) score += 12;
+  if (result.rating && result.rating >= 4) score += 4;
+  if (result.reviews && result.reviews >= 50) score += 4;
+  if (result.sponsored) score -= 8;
+  if (/band|case|charger|screen protector|strap|replacement|renewed|refurbished|used/.test(title)) score -= 55;
+  if (/kids|toy|holder|cover|bezel/.test(title)) score -= 35;
+  return score;
+}
+
+function pickBest(results: SerpApiResult[] | undefined, brand: string, model: string): SerpApiResult | undefined {
+  const scored = (results ?? [])
+    .map((r) => ({ result: r, score: scoreResult(r, brand, model) }))
+    .filter(({ score }) => score >= 45)
+    .sort((a, b) => b.score - a.score);
+  return scored[0]?.result;
 }
 
 function cacheKey(brand: string, model: string) {
@@ -69,25 +124,12 @@ async function resolveProduct(
         signal: ctrl.signal,
       }).finally(() => clearTimeout(t));
       if (res.ok) {
-        const data = (await res.json()) as {
-          organic_results?: Array<{
-            asin?: string;
-            title?: string;
-            link?: string;
-            thumbnail?: string;
-            sponsored?: boolean;
-          }>;
-        };
-        // Prefer first non-sponsored result whose title actually mentions the brand.
-        const brandLower = brand.toLowerCase();
-        const candidates = (data.organic_results ?? []).filter(
-          (r) => r.asin && (r.title?.toLowerCase().includes(brandLower) ?? false),
-        );
-        const pick = candidates.find((r) => !r.sponsored) ?? candidates[0];
+        const data = (await res.json()) as { organic_results?: SerpApiResult[] };
+        const pick = pickBest(data.organic_results, brand, model);
         if (pick?.asin) {
           const product: AmazonProduct = {
             url: dpUrl(pick.asin),
-            image: sanitizeImage(pick.thumbnail),
+            image: sanitizeImage(pick.thumbnail ?? pick.image),
             asin: pick.asin,
             title: pick.title ?? null,
             source: "serpapi",
@@ -109,7 +151,7 @@ async function resolveProduct(
   // Fallback to curated ASIN if available.
   if (fallbackAsin) {
     const product: AmazonProduct = {
-      url: searchUrl(brand, model), // safer than /dp/ with possibly-stale ASIN
+      url: searchUrl(brand, model),
       image: null,
       asin: fallbackAsin,
       title: null,
@@ -134,7 +176,7 @@ async function resolveProduct(
 function sanitizeImage(src: string | undefined | null): string | null {
   if (!src || typeof src !== "string") return null;
   if (!/^https:\/\//i.test(src)) return null;
-  return src;
+  return src.replace(/\._[A-Z0-9_,]+_\./i, "._AC_SL1500_.");
 }
 
 function safeFallback(brand: string, model: string, asin?: string): AmazonProduct {

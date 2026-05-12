@@ -14,23 +14,28 @@ function useMatch(use: string, w: Watch): number {
   // partial credit for adjacent uses
   if (use === "running" && w.bestFor.includes("multisport")) return 0.7;
   if (use === "multisport" && w.bestFor.includes("running")) return 0.7;
+  if (use === "outdoor" && w.bestFor.includes("multisport")) return 0.65;
+  if (use === "gym" && w.bestFor.includes("everyday")) return 0.6;
   if (use === "everyday" && w.bestFor.includes("health")) return 0.6;
   if (use === "health" && w.bestFor.includes("everyday")) return 0.6;
-  return 0.25;
+  return 0.1;
 }
 
 function phoneMatch(phone: string, w: Watch): number {
-  if (!phone || phone === "both") return w.phones.includes("both") ? 1 : 0.55;
-  if (w.phones.includes(phone as any) || w.phones.includes("both")) return 1;
+  if (!phone || phone === "both") return w.phones.includes("both") ? 1 : 0.7;
+  if (w.phones.includes(phone as any)) return 1;
+  if (w.phones.includes("both")) return 0.86;
   return 0;
 }
 
 function formMatch(form: string, w: Watch): number {
   if (!form) return 0.7;
   if (w.category === form) return 1;
-  if (form === "smartwatch" && w.category === "sportwatch") return 0.5;
-  if (form === "sportwatch" && w.category === "smartwatch") return 0.5;
-  return 0.2;
+  if (form === "smartwatch" && w.category === "sportwatch") return 0.32;
+  if (form === "sportwatch" && w.category === "smartwatch") return 0.28;
+  if (form === "band" && w.category === "hybrid") return 0.18;
+  if (form === "hybrid" && w.category === "band") return 0.18;
+  return 0.04;
 }
 
 function batteryMatch(target: number, w: Watch): number {
@@ -45,7 +50,7 @@ function batteryMatch(target: number, w: Watch): number {
 function featuresMatch(want: string[], w: Watch): number {
   if (want.length === 0) return 0.7;
   const have = want.filter((f) => w.features.includes(f)).length;
-  return have / want.length;
+  return Math.pow(have / want.length, 1.25);
 }
 
 function wristMatch(wristMM: number, w: Watch): number {
@@ -60,7 +65,7 @@ function wristMatch(wristMM: number, w: Watch): number {
 
 function styleMatch(style: string, w: Watch): number {
   if (!style) return 0.7;
-  return w.style.includes(style as any) ? 1 : 0.4;
+  return w.style.includes(style as any) ? 1 : 0.18;
 }
 
 function brandMatch(brands: string[], w: Watch): number {
@@ -87,16 +92,26 @@ function budgetMatch(budgets: string[], price: number): number {
 }
 
 const WEIGHTS = {
-  use: 0.20,
-  phone: 0.13,
-  form: 0.14,
+  use: 0.23,
+  phone: 0.18,
+  form: 0.18,
   battery: 0.09,
   features: 0.16,
-  wrist: 0.04,
+  wrist: 0.03,
   style: 0.06,
-  brand: 0.06,
-  budget: 0.12,
+  brand: 0.04,
+  budget: 0.03,
 };
+
+function exactnessBonus(a: QuizAnswers, w: Watch, s: Record<keyof typeof WEIGHTS, number>): number {
+  let bonus = 0;
+  if (s.use === 1 && s.form === 1) bonus += 0.018;
+  if (s.phone === 1) bonus += 0.01;
+  if (s.features === 1 && a.features.length >= 2) bonus += 0.012;
+  if (a.primaryUse === "health" && w.features.includes("ecg") && w.features.includes("spo2")) bonus += 0.012;
+  if (a.primaryUse === "outdoor" && w.features.includes("maps") && w.waterRating !== "IP68") bonus += 0.01;
+  return bonus;
+}
 
 export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
   return watchDatabase
@@ -129,7 +144,7 @@ export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
       const score = Object.entries(s).reduce(
         (sum, [k, v]) => sum + v * WEIGHTS[k as keyof typeof WEIGHTS],
         0,
-      );
+      ) + exactnessBonus(a, w, s);
       const reasons: string[] = [];
       if (s.use === 1) reasons.push(`Built for ${a.primaryUse}`);
       if (s.phone === 1 && a.phone !== "both") reasons.push(`Full ${a.phone === "iphone" ? "iPhone" : "Android"} integration`);
@@ -140,8 +155,8 @@ export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
       if (s.budget === 1) reasons.push("Fits your budget perfectly");
       return {
         watch: w,
-        score,
-        matchPercent: Math.round(score * 100),
+        score: Math.min(score, 0.99),
+        matchPercent: Math.min(99, Math.round(Math.min(score, 0.99) * 100)),
         reasons,
       };
     })
@@ -161,6 +176,7 @@ export interface WatchSetup {
 export function buildSetup(a: QuizAnswers): WatchSetup {
   const scored = scoreWatches(a);
   const primary = scored[0];
+  if (!primary) throw new Error("No watch recommendations available for these answers.");
   const alt =
     scored.find(
       (s) =>
@@ -172,7 +188,8 @@ export function buildSetup(a: QuizAnswers): WatchSetup {
       (s) =>
         s.watch.id !== primary.watch.id &&
         s.watch.id !== alt?.watch.id &&
-        s.watch.priceUSD < primary.watch.priceUSD * 0.7,
+        s.watch.priceUSD < primary.watch.priceUSD * 0.8 &&
+        s.score >= primary.score - 0.18,
     ) || null;
   return { primary, alt, budget };
 }
