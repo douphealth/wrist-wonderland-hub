@@ -26,6 +26,10 @@ export interface Watch {
   phones: WatchPhone[];
   style: WatchStyle[];
   highlight: string;
+  /** Verified Amazon Standard Identification Number — when present, deep-links straight to the product page. */
+  asin?: string;
+  /** Path on gearuptofit.com (without leading slash) for the in-depth review article. */
+  reviewPath?: string;
   imageURL?: string;
 }
 
