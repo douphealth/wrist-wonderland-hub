@@ -90,8 +90,8 @@ const ALL_GUIDES: (Guide & { match: (a: QuizAnswers) => number })[] = [
 
 export function pickGuides(answers: QuizAnswers, n = 4): Guide[] {
   return [...ALL_GUIDES]
-    .map((g) => ({ g, score: g.match(answers) + Math.random() * 0.001 }))
-    .sort((a, b) => b.score - a.score)
+    .map((g, index) => ({ g, index, score: g.match(answers) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
     .slice(0, n)
     .map(({ g }) => ({ title: g.title, blurb: g.blurb, path: g.path }));
 }
