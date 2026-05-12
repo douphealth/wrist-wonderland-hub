@@ -426,13 +426,13 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     watchesForImg.slice(0, 8).map(async (w) => {
       const p = lookupProduct(products, w);
       // Try live Amazon CDN image first, then category fallback (always works — local asset).
-      let img: { data: string; format: "JPEG" | "PNG" } | null = null;
+      let img: LoadedImage | null = null;
       if (p?.image) img = await urlToDataUrl(p.image);
       if (!img) img = await urlToDataUrl(categoryImage(w));
       return [w.id, img] as const;
     }),
   );
-  const imgMap = new Map<string, { data: string; format: "JPEG" | "PNG" } | null>(imgEntries);
+  const imgMap = new Map<string, LoadedImage | null>(imgEntries);
 
   const logoData = (await logoP)?.data ?? null;
 
