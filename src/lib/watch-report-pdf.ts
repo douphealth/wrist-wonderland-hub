@@ -88,6 +88,8 @@ function link(doc: jsPDF, x: number, y: number, text: string, url: string, size 
   doc.setTextColor(C.red[0], C.red[1], C.red[2]);
   doc.setFont("helvetica", "bold");
   doc.textWithLink(text, x, y, { url });
+  const tw = doc.getTextWidth(text);
+  drawLinkIcon(doc, x + tw + 1.2, y - size * 0.32, size * 0.32);
 }
 
 function drawRadar(doc: jsPDF, cx: number, cy: number, radius: number, data: { axis: string; value: number }[]) {
@@ -279,7 +281,7 @@ function addFooter(doc: jsPDF, page: number, total: number) {
 function drawWatchFrame(
   doc: jsPDF,
   x: number, y: number, w: number, h: number,
-  img: { data: string; format: "JPEG" | "PNG" } | null,
+  img: LoadedImage | null,
   brand: string, model: string,
 ) {
   // Soft shadow
@@ -299,7 +301,7 @@ function drawWatchFrame(
   if (img) {
     const pad = 1.5;
     try {
-      doc.addImage(img.data, img.format, x + pad, y + pad, w - pad * 2, h - pad * 2 - 1.5, undefined, "FAST");
+      drawImageContained(doc, img, x + pad, y + pad, w - pad * 2, h - pad * 2 - 1.5);
       return;
     } catch { /* fall through to placeholder */ }
   }
