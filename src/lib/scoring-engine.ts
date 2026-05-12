@@ -83,23 +83,37 @@ function budgetMatch(budgets: string[], price: number): number {
     if (b === "250-500" && price >= 200 && price <= 600) return 0.5;
     if (b === "500-plus" && price >= 400) return 0.5;
   }
-  return 0.1;
+  return 0.0;
 }
 
 const WEIGHTS = {
-  use: 0.18,
-  phone: 0.15,
-  form: 0.12,
-  battery: 0.10,
-  features: 0.15,
-  wrist: 0.06,
-  style: 0.07,
-  brand: 0.05,
+  use: 0.20,
+  phone: 0.13,
+  form: 0.14,
+  battery: 0.09,
+  features: 0.16,
+  wrist: 0.04,
+  style: 0.06,
+  brand: 0.06,
   budget: 0.12,
 };
 
 export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
   return watchDatabase
+    // Hard budget gate: when the user picks budget tiers, never recommend a
+    // watch whose price sits more than ~30% above their highest selected tier.
+    .filter((w) => {
+      if (a.budget.length === 0) return true;
+      const ceilings: number[] = [];
+      for (const b of a.budget) {
+        if (b === "under-100") ceilings.push(130);
+        else if (b === "100-250") ceilings.push(325);
+        else if (b === "250-500") ceilings.push(650);
+        else if (b === "500-plus") ceilings.push(Number.POSITIVE_INFINITY);
+      }
+      const ceiling = Math.max(...ceilings);
+      return w.priceUSD <= ceiling;
+    })
     .map((w) => {
       const s = {
         use: useMatch(a.primaryUse, w),
