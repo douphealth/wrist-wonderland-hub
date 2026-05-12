@@ -419,7 +419,7 @@ function BrevoSmartwatchSequence() {
 
   const fullText = useMemo(
     () =>
-      emails
+      [...emails, ...lifecycleEmails]
         .map(
           (e, i) =>
             `=== EMAIL ${i + 1} — ${e.day} ===
@@ -465,9 +465,11 @@ ${e.brevoRule}
             The GearUpToFit Smartwatch Email Sequence
           </h1>
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-            8 human-written emails, sent over 21 days, written for the official
-            Brevo WordPress plugin. Built for smartwatch, sport watch and fitness
-            band buyers — and for the broader GearUpToFit audience.
+            12 human-written emails across a 12-month lifecycle — pre-purchase
+            nurture (8 emails / 21 days) plus post-purchase activation, accessory,
+            UGC and annual upgrade flows. Built for the official Brevo WordPress
+            plugin with full segmentation matrix, KPI benchmarks, A/B test plan,
+            deliverability and GDPR controls.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Button onClick={copyAll} className="bg-gradient-primary glow-primary-sm font-bold uppercase tracking-wider text-xs">
