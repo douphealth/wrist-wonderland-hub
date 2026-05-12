@@ -45,7 +45,7 @@ function variantPenalty(title: string, model: string): number {
 }
 
 function searchUrl(brand: string, model: string): string {
-  const q = encodeURIComponent(`${brand} ${model}`.trim());
+  const q = encodeURIComponent(`${brand} ${model} watch`.trim());
   return `https://www.amazon.com/s?k=${q}&i=electronics&tag=${AMAZON_TAG}`;
 }
 
@@ -132,7 +132,7 @@ async function resolveProduct(
       const url = new URL("https://serpapi.com/search.json");
       url.searchParams.set("engine", "amazon");
       url.searchParams.set("amazon_domain", "amazon.com");
-      url.searchParams.set("k", `${brand} ${model}`);
+      url.searchParams.set("k", `${brand} ${model} watch`);
       url.searchParams.set("api_key", apiKey);
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 6000);
