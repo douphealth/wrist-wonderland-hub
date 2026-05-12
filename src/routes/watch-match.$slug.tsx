@@ -551,7 +551,7 @@ function RotationCard({
       </div>
       <p className="text-sm text-foreground/80 mb-4 leading-relaxed line-clamp-3">{item.watch.highlight}</p>
       <a
-        href={amazonSearchUrl(item.watch.brand, item.watch.model)}
+        href={amazonURL(item.watch)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
