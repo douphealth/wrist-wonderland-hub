@@ -60,7 +60,22 @@ export const Route = createFileRoute("/watch-match/$slug")({
       {
         name: "description",
         content:
-          "Personalized smartwatch recommendation with rotation, battery plan and full spec breakdown.",
+          "Personalized smartwatch recommendation from GearUpToFit — rotation pick, battery plan, full spec breakdown and verified Amazon links.",
+      },
+      {
+        property: "og:title",
+        content: `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`,
+      },
+      {
+        property: "og:description",
+        content:
+          "Take the 9-question WatchMatch AI quiz on GearUpToFit and find the smartwatch that actually fits your wrist, sport and life.",
+      },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: `https://gearuptofit.com/watch-match/${params.slug}`,
       },
     ],
   }),
