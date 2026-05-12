@@ -182,6 +182,28 @@ function WatchMatchResult() {
 
   const primary = setup.primary;
 
+  // Build live keyword set from the user's answers + top match — used to pull
+  // the most relevant published guides from gearuptofit.com via the WP REST API.
+  const liveKeywords = useMemo(() => {
+    const kws = new Set<string>();
+    kws.add(primary.watch.brand.toLowerCase());
+    kws.add(answers.primaryUse);
+    if (answers.form === "band") kws.add("fitness tracker");
+    if (answers.form === "sportwatch") kws.add("sports watch");
+    if (answers.form === "smartwatch") kws.add("smartwatch");
+    if (answers.features.includes("ecg")) kws.add("ECG");
+    if (answers.features.includes("swim")) kws.add("swimming");
+    return Array.from(kws).slice(0, 5);
+  }, [answers, primary]);
+
+  const fetchLivePosts = useServerFn(getRelevantGutfPosts);
+  const livePostsQuery = useQuery({
+    queryKey: ["gutf-posts", liveKeywords.join("|")],
+    queryFn: () => fetchLivePosts({ data: { keywords: liveKeywords, limit: 6 } }),
+    staleTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
   return (
     <div className="min-h-screen pb-16 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
