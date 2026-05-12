@@ -1,4 +1,8 @@
 import type { Watch } from "./watch-database";
+import catSmartwatch from "@/assets/cat-smartwatch.jpg";
+import catSportwatch from "@/assets/cat-sportwatch.jpg";
+import catBand from "@/assets/cat-band.jpg";
+import catHybrid from "@/assets/cat-hybrid.jpg";
 
 /**
  * Amazon Associates tag for gearuptofit.com.
@@ -8,17 +12,17 @@ export const AMAZON_TAG = "papalex-20";
 
 /**
  * Build an Amazon URL for a watch.
- * - If we have a verified ASIN, deep-link to /dp/{ASIN} so the user lands on the
- *   exact product detail page (no search disambiguation).
- * - Otherwise, fall back to a brand+model search scoped to Amazon's Sports & Outdoors
- *   category to keep the first results highly relevant.
+ *
+ * We deliberately use Amazon's search endpoint (not /dp/{ASIN}) for EVERY
+ * link. ASINs change, get retired, or differ by region — a hard-coded /dp/
+ * link can return a 404 / "Page Not Found" page. A search URL with the
+ * brand + model name + electronics category ALWAYS lands on a live Amazon
+ * results page where the exact product is the first hit, with our
+ * affiliate tag attributed.
  */
 export function amazonURL(watch: Pick<Watch, "brand" | "model" | "asin">) {
-  if (watch.asin) {
-    return `https://www.amazon.com/dp/${watch.asin}?tag=${AMAZON_TAG}&linkCode=ogi&th=1&psc=1`;
-  }
-  const q = encodeURIComponent(`${watch.brand} ${watch.model}`);
-  return `https://www.amazon.com/s?k=${q}&i=sporting&tag=${AMAZON_TAG}`;
+  const q = encodeURIComponent(`${watch.brand} ${watch.model}`.trim());
+  return `https://www.amazon.com/s?k=${q}&i=electronics&tag=${AMAZON_TAG}`;
 }
 
 /** Build a gearuptofit.com URL from a relative path (no leading slash). */
@@ -27,16 +31,24 @@ export function gutfURL(path: string) {
 }
 
 /**
- * Official Amazon product image, served by the Amazon Associates image widget.
- * Returns a real product photo for any verified ASIN (no PA-API required) and
- * carries the affiliate tag so the impression is attributed correctly.
- * Returns undefined when there is no ASIN — caller should render a fallback.
+ * Returns a hand-picked, locally-bundled hero image that reliably represents
+ * the watch's category. We avoid the Amazon image widget because it requires
+ * a verified ASIN, can be CORS-blocked, and silently 404s when the ASIN is
+ * stale — leaving an empty image slot. A category image always renders.
  */
-export function amazonImage(
-  watch: Pick<Watch, "asin" | "imageURL">,
-  size: 160 | 250 | 500 = 250
-): string | undefined {
+export function categoryImage(
+  watch: Pick<Watch, "category" | "imageURL">
+): string {
   if (watch.imageURL) return watch.imageURL;
-  if (!watch.asin) return undefined;
-  return `https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN=${watch.asin}&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL${size}_&tag=${AMAZON_TAG}`;
+  switch (watch.category) {
+    case "sportwatch":
+      return catSportwatch;
+    case "band":
+      return catBand;
+    case "hybrid":
+      return catHybrid;
+    case "smartwatch":
+    default:
+      return catSmartwatch;
+  }
 }

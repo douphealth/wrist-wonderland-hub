@@ -12,7 +12,7 @@ import {
 import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
-import { amazonURL, amazonImage, gutfURL } from "@/lib/amazon";
+import { amazonURL, categoryImage, gutfURL } from "@/lib/amazon";
 import { pickGuides } from "@/lib/featured-guides";
 import { getRelevantGutfPosts } from "@/lib/gearuptofit-posts.functions";
 import { Button } from "@/components/ui/button";
@@ -343,20 +343,19 @@ function WatchMatchResult() {
 
             <div className="md:flex md:gap-6 md:items-start">
               <div className="md:w-2/5 mb-5 md:mb-0">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden p-6">
-                  {amazonImage(primary.watch, 500) ? (
-                    <img
-                      src={amazonImage(primary.watch, 500)}
-                      alt={`${primary.watch.brand} ${primary.watch.model} on Amazon`}
-                      loading="lazy"
-                      className="max-h-full max-w-full object-contain drop-shadow-2xl"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <WatchIcon className="w-32 h-32 text-primary/40" strokeWidth={1} />
-                  )}
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden relative">
+                  <img
+                    src={categoryImage(primary.watch)}
+                    alt={`${primary.watch.brand} ${primary.watch.model} — ${primary.watch.category}`}
+                    loading="lazy"
+                    width={896}
+                    height={896}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+                  <span className="absolute bottom-3 left-3 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
+                    {primary.watch.brand}
+                  </span>
                 </div>
               </div>
               <div className="flex-1">
@@ -484,18 +483,15 @@ function WatchMatchResult() {
                 >
                   #{idx + 1}
                 </div>
-                <div className="hidden sm:flex w-14 h-14 rounded-lg bg-background/50 border border-border/40 items-center justify-center flex-shrink-0 overflow-hidden p-1.5">
-                  {amazonImage(s.watch, 160) ? (
-                    <img
-                      src={amazonImage(s.watch, 160)}
-                      alt={`${s.watch.brand} ${s.watch.model}`}
-                      loading="lazy"
-                      className="max-h-full max-w-full object-contain"
-                      onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
-                    />
-                  ) : (
-                    <WatchIcon className="w-6 h-6 text-primary/40" strokeWidth={1.5} />
-                  )}
+                <div className="hidden sm:block w-14 h-14 rounded-lg border border-border/40 flex-shrink-0 overflow-hidden">
+                  <img
+                    src={categoryImage(s.watch)}
+                    alt={`${s.watch.brand} ${s.watch.model}`}
+                    loading="lazy"
+                    width={160}
+                    height={160}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm md:text-base truncate">
