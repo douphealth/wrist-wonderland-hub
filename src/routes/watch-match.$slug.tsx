@@ -276,6 +276,19 @@ function WatchMatchResult() {
   const resolvedUrl = (w: Parameters<typeof amazonURL>[0]) =>
     productFor(w)?.url || amazonURL(w);
 
+  const amazonLoading = amazonQuery.isLoading;
+  // Silent error handler — swap broken thumbnails for the category image once,
+  // then detach the handler so we never enter an error loop or log to console.
+  const handleImgError = (
+    e: React.SyntheticEvent<HTMLImageElement>,
+    w: Parameters<typeof categoryImage>[0],
+  ) => {
+    const img = e.currentTarget;
+    img.onerror = null;
+    const fallback = categoryImage(w);
+    if (img.src !== fallback) img.src = fallback;
+  };
+
   return (
     <div className="min-h-screen pb-16 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
@@ -423,10 +436,11 @@ function WatchMatchResult() {
                     width={896}
                     height={896}
                     className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-4"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = categoryImage(primary.watch);
-                    }}
+                    onError={(e) => handleImgError(e, primary.watch)}
                   />
+                  {amazonLoading && (
+                    <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
                   <span className="absolute bottom-3 left-3 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
                     {primary.watch.brand}
@@ -469,10 +483,11 @@ function WatchMatchResult() {
                     href={resolvedUrl(primary.watch)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all"
+                    aria-busy={amazonLoading}
+                    className={`inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all ${amazonLoading ? "animate-pulse" : ""}`}
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    Check Price on Amazon
+                    {amazonLoading ? "Verifying live price…" : "Check Price on Amazon"}
                     <ExternalLink className="w-3 h-3" />
                   </a>
                   {primary.watch.reviewPath && (
