@@ -279,6 +279,25 @@ function WatchMatchResult() {
     productFor(w)?.url || amazonURL(w);
 
   const amazonLoading = amazonQuery.isLoading;
+
+  const handleDownloadPDF = useCallback(async () => {
+    if (!answers || !rec || !setup) return;
+    toast.info("Generating your WatchMatch report…");
+    const { generateWatchReportPDF } = await import("@/lib/watch-report-pdf");
+    const pMap = new Map<string, { url: string; image: string | null }>();
+    for (const entry of amazonQuery.data?.products ?? []) {
+      pMap.set(entry.key, { url: entry.product.url, image: entry.product.image });
+    }
+    await generateWatchReportPDF({
+      answers,
+      recommendation: rec,
+      setup,
+      top,
+      radarData,
+      products: pMap,
+    });
+    toast.success("Your WatchMatch PDF report has been downloaded.");
+  }, [answers, rec, setup, top, radarData, amazonQuery.data]);
   // Silent error handler — swap broken thumbnails for the category image once,
   // then detach the handler so we never enter an error loop or log to console.
   const handleImgError = (
