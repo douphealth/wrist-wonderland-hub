@@ -484,6 +484,19 @@ function WatchMatchResult() {
                 >
                   #{idx + 1}
                 </div>
+                <div className="hidden sm:flex w-14 h-14 rounded-lg bg-background/50 border border-border/40 items-center justify-center flex-shrink-0 overflow-hidden p-1.5">
+                  {amazonImage(s.watch, 160) ? (
+                    <img
+                      src={amazonImage(s.watch, 160)}
+                      alt={`${s.watch.brand} ${s.watch.model}`}
+                      loading="lazy"
+                      className="max-h-full max-w-full object-contain"
+                      onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+                    />
+                  ) : (
+                    <WatchIcon className="w-6 h-6 text-primary/40" strokeWidth={1.5} />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm md:text-base truncate">
                     {s.watch.brand} {s.watch.model}
@@ -492,11 +505,16 @@ function WatchMatchResult() {
                     ${s.watch.priceUSD} · {s.watch.batteryDays}d battery · {s.watch.display}
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex-shrink-0">
                   <div className="text-lg font-bold text-gradient tabular-nums">{s.matchPercent}%</div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground">
-                    Match
-                  </div>
+                  <a
+                    href={amazonURL(s.watch)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] uppercase tracking-widest text-primary hover:underline inline-flex items-center gap-1"
+                  >
+                    Buy <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
                 </div>
               </div>
             ))}
