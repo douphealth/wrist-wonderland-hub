@@ -1,5 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { z } from "zod";
 import {
@@ -10,8 +12,9 @@ import {
 import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
-import { amazonURL, gutfURL } from "@/lib/amazon";
+import { amazonURL, amazonImage, gutfURL } from "@/lib/amazon";
 import { pickGuides } from "@/lib/featured-guides";
+import { getRelevantGutfPosts } from "@/lib/gearuptofit-posts.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
