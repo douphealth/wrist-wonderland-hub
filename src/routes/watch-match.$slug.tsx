@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -41,6 +41,7 @@ import {
   Battery,
   CheckCircle,
   Copy,
+  Download,
   ExternalLink,
   Heart,
   Share2,
@@ -51,6 +52,7 @@ import {
   Watch as WatchIcon,
   Zap,
   BookOpen,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -200,6 +202,14 @@ function WatchMatchResult() {
     }
   };
 
+  const handleDownloadPDF = useCallback(async () => {
+    if (!answers || !rec || !setup) return;
+    toast.info("Generating your WatchMatch report…");
+    const { generateWatchReportPDF } = await import("@/lib/watch-report-pdf");
+    generateWatchReportPDF({ answers, recommendation: rec, setup, top });
+    toast.success("Your WatchMatch PDF report has been downloaded.");
+  }, [answers, rec, setup, top]);
+
   if (!answers || !rec || !setup) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-dark">
@@ -347,9 +357,20 @@ function WatchMatchResult() {
             <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               {rec.profile.summary}
             </p>
-            <p className="mt-4 text-[10px] text-muted-foreground uppercase tracking-widest">
-              Database verified · {WATCH_DB_LAST_UPDATED}
-            </p>
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <Button
+                onClick={handleDownloadPDF}
+                size="lg"
+                className="bg-gradient-primary glow-primary font-bold uppercase tracking-wider px-6 md:px-8 h-12 rounded-xl text-sm group"
+              >
+                <Download className="w-4 h-4 mr-2 group-hover:animate-bounce" />
+                Download PDF Report
+              </Button>
+              <p className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-widest">
+                <ShieldCheck className="w-3 h-3 text-primary" />
+                Database verified · {WATCH_DB_LAST_UPDATED}
+              </p>
+            </div>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 md:gap-6">

@@ -28,11 +28,24 @@ type SerpApiResult = {
   price?: { raw?: string; value?: number } | string;
 };
 
-const TTL_MS = 60 * 60 * 1000; // 1h
+const TTL_MS = 24 * 60 * 60 * 1000; // 24h — conserve SerpApi quota across repeat quiz/result views.
 const cache = new Map<string, { ts: number; product: AmazonProduct }>();
 
+const ACCESSORY_RE = /\b(cable|charger|charging|cord|adapter|dock|cradle|screen\s*protector|protector|tempered\s*glass|hydrogel|film|case|cover|bezel|strap|band|replacement|holder|mount|stand|dust\s*plug|compatible\s+(?:with|for))\b/i;
+const PRODUCT_CLASS_RE = /\b(smart\s*watch|smartwatch|sport\s*watch|sports\s*watch|gps\s*(?:watch|sports)|fitness\s*tracker|activity\s*tracker|wearable)\b/i;
+
+function variantPenalty(title: string, model: string): number {
+  const t = normalize(title);
+  const m = normalize(model);
+  if (m === "vantage v3" && /\bvantage\s+(m3|v2|v)\b/.test(t)) return -140;
+  if (m === "race" && /\brace\s+(s|2)\b/.test(t)) return -110;
+  if (m === "t rex 3" && /\bt\s*rex\s*3\s*pro\b/.test(t)) return -70;
+  if (m === "watch series 10" && /\bseries\s+(?:9|8|7|se)\b/.test(t)) return -120;
+  return 0;
+}
+
 function searchUrl(brand: string, model: string): string {
-  const q = encodeURIComponent(`${brand} ${model}`.trim());
+  const q = encodeURIComponent(`${brand} ${model} watch`.trim());
   return `https://www.amazon.com/s?k=${q}&i=electronics&tag=${AMAZON_TAG}`;
 }
 
@@ -52,26 +65,30 @@ function normalize(s: string): string {
 function modelTokens(model: string): string[] {
   return normalize(model)
     .split(" ")
-    .filter((t) => t.length > 1 && !new Set(["watch", "smartwatch", "gps", "lte", "gen", "edition"]).has(t));
+    .filter((t) => !new Set(["watch", "smartwatch", "gps", "lte", "gen", "edition"]).has(t));
 }
 
 function scoreResult(result: SerpApiResult, brand: string, model: string): number {
-  const title = normalize(result.title ?? "");
+  const rawTitle = result.title ?? "";
+  const title = normalize(rawTitle);
   const brandText = normalize(brand);
   const tokens = modelTokens(model);
   let score = 0;
   if (!result.asin || !title) return -100;
+  if (ACCESSORY_RE.test(rawTitle)) return -1000;
+  if (!PRODUCT_CLASS_RE.test(rawTitle)) score -= 35;
+  score += variantPenalty(rawTitle, model);
   if (title.includes(brandText)) score += 45;
-  else score -= 35;
+  else score += tokens.length > 0 && tokens.every((t) => title.includes(t)) ? 8 : -45;
   const matched = tokens.filter((t) => title.includes(t)).length;
+  if (tokens.length > 0 && matched < tokens.length) score -= 80;
   score += matched * 18;
   if (matched === tokens.length && tokens.length > 0) score += 25;
   if (result.thumbnail || result.image) score += 12;
   if (result.rating && result.rating >= 4) score += 4;
   if (result.reviews && result.reviews >= 50) score += 4;
   if (result.sponsored) score -= 8;
-  if (/band|case|charger|screen protector|strap|replacement|renewed|refurbished|used/.test(title)) score -= 55;
-  if (/kids|toy|holder|cover|bezel/.test(title)) score -= 35;
+  if (/\b(kids|toy|renewed|refurbished|used)\b/.test(title)) score -= 40;
   return score;
 }
 
@@ -115,7 +132,7 @@ async function resolveProduct(
       const url = new URL("https://serpapi.com/search.json");
       url.searchParams.set("engine", "amazon");
       url.searchParams.set("amazon_domain", "amazon.com");
-      url.searchParams.set("k", `${brand} ${model}`);
+      url.searchParams.set("k", `${brand} ${model} watch`);
       url.searchParams.set("api_key", apiKey);
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 6000);
