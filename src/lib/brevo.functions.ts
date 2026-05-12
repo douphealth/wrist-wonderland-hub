@@ -78,6 +78,28 @@ function senderEmail(): string {
   return process.env.BREVO_SENDER_EMAIL ?? "info@gearuptofit.com";
 }
 
+const PUBLIC_APP_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+const GEARUPTOFIT_ORIGIN = "https://gearuptofit.com";
+
+function normalizeReportURL(raw?: string): string {
+  if (!raw) return `${PUBLIC_APP_ORIGIN}/watch-match/`;
+  try {
+    const url = new URL(raw);
+    const host = url.hostname.toLowerCase();
+    if (host.includes("lovableproject.com") || host.includes("id-preview") || host === "lovable.dev") {
+      url.protocol = "https:";
+      url.host = new URL(PUBLIC_APP_ORIGIN).host;
+    }
+    return url.toString();
+  } catch {
+    return `${PUBLIC_APP_ORIGIN}/watch-match/`;
+  }
+}
+
+function guideURL(path: string): string {
+  return `${GEARUPTOFIT_ORIGIN}/${path.replace(/^\//, "")}`;
+}
+
 function welcomeHTML(input: SubscribeInput): { subject: string; html: string } {
   const name = input.firstName?.trim() || "there";
   const brand = input.topMatchBrand ?? "your match";
