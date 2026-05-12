@@ -62,7 +62,12 @@ async function resolveProduct(
       url.searchParams.set("amazon_domain", "amazon.com");
       url.searchParams.set("k", `${brand} ${model}`);
       url.searchParams.set("api_key", apiKey);
-      const res = await fetch(url.toString(), { headers: { Accept: "application/json" } });
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 6000);
+      const res = await fetch(url.toString(), {
+        headers: { Accept: "application/json" },
+        signal: ctrl.signal,
+      }).finally(() => clearTimeout(t));
       if (res.ok) {
         const data = (await res.json()) as {
           organic_results?: Array<{
@@ -82,7 +87,7 @@ async function resolveProduct(
         if (pick?.asin) {
           const product: AmazonProduct = {
             url: dpUrl(pick.asin),
-            image: pick.thumbnail ?? null,
+            image: sanitizeImage(pick.thumbnail),
             asin: pick.asin,
             title: pick.title ?? null,
             source: "serpapi",
@@ -94,14 +99,17 @@ async function resolveProduct(
         console.error(`SerpApi amazon search failed [${res.status}] for ${brand} ${model}`);
       }
     } catch (err) {
-      console.error(`SerpApi amazon search threw for ${brand} ${model}`, err);
+      console.error(
+        `SerpApi amazon search threw for ${brand} ${model}:`,
+        err instanceof Error ? err.message : err,
+      );
     }
   }
 
   // Fallback to curated ASIN if available.
   if (fallbackAsin) {
     const product: AmazonProduct = {
-      url: dpUrl(fallbackAsin),
+      url: searchUrl(brand, model), // safer than /dp/ with possibly-stale ASIN
       image: null,
       asin: fallbackAsin,
       title: null,
@@ -122,6 +130,23 @@ async function resolveProduct(
   return product;
 }
 
+/** Only accept absolute https image URLs from Amazon-like CDNs. */
+function sanitizeImage(src: string | undefined | null): string | null {
+  if (!src || typeof src !== "string") return null;
+  if (!/^https:\/\//i.test(src)) return null;
+  return src;
+}
+
+function safeFallback(brand: string, model: string, asin?: string): AmazonProduct {
+  return {
+    url: searchUrl(brand, model),
+    image: null,
+    asin: asin ?? null,
+    title: null,
+    source: "search",
+  };
+}
+
 const watchInput = z.object({
   brand: z.string().min(1).max(60),
   model: z.string().min(1).max(80),
@@ -135,13 +160,23 @@ export const getAmazonProducts = createServerFn({ method: "POST" })
     }),
   )
   .handler(async ({ data }) => {
-    const products = await Promise.all(
-      data.watches.map((w) => resolveProduct(w.brand, w.model, w.asin)),
+    // Use allSettled + per-item try/catch so a single failure never produces a 500.
+    const settled = await Promise.allSettled(
+      data.watches.map((w) =>
+        resolveProduct(w.brand, w.model, w.asin).catch(() =>
+          safeFallback(w.brand, w.model, w.asin),
+        ),
+      ),
     );
     return {
-      products: data.watches.map((w, i) => ({
-        key: `${w.brand}::${w.model}`.toLowerCase(),
-        product: products[i],
-      })),
+      products: data.watches.map((w, i) => {
+        const r = settled[i];
+        const product =
+          r.status === "fulfilled" ? r.value : safeFallback(w.brand, w.model, w.asin);
+        return {
+          key: `${w.brand}::${w.model}`.toLowerCase(),
+          product,
+        };
+      }),
     };
   });

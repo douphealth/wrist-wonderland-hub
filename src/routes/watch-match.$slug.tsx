@@ -276,6 +276,19 @@ function WatchMatchResult() {
   const resolvedUrl = (w: Parameters<typeof amazonURL>[0]) =>
     productFor(w)?.url || amazonURL(w);
 
+  const amazonLoading = amazonQuery.isLoading;
+  // Silent error handler — swap broken thumbnails for the category image once,
+  // then detach the handler so we never enter an error loop or log to console.
+  const handleImgError = (
+    e: React.SyntheticEvent<HTMLImageElement>,
+    w: Parameters<typeof categoryImage>[0],
+  ) => {
+    const img = e.currentTarget;
+    img.onerror = null;
+    const fallback = categoryImage(w);
+    if (img.src !== fallback) img.src = fallback;
+  };
+
   return (
     <div className="min-h-screen pb-16 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
@@ -423,10 +436,11 @@ function WatchMatchResult() {
                     width={896}
                     height={896}
                     className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-4"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = categoryImage(primary.watch);
-                    }}
+                    onError={(e) => handleImgError(e, primary.watch)}
                   />
+                  {amazonLoading && (
+                    <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
                   <span className="absolute bottom-3 left-3 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
                     {primary.watch.brand}
@@ -469,10 +483,11 @@ function WatchMatchResult() {
                     href={resolvedUrl(primary.watch)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all"
+                    aria-busy={amazonLoading}
+                    className={`inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all ${amazonLoading ? "animate-pulse" : ""}`}
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    Check Price on Amazon
+                    {amazonLoading ? "Verifying live price…" : "Check Price on Amazon"}
                     <ExternalLink className="w-3 h-3" />
                   </a>
                   {primary.watch.reviewPath && (
@@ -502,6 +517,7 @@ function WatchMatchResult() {
               icon="🎯"
               imageUrl={resolvedImage(setup.alt.watch)}
               buyUrl={resolvedUrl(setup.alt.watch)}
+              loading={amazonLoading}
             />
           )}
           {setup.budget && (
@@ -512,6 +528,7 @@ function WatchMatchResult() {
               icon="💸"
               imageUrl={resolvedImage(setup.budget.watch)}
               buyUrl={resolvedUrl(setup.budget.watch)}
+              loading={amazonLoading}
             />
           )}
         </div>
@@ -577,6 +594,9 @@ function WatchMatchResult() {
                   #{idx + 1}
                 </div>
                 <div className="hidden sm:block w-14 h-14 rounded-lg border border-border/40 flex-shrink-0 overflow-hidden">
+                  {amazonLoading ? (
+                    <div className="w-full h-full animate-pulse bg-card-elevated" />
+                  ) : (
                   <img
                     src={resolvedImage(s.watch)}
                     alt={`${s.watch.brand} ${s.watch.model}`}
@@ -584,10 +604,9 @@ function WatchMatchResult() {
                     width={160}
                     height={160}
                     className="w-full h-full object-contain bg-card-elevated p-1"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = categoryImage(s.watch);
-                    }}
+                    onError={(e) => handleImgError(e, s.watch)}
                   />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm md:text-base truncate">
@@ -785,6 +804,7 @@ function RotationCard({
   icon,
   imageUrl,
   buyUrl,
+  loading,
 }: {
   title: string;
   subtitle: string;
@@ -792,6 +812,7 @@ function RotationCard({
   icon: string;
   imageUrl?: string;
   buyUrl?: string;
+  loading?: boolean;
 }) {
   return (
     <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-6 hover:border-primary/30 transition-all">
@@ -804,6 +825,9 @@ function RotationCard({
         <div className="text-lg font-bold text-gradient tabular-nums">{item.matchPercent}%</div>
       </div>
       <div className="aspect-[16/9] rounded-xl border border-border/40 overflow-hidden mb-3 relative">
+        {loading && (
+          <div className="absolute inset-0 z-10 animate-pulse bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+        )}
         <img
           src={imageUrl || categoryImage(item.watch)}
           alt={`${item.watch.brand} ${item.watch.model}`}
@@ -812,6 +836,7 @@ function RotationCard({
           height={896}
           className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-3"
           onError={(e) => {
+            (e.currentTarget as HTMLImageElement).onerror = null;
             (e.currentTarget as HTMLImageElement).src = categoryImage(item.watch);
           }}
         />
@@ -831,9 +856,10 @@ function RotationCard({
         href={buyUrl || amazonURL(item.watch)}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+        aria-busy={loading}
+        className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline ${loading ? "opacity-70" : ""}`}
       >
-        Check on Amazon <ExternalLink className="w-3 h-3" />
+        {loading ? "Verifying…" : "Check on Amazon"} <ExternalLink className="w-3 h-3" />
       </a>
     </motion.div>
   );
