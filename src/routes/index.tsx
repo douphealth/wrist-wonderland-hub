@@ -124,9 +124,9 @@ function Index() {
             <img
               src={step.bgImage}
               alt=""
-              className="absolute inset-0 w-full h-full object-cover opacity-25"
+              className="absolute inset-0 w-full h-full object-cover opacity-45"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/95" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/45 to-background/92" />
           </motion.div>
         </AnimatePresence>
       )}
