@@ -1,3 +1,13 @@
+import qbgUse from "@/assets/qbg-use.jpg";
+import qbgPhone from "@/assets/qbg-phone.jpg";
+import qbgForm from "@/assets/qbg-form.jpg";
+import qbgBattery from "@/assets/qbg-battery.jpg";
+import qbgFeatures from "@/assets/qbg-features.jpg";
+import qbgWrist from "@/assets/qbg-wrist.jpg";
+import qbgStyle from "@/assets/qbg-style.jpg";
+import qbgBrand from "@/assets/qbg-brand.jpg";
+import qbgBudget from "@/assets/qbg-budget.jpg";
+
 export interface QuizOption {
   value: string;
   label: string;
@@ -12,6 +22,7 @@ export interface QuizStep {
   type: "single" | "multi" | "slider" | "brand-multi";
   options?: QuizOption[];
   sliderConfig?: { min: number; max: number; step: number; unit: string; labels?: string[] };
+  bgImage?: string;
 }
 
 export const quizSteps: QuizStep[] = [
@@ -20,6 +31,7 @@ export const quizSteps: QuizStep[] = [
     title: "What will you use it for most?",
     subtitle: "Your top activity drives the sensors and battery profile we need.",
     type: "single",
+    bgImage: qbgUse,
     options: [
       { value: "running", label: "Running", description: "GPS pace, cadence, training load", icon: "Footprints" },
       { value: "multisport", label: "Multisport", description: "Triathlon, swim+bike+run", icon: "Activity" },
@@ -34,6 +46,7 @@ export const quizSteps: QuizStep[] = [
     title: "Which phone do you use?",
     subtitle: "Some watches only pair fully with iPhone or Android.",
     type: "single",
+    bgImage: qbgPhone,
     options: [
       { value: "iphone", label: "iPhone", description: "iOS 16 or newer", icon: "Apple" },
       { value: "android", label: "Android", description: "Pixel, Samsung, OnePlus…", icon: "Smartphone" },
@@ -45,6 +58,7 @@ export const quizSteps: QuizStep[] = [
     title: "Watch or band?",
     subtitle: "Pick the form factor that fits your lifestyle and wrist.",
     type: "single",
+    bgImage: qbgForm,
     options: [
       { value: "smartwatch", label: "Smartwatch", description: "Full screen, apps, payments", icon: "Watch" },
       { value: "sportwatch", label: "Sport / GPS Watch", description: "Rugged, training-first", icon: "Timer" },
@@ -57,6 +71,7 @@ export const quizSteps: QuizStep[] = [
     title: "Battery life expectation",
     subtitle: "How many days do you want between charges?",
     type: "slider",
+    bgImage: qbgBattery,
     sliderConfig: { min: 1, max: 30, step: 1, unit: "days", labels: ["1 day", "7 days", "14 days", "21 days", "30+ days"] },
   },
   {
@@ -64,6 +79,7 @@ export const quizSteps: QuizStep[] = [
     title: "Must-have features",
     subtitle: "Pick everything that matters to you. We'll match against verified specs.",
     type: "multi",
+    bgImage: qbgFeatures,
     options: [
       { value: "gps", label: "Built-in GPS", icon: "MapPin" },
       { value: "ecg", label: "ECG", icon: "HeartPulse" },
@@ -81,6 +97,7 @@ export const quizSteps: QuizStep[] = [
     title: "Wrist size",
     subtitle: "Slide to your wrist circumference (mm) — affects fit and case size.",
     type: "slider",
+    bgImage: qbgWrist,
     sliderConfig: { min: 130, max: 220, step: 5, unit: "mm", labels: ["130", "150", "170", "190", "220"] },
   },
   {
@@ -88,6 +105,7 @@ export const quizSteps: QuizStep[] = [
     title: "Style preference",
     subtitle: "How should it look on your wrist?",
     type: "single",
+    bgImage: qbgStyle,
     options: [
       { value: "minimal", label: "Minimal", description: "Clean, slim, understated", icon: "Minus" },
       { value: "rugged", label: "Rugged", description: "Tactical, tough, oversized", icon: "Shield" },
@@ -100,12 +118,14 @@ export const quizSteps: QuizStep[] = [
     title: "Brand preference",
     subtitle: "Pick brands you like, or skip if you have no preference.",
     type: "brand-multi",
+    bgImage: qbgBrand,
   },
   {
     id: "budget",
     title: "Budget range",
     subtitle: "Select one or more price ranges you're comfortable with.",
     type: "multi",
+    bgImage: qbgBudget,
     options: [
       { value: "under-100", label: "Under $100", description: "Essentials & bands", icon: "DollarSign" },
       { value: "100-250", label: "$100 – $250", description: "Mid-range sweet spot", icon: "Wallet" },
