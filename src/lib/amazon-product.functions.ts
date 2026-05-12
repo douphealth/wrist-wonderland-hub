@@ -151,7 +151,7 @@ async function resolveProduct(
   // Fallback to curated ASIN if available.
   if (fallbackAsin) {
     const product: AmazonProduct = {
-      url: dpUrl(fallbackAsin),
+      url: searchUrl(brand, model),
       image: null,
       asin: fallbackAsin,
       title: null,
