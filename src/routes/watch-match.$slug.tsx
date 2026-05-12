@@ -206,9 +206,20 @@ function WatchMatchResult() {
     if (!answers || !rec || !setup) return;
     toast.info("Generating your WatchMatch report…");
     const { generateWatchReportPDF } = await import("@/lib/watch-report-pdf");
-    generateWatchReportPDF({ answers, recommendation: rec, setup, top });
+    const productMap = new Map<string, { url: string; image: string | null }>();
+    for (const entry of amazonQuery.data?.products ?? []) {
+      productMap.set(entry.key, { url: entry.product.url, image: entry.product.image });
+    }
+    await generateWatchReportPDF({
+      answers,
+      recommendation: rec,
+      setup,
+      top,
+      radarData,
+      products: productMap,
+    });
     toast.success("Your WatchMatch PDF report has been downloaded.");
-  }, [answers, rec, setup, top]);
+  }, [answers, rec, setup, top, radarData, amazonQuery.data]);
 
   if (!answers || !rec || !setup) {
     return (
