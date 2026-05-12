@@ -520,7 +520,7 @@ function WatchMatchResult() {
               },
               {
                 q: "Is WatchMatch AI free?",
-                a: "Yes. No signup, no email required, no paywall. Some product links are Amazon affiliate links — GearUpToFit may earn a commission at no extra cost to you.",
+                a: "Yes — no signup, no email required, no paywall. Product links are Amazon affiliate links (tag: papalex-20) — GearUpToFit may earn a small commission at no extra cost to you. That's what keeps the quiz, the database and the reviews free.",
               },
               {
                 q: "Can I use any smartwatch with my iPhone or Android?",
