@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { CheckCircle, ClipboardCopy, Mail, MousePointerClick, Route as RouteIcon, Tags, Timer, Workflow } from "lucide-react";
@@ -463,7 +464,7 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StrategyCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+function StrategyCard({ icon, title, text }: { icon: ReactNode; title: string; text: string }) {
   return (
     <div className="glass rounded-2xl p-5">
       <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">{icon}</div>
