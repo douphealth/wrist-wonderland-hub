@@ -254,6 +254,138 @@ GearUpToFit.com`,
   },
 ];
 
+// Post-purchase lifecycle (triggered when 'amazon_click' goal fires OR contact self-reports 'I bought it')
+const lifecycleEmails: EmailStep[] = [
+  {
+    day: "Day 30 post-purchase",
+    subject: "Your first 30 days with the {{ contact.TOP_MATCH_MODEL }} — three settings to change tonight",
+    preheader: "Default settings are conservative. These three unlock the watch you actually paid for.",
+    goal: "Activation. Drive deeper feature use → higher retention, fewer returns, more affiliate trust.",
+    body: `You've had it a month. Here are the three settings 90% of buyers never touch — and that change the experience the most:
+
+1. **GPS mode → Multi-band / All-Systems**. Default is usually 'Auto'. Force it on for outdoor workouts.
+2. **HR broadcast over BLE**. Lets your watch act as a chest-strap replacement for Zwift, Peloton, gym bikes.
+3. **Sleep window + Do Not Disturb sync**. Massive accuracy jump on sleep stages and recovery.
+
+Full setup checklist for your model: ${G("review/" + "{{ contact.TOP_MATCH_SLUG }}-setup")}
+
+Alex`,
+    cta: "Open the setup checklist",
+    url: G("review/best-smartwatches-of-the-year"),
+    brevoRule:
+      "Trigger: contact has tag 'purchased' OR amazon_click event > 0. Wait 30 days from event. Skip if contact unsubscribed.",
+  },
+  {
+    day: "Day 60 post-purchase",
+    subject: "The 4 accessories actually worth buying (and the 9 that aren't)",
+    preheader: "Bands, chargers, screen protectors — what's worth it, what's a waste.",
+    goal: "Accessory revenue + practical value. Position GearUpToFit as the trusted post-purchase advisor.",
+    body: `Worth it:
+- A second band in silicone (sweat) + a nylon/leather (office). $15–30 each.
+- A genuine OEM fast charger for travel. $20–40.
+- A tempered-glass screen protector if you have AMOLED. $8–15.
+- A chest HR strap (Polar H10 or Garmin HRM-Pro) if you do intervals. $80.
+
+Not worth it: third-party "cradle" chargers, $5 bands that stain skin, sapphire screen "upgrades", magnetic clasps that pop off mid-run, USB cable extenders, novelty cases.
+
+Full accessory guide: ${G("review/best-smartwatch-accessories")}
+
+Alex`,
+    cta: "See the accessory guide",
+    url: G("review/best-smartwatch-accessories"),
+    brevoRule:
+      "Wait 60 days from purchase event. A/B test subject line variant: 'Stop wasting money on smartwatch accessories'.",
+  },
+  {
+    day: "Day 120 post-purchase",
+    subject: "Quick favor — would you leave a 1-line review?",
+    preheader: "It helps other readers more than you'd think. 30 seconds, totally optional.",
+    goal: "User-generated content for review pages → SEO + social proof loop.",
+    body: `You've had your watch ~4 months — long enough to know the truth.
+
+If you have 30 seconds, hit reply with one line: what you love, what annoys you, would you buy it again?
+
+I publish reader quotes (first name only) on the review page. It's the single most-trusted thing on the page — way more than my own writing.
+
+No reply needed if you're not into it. Either way, thanks for reading.
+
+Alex`,
+    cta: "Reply with one line",
+    url: "mailto:hello@gearuptofit.com?subject=My%20watch%20review",
+    brevoRule:
+      "Wait 120 days from purchase. Tag replies with 'ugc_submitted'. Reply-to must be monitored. Single send — do not nag.",
+  },
+  {
+    day: "Month 12 post-purchase",
+    subject: "One year in — should you upgrade, or wait?",
+    preheader: "An honest framework. Most years, the answer is wait.",
+    goal: "Re-engagement at the natural upgrade moment. High-intent affiliate window without being pushy.",
+    body: `You've owned your {{ contact.TOP_MATCH_MODEL }} for a year. The honest upgrade test:
+
+- Battery still holds 80%+ of day-1? → Keep it.
+- New model adds multi-band GPS / AMOLED / 2x battery your watch lacks? → Upgrade is real.
+- New model is just a faster chip + new band colors? → Skip.
+
+If you're due, your re-take of WatchMatch is here (it remembers your last answers): https://gearuptofit.com/watch-match/
+
+If you're keeping it, here's the squeeze-more-life-out-of-it guide: ${G("review/extend-smartwatch-life")}
+
+Alex`,
+    cta: "Re-run WatchMatch",
+    url: "https://gearuptofit.com/watch-match/",
+    brevoRule:
+      "Wait 365 days. Suppress if contact already entered a new WatchMatch session in the last 60 days. Annual cadence — repeat each year while contact is engaged.",
+  },
+];
+
+const segmentationMatrix = [
+  { segment: "iPhone + Endurance + 500+", primary: "Apple Watch Ultra 2", swap: ["Garmin Fenix 8 AMOLED 47", "Coros Vertix 2S"], cadence: "Standard 8-step + post-purchase" },
+  { segment: "Android + Endurance + 500+", primary: "Garmin Fenix 8 AMOLED 47", swap: ["Coros Vertix 2S", "Suunto Vertical"], cadence: "Standard 8-step, swap email 2 to Android-first" },
+  { segment: "iPhone + Daily + 250–500", primary: "Apple Watch Series 10", swap: ["Apple Watch SE 3", "Galaxy Watch 7"], cadence: "Standard, emphasize ecosystem in email 2" },
+  { segment: "Android + Daily + 250–500", primary: "Galaxy Watch Ultra", swap: ["Pixel Watch 3", "Galaxy Watch 7"], cadence: "Standard, emphasize Wear OS in email 2" },
+  { segment: "Any + Band + <100", primary: "Xiaomi Smart Band 9", swap: ["Fitbit Inspire 3", "Amazfit Bip 5"], cadence: "Skip email 5 (sport-watch reframe), use band variant" },
+  { segment: "Any + Health-first + 250–500", primary: "Withings ScanWatch 2", swap: ["Garmin Venu 3", "Apple Watch Series 10"], cadence: "Tag 'health_focus', prioritize ECG/sleep guides" },
+];
+
+const kpiBenchmarks = [
+  { metric: "Open rate (email 1)", target: "55–70%", floor: "<40% triggers subject-line A/B", note: "Highest-intent moment in the journey" },
+  { metric: "Open rate (avg 2–8)", target: "32–45%", floor: "<22% review send time + from-name", note: "Industry avg ~21% (Mailchimp 2024)" },
+  { metric: "Click-through rate", target: "5–9%", floor: "<2.5% review CTA placement", note: "Affiliate vertical benchmark ~2.6%" },
+  { metric: "Amazon goal (purchase click)", target: "8–14%", floor: "<5%", note: "Tracked via Brevo goal on amazon.com link" },
+  { metric: "Unsubscribe rate", target: "<0.5% per email", floor: ">1.0% pause sequence", note: "Healthy long-term list signal" },
+  { metric: "Spam complaint rate", target: "<0.08%", floor: ">0.1% Gmail postmaster alert", note: "Postmaster Tools must be wired" },
+  { metric: "Bounce rate", target: "<2% hard bounce", floor: ">5% audit list hygiene", note: "Use Brevo's auto-suppression" },
+  { metric: "Sequence completion", target: "60–75%", floor: "<45%", note: "Drop-off concentrated around email 5" },
+];
+
+const abTests = [
+  { id: "T1", element: "Email 1 subject", a: "Your WatchMatch result — plus the one spec most people get wrong", b: "Don't buy your watch yet ({{ contact.TOP_MATCH_MODEL }} included)", winnerMetric: "Open rate, 24h", traffic: "50/50, min 1,000 sends" },
+  { id: "T2", element: "Email 3 send time", a: "Tue 09:00 local (Brevo send-time optimization)", b: "Sun 18:00 local", winnerMetric: "Open + CTR composite", traffic: "50/50, 2-week window" },
+  { id: "T3", element: "Email 4 CTA", a: "Single button: 'See sensor-by-sensor picks'", b: "Three inline links to ECG / senior / BP guides", winnerMetric: "CTR per recipient", traffic: "50/50, 1,500 sends" },
+  { id: "T4", element: "From name", a: "Alex from GearUpToFit", b: "GearUpToFit", winnerMetric: "Open rate across full sequence", traffic: "Hold-out 20%" },
+  { id: "T5", element: "Email 6 personalization depth", a: "Generic check-in", b: "Reference TOP_MATCH_BRAND and PRIMARY_USE", winnerMetric: "Reply rate", traffic: "50/50" },
+];
+
+const deliverabilityChecklist = [
+  "SPF, DKIM and DMARC published for gearuptofit.com (DMARC at p=quarantine, ramp to p=reject after 30d clean).",
+  "BIMI record + VMC certificate for the GearUpToFit logo to render in Gmail/Apple Mail.",
+  "Dedicated Brevo IP (or warm shared IP) — warm-up schedule: 50 → 500 → 2k → 10k over 14 days.",
+  "List-Unsubscribe + List-Unsubscribe-Post headers (RFC 8058 one-click) — Brevo enables by default; verify in raw source.",
+  "Google Postmaster Tools + Microsoft SNDS connected; alert on spam-rate >0.1% or domain reputation drop to 'Medium'.",
+  "Plain-text alternative auto-generated (Brevo handles, but verify on first send via mail-tester.com — target ≥9.5/10).",
+  "Image-to-text ratio < 60% in every email; alt text on every image; no link shorteners (bit.ly etc).",
+  "Re-engagement gate: if contact has 0 opens in last 90 days, move to sunset flow (3 'still want this?' emails, then suppress).",
+];
+
+const gdprChecklist = [
+  "Double opt-in on the WatchMatch result form (Brevo confirmation email step) — required for EU contacts.",
+  "Granular consent: separate checkbox for 'WatchMatch result emails' vs 'GearUpToFit weekly newsletter'. No pre-ticked boxes.",
+  "Consent log: store IP, timestamp, form version, and consent text in Brevo contact attributes (CONSENT_TS, CONSENT_IP, CONSENT_VERSION).",
+  "One-click unsubscribe in every email (List-Unsubscribe header + visible footer link). Honor within 10 business days max — Brevo is instant.",
+  "Right-to-erasure workflow: Brevo Contact API DELETE endpoint wired to a /privacy/erasure form on gearuptofit.com.",
+  "Data Processing Addendum (DPA) signed with Brevo (auto-available in account settings) — required for EU operations.",
+];
+
 const setupSteps = [
   {
     title: "1. Install the official Brevo WordPress plugin",
