@@ -110,6 +110,27 @@ function Index() {
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[120px]" />
       </div>
 
+      {step.bgImage && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`bg-${currentStep}`}
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="fixed inset-0 pointer-events-none"
+            aria-hidden
+          >
+            <img
+              src={step.bgImage}
+              alt=""
+              className="absolute inset-0 w-full h-full object-cover opacity-25"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/95" />
+          </motion.div>
+        </AnimatePresence>
+      )}
+
       <QuizProgress currentStep={currentStep} totalSteps={quizSteps.length} progress={progress} />
 
       <div className="flex-1 flex items-center justify-center px-4 py-6 md:py-8 relative z-10">
