@@ -88,6 +88,8 @@ function link(doc: jsPDF, x: number, y: number, text: string, url: string, size 
   doc.setTextColor(C.red[0], C.red[1], C.red[2]);
   doc.setFont("helvetica", "bold");
   doc.textWithLink(text, x, y, { url });
+  const tw = doc.getTextWidth(text);
+  drawLinkIcon(doc, x + tw + 1.2, y - size * 0.32, size * 0.32);
 }
 
 function drawRadar(doc: jsPDF, cx: number, cy: number, radius: number, data: { axis: string; value: number }[]) {
@@ -147,9 +149,23 @@ function drawRadar(doc: jsPDF, cx: number, cy: number, radius: number, data: { a
 }
 
 // ─── Image loading (logo + product photos) ───
-async function urlToDataUrl(url: string): Promise<{ data: string; format: "JPEG" | "PNG" } | null> {
+type LoadedImage = { data: string; format: "JPEG" | "PNG"; w: number; h: number };
+
+/**
+ * Bump Amazon CDN thumbnails to a large, square-canvas variant so SERP
+ * thumbs (often 160-320px) don't render blurry inside the PDF.
+ */
+function upgradeAmazonImage(url: string): string {
+  if (!/\.(media-)?amazon\.|ssl-images-amazon|images-na\.ssl/i.test(url)) return url;
+  return url
+    .replace(/\._[A-Z0-9_,]+_\./i, "._AC_SL1500_.")
+    .replace(/(\/I\/[^.]+)\.(jpg|jpeg|png)/i, "$1._AC_SL1500_.$2");
+}
+
+async function urlToDataUrl(url: string): Promise<LoadedImage | null> {
   try {
-    const r = await fetch(url, { mode: "cors" });
+    const finalUrl = upgradeAmazonImage(url);
+    const r = await fetch(finalUrl, { mode: "cors" });
     if (!r.ok) return null;
     const blob = await r.blob();
     if (blob.size < 1500) return null;
@@ -160,10 +176,57 @@ async function urlToDataUrl(url: string): Promise<{ data: string; format: "JPEG"
       fr.readAsDataURL(blob);
     });
     const format: "JPEG" | "PNG" = blob.type.includes("png") ? "PNG" : "JPEG";
-    return { data, format };
+    // Measure natural dimensions so we can letterbox (contain-fit) without distortion.
+    const dims = await new Promise<{ w: number; h: number }>((resolve) => {
+      if (typeof Image === "undefined") return resolve({ w: 1, h: 1 });
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth || 1, h: img.naturalHeight || 1 });
+      img.onerror = () => resolve({ w: 1, h: 1 });
+      img.src = data;
+    });
+    return { data, format, w: dims.w, h: dims.h };
   } catch {
     return null;
   }
+}
+
+/**
+ * Draw `img` inside the box (x,y,w,h) preserving its aspect ratio (object-fit: contain).
+ * Prevents the squashed/stretched look caused by jsPDF's default stretch-to-fill.
+ */
+function drawImageContained(
+  doc: jsPDF,
+  img: LoadedImage,
+  x: number, y: number, w: number, h: number,
+) {
+  const ar = img.w / img.h;
+  const boxAr = w / h;
+  let dw = w, dh = h;
+  if (ar > boxAr) {
+    dw = w;
+    dh = w / ar;
+  } else {
+    dh = h;
+    dw = h * ar;
+  }
+  const dx = x + (w - dw) / 2;
+  const dy = y + (h - dh) / 2;
+  doc.addImage(img.data, img.format, dx, dy, dw, dh, undefined, "SLOW");
+}
+
+/** Tiny external-link glyph drawn as vector (a square with an arrow). */
+function drawLinkIcon(doc: jsPDF, x: number, y: number, size = 2.2, color: RGB = C.red) {
+  doc.setDrawColor(color[0], color[1], color[2]);
+  doc.setLineWidth(0.25);
+  // square (open at top-right)
+  doc.line(x, y, x, y + size);
+  doc.line(x, y + size, x + size, y + size);
+  doc.line(x + size, y + size, x + size, y + size * 0.45);
+  // arrow shaft
+  doc.line(x + size * 0.45, y + size * 0.55, x + size + 0.6, y - 0.2);
+  // arrow head
+  doc.line(x + size + 0.6, y - 0.2, x + size * 0.55, y - 0.2);
+  doc.line(x + size + 0.6, y - 0.2, x + size + 0.6, y + size * 0.55);
 }
 
 // ─── Page chrome ───
@@ -218,7 +281,7 @@ function addFooter(doc: jsPDF, page: number, total: number) {
 function drawWatchFrame(
   doc: jsPDF,
   x: number, y: number, w: number, h: number,
-  img: { data: string; format: "JPEG" | "PNG" } | null,
+  img: LoadedImage | null,
   brand: string, model: string,
 ) {
   // Soft shadow
@@ -238,7 +301,7 @@ function drawWatchFrame(
   if (img) {
     const pad = 1.5;
     try {
-      doc.addImage(img.data, img.format, x + pad, y + pad, w - pad * 2, h - pad * 2 - 1.5, undefined, "FAST");
+      drawImageContained(doc, img, x + pad, y + pad, w - pad * 2, h - pad * 2 - 1.5);
       return;
     } catch { /* fall through to placeholder */ }
   }
@@ -363,13 +426,13 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     watchesForImg.slice(0, 8).map(async (w) => {
       const p = lookupProduct(products, w);
       // Try live Amazon CDN image first, then category fallback (always works — local asset).
-      let img: { data: string; format: "JPEG" | "PNG" } | null = null;
+      let img: LoadedImage | null = null;
       if (p?.image) img = await urlToDataUrl(p.image);
       if (!img) img = await urlToDataUrl(categoryImage(w));
       return [w.id, img] as const;
     }),
   );
-  const imgMap = new Map<string, { data: string; format: "JPEG" | "PNG" } | null>(imgEntries);
+  const imgMap = new Map<string, LoadedImage | null>(imgEntries);
 
   const logoData = (await logoP)?.data ?? null;
 
