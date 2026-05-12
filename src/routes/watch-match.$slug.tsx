@@ -192,6 +192,7 @@ function WatchMatchResult() {
 
   const closeGate = useCallback(() => {
     setGateOpen(false);
+    setDownloadAfterUnlock(false);
     try {
       sessionStorage.setItem("wm_gate_dismissed_v1", "1");
     } catch {
@@ -455,7 +456,7 @@ function WatchMatchResult() {
                 className="bg-gradient-primary glow-primary font-bold uppercase tracking-wider px-6 md:px-8 h-12 rounded-xl text-sm group"
               >
                 <Download className="w-4 h-4 mr-2 group-hover:animate-bounce" />
-                Download PDF Report
+                {subscribed ? "Download PDF Report" : "Email & Download PDF Report"}
               </Button>
               {!subscribed && (
                 <Button
