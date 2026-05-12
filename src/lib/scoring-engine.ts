@@ -23,7 +23,8 @@ function useMatch(use: string, w: Watch): number {
 
 function phoneMatch(phone: string, w: Watch): number {
   if (!phone || phone === "both") return w.phones.includes("both") ? 1 : 0.7;
-  if (w.phones.includes(phone as any) || w.phones.includes("both")) return 1;
+  if (w.phones.includes(phone as any)) return 1;
+  if (w.phones.includes("both")) return 0.86;
   return 0;
 }
 
@@ -91,27 +92,24 @@ function budgetMatch(budgets: string[], price: number): number {
 }
 
 const WEIGHTS = {
-  use: 0.24,
-  phone: 0.16,
+  use: 0.23,
+  phone: 0.18,
   form: 0.18,
-  battery: 0.08,
+  battery: 0.09,
   features: 0.16,
   wrist: 0.03,
-  style: 0.07,
+  style: 0.06,
   brand: 0.04,
-  budget: 0.04,
+  budget: 0.03,
 };
 
 function exactnessBonus(a: QuizAnswers, w: Watch, s: Record<keyof typeof WEIGHTS, number>): number {
   let bonus = 0;
-  if (s.use === 1) bonus += 0.035;
-  if (s.form === 1) bonus += 0.04;
-  if (s.phone === 1) bonus += 0.02;
-  if (s.features === 1 && a.features.length >= 2) bonus += 0.025;
-  if (s.style === 1 && a.style) bonus += 0.015;
-  if (a.primaryUse === "health" && w.features.includes("ecg") && w.features.includes("spo2")) bonus += 0.025;
-  if (a.primaryUse === "outdoor" && w.features.includes("maps") && w.waterRating !== "IP68") bonus += 0.02;
-  if ((a.primaryUse === "running" || a.primaryUse === "multisport") && w.features.includes("gps")) bonus += 0.015;
+  if (s.use === 1 && s.form === 1) bonus += 0.018;
+  if (s.phone === 1) bonus += 0.01;
+  if (s.features === 1 && a.features.length >= 2) bonus += 0.012;
+  if (a.primaryUse === "health" && w.features.includes("ecg") && w.features.includes("spo2")) bonus += 0.012;
+  if (a.primaryUse === "outdoor" && w.features.includes("maps") && w.waterRating !== "IP68") bonus += 0.01;
   return bonus;
 }
 
