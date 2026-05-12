@@ -517,6 +517,7 @@ function WatchMatchResult() {
               icon="🎯"
               imageUrl={resolvedImage(setup.alt.watch)}
               buyUrl={resolvedUrl(setup.alt.watch)}
+              loading={amazonLoading}
             />
           )}
           {setup.budget && (
@@ -527,6 +528,7 @@ function WatchMatchResult() {
               icon="💸"
               imageUrl={resolvedImage(setup.budget.watch)}
               buyUrl={resolvedUrl(setup.budget.watch)}
+              loading={amazonLoading}
             />
           )}
         </div>
@@ -592,6 +594,9 @@ function WatchMatchResult() {
                   #{idx + 1}
                 </div>
                 <div className="hidden sm:block w-14 h-14 rounded-lg border border-border/40 flex-shrink-0 overflow-hidden">
+                  {amazonLoading ? (
+                    <div className="w-full h-full animate-pulse bg-card-elevated" />
+                  ) : (
                   <img
                     src={resolvedImage(s.watch)}
                     alt={`${s.watch.brand} ${s.watch.model}`}
@@ -599,10 +604,9 @@ function WatchMatchResult() {
                     width={160}
                     height={160}
                     className="w-full h-full object-contain bg-card-elevated p-1"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).src = categoryImage(s.watch);
-                    }}
+                    onError={(e) => handleImgError(e, s.watch)}
                   />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm md:text-base truncate">
