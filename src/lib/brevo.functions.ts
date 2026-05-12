@@ -100,54 +100,98 @@ function guideURL(path: string): string {
   return `${GEARUPTOFIT_ORIGIN}/${path.replace(/^\//, "")}`;
 }
 
-function welcomeHTML(input: SubscribeInput): { subject: string; html: string } {
+function welcomeHTML(input: SubscribeInput): { subject: string; html: string; text: string } {
   const name = input.firstName?.trim() || "there";
   const brand = input.topMatchBrand ?? "your match";
   const model = input.topMatchModel ?? "";
-  const url = input.watchMatchURL ?? "https://gearuptofit.com/watch-match/";
-  const subject = `${name}, your WatchMatch result + the spec most buyers regret ignoring`;
+  const matchName = `${brand} ${model}`.trim();
+  const category = input.category ?? "watch profile";
+  const url = normalizeReportURL(input.watchMatchURL);
+  const battery = input.batteryPref ? `${input.batteryPref}+ day` : "your preferred";
+  const platform = input.phoneOS === "iphone" ? "iPhone" : input.phoneOS === "android" ? "Android" : "your phone";
+  const subject = `${name}, your WatchMatch report is ready`;
+  const text = `Hi ${name},
+
+Your WatchMatch report is ready.
+
+Top match: ${matchName}
+Profile: ${category}
+Context: ${platform}, ${battery} battery preference
+
+Open your report here:
+${url}
+
+My quick read: do not buy on the headline spec alone. Before you decide, check three things in your report: case size on your wrist, real GPS mode for your routes, and battery life with the features you will actually keep switched on.
+
+Over the next few notes, I will help you compare platform lock-in, battery claims, health sensors, and the alternates worth considering — short, practical, and written like a real buyer's guide.
+
+Reply to this email if you want me to sanity-check a model before you buy.
+
+Alex
+GearUpToFit`;
   const html = `<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;background:#0b0b10;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#e9e9ee;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0b0b10;padding:32px 16px;">
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHTML(subject)}</title></head>
+<body style="margin:0;background:#f5f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#17191f;">
+  <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0;">Your personalized result, the three checks I would make before buying, and the next expert notes.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f6f8;padding:28px 14px;">
     <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background:#13131a;border:1px solid #26262f;border-radius:16px;overflow:hidden;">
-        <tr><td style="padding:28px 32px 8px;">
-          <div style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#ff3b6b;font-weight:700;">WatchMatch AI · GearUpToFit</div>
-          <h1 style="margin:14px 0 6px;font-size:26px;line-height:1.15;color:#fff;letter-spacing:-.01em;">Hi ${escapeHTML(name)} — your match is ready.</h1>
-          <p style="margin:0;color:#a8a8b3;font-size:15px;line-height:1.55;">Thanks for trusting GearUpToFit to help you choose your next watch.</p>
+      <table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:640px;background:#ffffff;border:1px solid #e6e8ee;border-radius:18px;overflow:hidden;box-shadow:0 18px 60px rgba(17,24,39,.08);">
+        <tr><td style="background:#11131a;padding:28px 30px 24px;">
+          <div style="font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#ff4f75;font-weight:800;">GearUpToFit · WatchMatch AI</div>
+          <h1 style="margin:14px 0 10px;font-size:30px;line-height:1.12;color:#ffffff;font-weight:800;letter-spacing:-.02em;">Hi ${escapeHTML(name)} — I finished your watch report.</h1>
+          <p style="margin:0;color:#c9cbd3;font-size:16px;line-height:1.6;">I built this around how you said you’ll actually use the watch — not around the loudest spec sheet.</p>
         </td></tr>
-        <tr><td style="padding:18px 32px 8px;">
-          <div style="background:linear-gradient(135deg,rgba(255,59,107,.12),rgba(255,59,107,.04));border:1px solid rgba(255,59,107,.35);border-radius:12px;padding:18px 20px;">
-            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#ff3b6b;font-weight:700;margin-bottom:6px;">Your top match</div>
-            <div style="font-size:20px;font-weight:700;color:#fff;">${escapeHTML(brand)} ${escapeHTML(model)}</div>
+        <tr><td style="padding:26px 30px 10px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #eceef3;border-radius:14px;overflow:hidden;">
+            <tr>
+              <td style="padding:18px 20px;background:#fbfbfd;">
+                <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;font-weight:800;margin-bottom:7px;">Your top match</div>
+                <div style="font-size:24px;line-height:1.2;font-weight:800;color:#161821;">${escapeHTML(matchName)}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:15px 20px;background:#ffffff;border-top:1px solid #eceef3;color:#4b5563;font-size:14px;line-height:1.65;">
+                <strong style="color:#161821;">Profile:</strong> ${escapeHTML(category)} &nbsp;·&nbsp; <strong style="color:#161821;">Phone:</strong> ${escapeHTML(platform)} &nbsp;·&nbsp; <strong style="color:#161821;">Battery:</strong> ${escapeHTML(battery)}
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+        <tr><td style="padding:18px 30px 2px;color:#30333d;font-size:16px;line-height:1.72;">
+          <p style="margin:0 0 16px;">A quick, honest note before you buy: the “best” watch is usually not the one with the longest feature list. It is the one that still feels right on your wrist after two weeks, records your normal routes accurately, and does not force you into charging habits you hate.</p>
+          <p style="margin:0 0 16px;">So when you open the report, look at these three sections first:</p>
+          <ol style="margin:0 0 18px 22px;padding:0;">
+            <li style="margin-bottom:8px;"><strong>Case fit.</strong> If your wrist is small, size and lug shape matter more than almost any sensor.</li>
+            <li style="margin-bottom:8px;"><strong>GPS mode.</strong> Trail, city, and cycling users should care about multi-band/all-systems GPS.</li>
+            <li style="margin-bottom:8px;"><strong>Real battery.</strong> Always-on display, SpO2, music, and GPS can cut marketing claims in half.</li>
+          </ol>
+        </td></tr>
+        <tr><td align="center" style="padding:20px 30px 10px;">
+          <a href="${escapeAttr(url)}" style="display:inline-block;background:#ff3b6b;color:#ffffff;text-decoration:none;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:15px 26px;border-radius:10px;font-size:14px;box-shadow:0 12px 30px rgba(255,59,107,.22);">Open my WatchMatch report</a>
+          <div style="margin-top:12px;color:#777d8a;font-size:12px;line-height:1.5;">If the button does not open, copy this link:<br><a href="${escapeAttr(url)}" style="color:#ff3b6b;text-decoration:underline;word-break:break-all;">${escapeHTML(url)}</a></div>
+        </td></tr>
+        <tr><td style="padding:22px 30px 8px;">
+          <div style="border-top:1px solid #eceef3;padding-top:20px;">
+            <div style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#6b7280;font-weight:800;margin-bottom:10px;">What I’ll send next</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              <tr><td style="padding:9px 0;color:#30333d;font-size:14px;line-height:1.55;"><strong>Day 2:</strong> platform lock-in — what iPhone and Android users should avoid.</td></tr>
+              <tr><td style="padding:9px 0;color:#30333d;font-size:14px;line-height:1.55;border-top:1px solid #f0f1f4;"><strong>Day 4:</strong> real battery math — the number brands do not put on the box.</td></tr>
+              <tr><td style="padding:9px 0;color:#30333d;font-size:14px;line-height:1.55;border-top:1px solid #f0f1f4;"><strong>Day 6:</strong> the sensors that matter, and the ones you should not overpay for.</td></tr>
+              <tr><td style="padding:9px 0;color:#30333d;font-size:14px;line-height:1.55;border-top:1px solid #f0f1f4;"><strong>Later:</strong> alternates, setup tips, and accessories that are actually worth it.</td></tr>
+            </table>
           </div>
         </td></tr>
-        <tr><td style="padding:18px 32px 4px;color:#cfcfd6;font-size:15px;line-height:1.65;">
-          <p style="margin:0 0 14px;">Before you click <em>buy</em>, one quick warning. The single spec most buyers regret ignoring isn't battery, screen size, or sensors — it's <strong>GPS architecture</strong>.</p>
-          <p style="margin:0 0 14px;">Single-frequency GPS will drift 30–80 m on tree-lined trails and city blocks. Multi-band (L1+L5) holds within 5 m. If you run, hike, or cycle outside a track, this is the spec that decides whether your splits are real.</p>
-          <p style="margin:0 0 6px;">If your match has multi-band, you're set. If not, your result page lists a near-equivalent that does — scroll to <strong>Alternate Pick</strong>.</p>
+        <tr><td style="padding:18px 30px 28px;color:#525866;font-size:15px;line-height:1.7;">
+          <p style="margin:0 0 12px;">If you are torn between two models, reply with the names. I’ll tell you which one I’d buy and why — no script, no generic answer.</p>
+          <p style="margin:0;color:#17191f;font-weight:700;">Alex<br><span style="font-weight:500;color:#6b7280;">GearUpToFit</span></p>
         </td></tr>
-        <tr><td align="center" style="padding:22px 32px 8px;">
-          <a href="${escapeAttr(url)}" style="display:inline-block;background:#ff3b6b;color:#fff;text-decoration:none;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:14px 26px;border-radius:12px;font-size:14px;">Open my full WatchMatch report</a>
-        </td></tr>
-        <tr><td style="padding:14px 32px 4px;color:#9a9aa3;font-size:13px;line-height:1.6;">
-          <p style="margin:0 0 6px;"><strong style="color:#e9e9ee;">What happens next:</strong></p>
-          <ul style="margin:6px 0 14px 18px;padding:0;">
-            <li>Day 2 — the 3-watch rotation that lowers injury &amp; battery anxiety</li>
-            <li>Day 4 — the only 4 sensors that actually change a buying decision</li>
-            <li>Day 7 — a head-to-head: your match vs. its biggest rival</li>
-            <li>Day 14 — straps, charging cradles &amp; accessories worth owning</li>
-          </ul>
-        </td></tr>
-        <tr><td style="padding:8px 32px 28px;color:#74747d;font-size:12px;line-height:1.6;border-top:1px solid #26262f;">
-          You're getting this because you took the WatchMatch quiz on GearUpToFit and asked us to email you the result. Reply with "stop" any time and we'll remove you immediately.
+        <tr><td style="padding:16px 30px 24px;background:#fbfbfd;color:#7b8190;font-size:12px;line-height:1.6;border-top:1px solid #eceef3;">
+          You are receiving this because you requested your WatchMatch report on GearUpToFit. If this is not useful, use Brevo’s unsubscribe link or reply with “stop” and we will remove you.
         </td></tr>
       </table>
     </td></tr>
   </table>
 </body></html>`;
-  return { subject, html };
+  return { subject, html, text };
 }
 
 function escapeHTML(s: string): string {
