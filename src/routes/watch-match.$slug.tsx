@@ -13,6 +13,10 @@ import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
 import { amazonURL, categoryImage, gutfURL } from "@/lib/amazon";
+import catSmartwatch from "@/assets/cat-smartwatch.jpg";
+import catSportwatch from "@/assets/cat-sportwatch.jpg";
+import catBand from "@/assets/cat-band.jpg";
+import catHybrid from "@/assets/cat-hybrid.jpg";
 import { pickGuides } from "@/lib/featured-guides";
 import { getRelevantGutfPosts } from "@/lib/gearuptofit-posts.functions";
 import { Button } from "@/components/ui/button";
@@ -53,6 +57,25 @@ const searchSchema = z.object({
   d: z.string().optional(),
 });
 
+/**
+ * Absolute origin used for og:image / twitter:image. Social crawlers require
+ * fully-qualified URLs — relative asset paths are silently ignored.
+ */
+const OG_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+
+function ogImageForSlug(slug: string): string {
+  // Slug shape: `${primaryUse}-${phone}-${form}-${style}` (see generateSlug).
+  const form = (slug.split("-")[2] || "smartwatch").toLowerCase();
+  const map: Record<string, string> = {
+    smartwatch: catSmartwatch,
+    sportwatch: catSportwatch,
+    band: catBand,
+    hybrid: catHybrid,
+  };
+  const asset = map[form] ?? catSmartwatch;
+  return asset.startsWith("http") ? asset : `${OG_ORIGIN}${asset}`;
+}
+
 export const Route = createFileRoute("/watch-match/$slug")({
   validateSearch: searchSchema,
   head: ({ params }) => ({
@@ -73,6 +96,21 @@ export const Route = createFileRoute("/watch-match/$slug")({
         property: "og:description",
         content:
           "Take the 9-question WatchMatch AI quiz on GearUpToFit and find the smartwatch that actually fits your wrist, sport and life.",
+      },
+      { property: "og:type", content: "article" },
+      { property: "og:image", content: ogImageForSlug(params.slug) },
+      { property: "og:image:width", content: "896" },
+      { property: "og:image:height", content: "896" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ogImageForSlug(params.slug) },
+      {
+        name: "twitter:title",
+        content: `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`,
+      },
+      {
+        name: "twitter:description",
+        content:
+          "9-question WatchMatch AI quiz on GearUpToFit — find the smartwatch that fits your wrist, sport and life.",
       },
     ],
     links: [
