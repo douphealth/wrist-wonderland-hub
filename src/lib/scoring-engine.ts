@@ -14,13 +14,15 @@ function useMatch(use: string, w: Watch): number {
   // partial credit for adjacent uses
   if (use === "running" && w.bestFor.includes("multisport")) return 0.7;
   if (use === "multisport" && w.bestFor.includes("running")) return 0.7;
+  if (use === "outdoor" && w.bestFor.includes("multisport")) return 0.65;
+  if (use === "gym" && w.bestFor.includes("everyday")) return 0.6;
   if (use === "everyday" && w.bestFor.includes("health")) return 0.6;
   if (use === "health" && w.bestFor.includes("everyday")) return 0.6;
-  return 0.25;
+  return 0.1;
 }
 
 function phoneMatch(phone: string, w: Watch): number {
-  if (!phone || phone === "both") return w.phones.includes("both") ? 1 : 0.55;
+  if (!phone || phone === "both") return w.phones.includes("both") ? 1 : 0.7;
   if (w.phones.includes(phone as any) || w.phones.includes("both")) return 1;
   return 0;
 }
@@ -28,9 +30,11 @@ function phoneMatch(phone: string, w: Watch): number {
 function formMatch(form: string, w: Watch): number {
   if (!form) return 0.7;
   if (w.category === form) return 1;
-  if (form === "smartwatch" && w.category === "sportwatch") return 0.5;
-  if (form === "sportwatch" && w.category === "smartwatch") return 0.5;
-  return 0.2;
+  if (form === "smartwatch" && w.category === "sportwatch") return 0.32;
+  if (form === "sportwatch" && w.category === "smartwatch") return 0.28;
+  if (form === "band" && w.category === "hybrid") return 0.18;
+  if (form === "hybrid" && w.category === "band") return 0.18;
+  return 0.04;
 }
 
 function batteryMatch(target: number, w: Watch): number {
@@ -45,7 +49,7 @@ function batteryMatch(target: number, w: Watch): number {
 function featuresMatch(want: string[], w: Watch): number {
   if (want.length === 0) return 0.7;
   const have = want.filter((f) => w.features.includes(f)).length;
-  return have / want.length;
+  return Math.pow(have / want.length, 1.25);
 }
 
 function wristMatch(wristMM: number, w: Watch): number {
@@ -60,7 +64,7 @@ function wristMatch(wristMM: number, w: Watch): number {
 
 function styleMatch(style: string, w: Watch): number {
   if (!style) return 0.7;
-  return w.style.includes(style as any) ? 1 : 0.4;
+  return w.style.includes(style as any) ? 1 : 0.18;
 }
 
 function brandMatch(brands: string[], w: Watch): number {
