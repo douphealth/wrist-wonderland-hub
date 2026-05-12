@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
@@ -53,8 +53,10 @@ import {
   Zap,
   BookOpen,
   ShieldCheck,
+  Mail,
 } from "lucide-react";
 import { toast } from "sonner";
+import EmailGate, { hasSubscribed } from "@/components/EmailGate";
 
 const searchSchema = z.object({
   d: z.string().optional(),
@@ -143,6 +145,57 @@ function WatchMatchResult() {
   const { slug } = Route.useParams();
   const { d } = Route.useSearch();
   const [copied, setCopied] = useState(false);
+  const [gateOpen, setGateOpen] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
+  const autoOpenedRef = useRef(false);
+
+  // Hydrate subscribed flag and auto-open the EmailGate after a soft dwell
+  // (10s) on first visit. We never re-open for users who've already opted in
+  // or dismissed the modal in this session.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (hasSubscribed()) {
+      setSubscribed(true);
+      return;
+    }
+    const dismissed = sessionStorage.getItem("wm_gate_dismissed_v1");
+    if (dismissed) return;
+    const t = window.setTimeout(() => {
+      if (autoOpenedRef.current) return;
+      autoOpenedRef.current = true;
+      setGateOpen(true);
+    }, 10000);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  // Exit-intent: pointer leaving the top of the viewport (desktop only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (subscribed) return;
+    if (sessionStorage.getItem("wm_gate_dismissed_v1")) return;
+    const onLeave = (e: MouseEvent) => {
+      if (e.clientY > 0) return;
+      if (autoOpenedRef.current) return;
+      autoOpenedRef.current = true;
+      setGateOpen(true);
+    };
+    document.addEventListener("mouseout", onLeave);
+    return () => document.removeEventListener("mouseout", onLeave);
+  }, [subscribed]);
+
+  const closeGate = useCallback(() => {
+    setGateOpen(false);
+    try {
+      sessionStorage.setItem("wm_gate_dismissed_v1", "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const onUnlock = useCallback(() => {
+    setSubscribed(true);
+    setGateOpen(false);
+  }, []);
 
   const answers: QuizAnswers | null = useMemo(() => {
     if (d) {
@@ -382,6 +435,23 @@ function WatchMatchResult() {
                 <Download className="w-4 h-4 mr-2 group-hover:animate-bounce" />
                 Download PDF Report
               </Button>
+              {!subscribed && (
+                <Button
+                  onClick={() => setGateOpen(true)}
+                  variant="outline"
+                  size="lg"
+                  className="h-12 px-6 md:px-8 rounded-xl text-sm font-bold uppercase tracking-wider border-primary/40 hover:border-primary hover:bg-primary/10"
+                >
+                  <Mail className="w-4 h-4 mr-2 text-primary" />
+                  Email me my report + 8-day series
+                </Button>
+              )}
+              {subscribed && (
+                <p className="inline-flex items-center gap-1.5 text-[11px] text-primary uppercase tracking-widest">
+                  <CheckCircle className="w-3 h-3" />
+                  Day-0 email sent · 7 more on the way
+                </p>
+              )}
               <p className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground uppercase tracking-widest">
                 <ShieldCheck className="w-3 h-3 text-primary" />
                 Database verified · {WATCH_DB_LAST_UPDATED}
@@ -821,6 +891,19 @@ function WatchMatchResult() {
           </Link>
         </div>
       </main>
+
+      <EmailGate
+        open={gateOpen}
+        onClose={closeGate}
+        onUnlock={onUnlock}
+        topMatchBrand={primary.watch.brand}
+        topMatchModel={primary.watch.model}
+        category={rec.profile.category}
+        phoneOS={answers.phone}
+        batteryPref={answers.battery}
+        watchMatchURL={typeof window !== "undefined" ? window.location.href : undefined}
+        source="quiz_gate"
+      />
     </div>
   );
 }
