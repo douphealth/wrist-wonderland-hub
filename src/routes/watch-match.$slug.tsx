@@ -804,6 +804,7 @@ function RotationCard({
   icon,
   imageUrl,
   buyUrl,
+  loading,
 }: {
   title: string;
   subtitle: string;
@@ -811,6 +812,7 @@ function RotationCard({
   icon: string;
   imageUrl?: string;
   buyUrl?: string;
+  loading?: boolean;
 }) {
   return (
     <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-6 hover:border-primary/30 transition-all">
@@ -823,6 +825,9 @@ function RotationCard({
         <div className="text-lg font-bold text-gradient tabular-nums">{item.matchPercent}%</div>
       </div>
       <div className="aspect-[16/9] rounded-xl border border-border/40 overflow-hidden mb-3 relative">
+        {loading && (
+          <div className="absolute inset-0 z-10 animate-pulse bg-gradient-to-br from-primary/5 via-transparent to-primary/10" />
+        )}
         <img
           src={imageUrl || categoryImage(item.watch)}
           alt={`${item.watch.brand} ${item.watch.model}`}
@@ -831,6 +836,7 @@ function RotationCard({
           height={896}
           className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-3"
           onError={(e) => {
+            (e.currentTarget as HTMLImageElement).onerror = null;
             (e.currentTarget as HTMLImageElement).src = categoryImage(item.watch);
           }}
         />
@@ -850,9 +856,10 @@ function RotationCard({
         href={buyUrl || amazonURL(item.watch)}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
+        aria-busy={loading}
+        className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline ${loading ? "opacity-70" : ""}`}
       >
-        Check on Amazon <ExternalLink className="w-3 h-3" />
+        {loading ? "Verifying…" : "Check on Amazon"} <ExternalLink className="w-3 h-3" />
       </a>
     </motion.div>
   );
