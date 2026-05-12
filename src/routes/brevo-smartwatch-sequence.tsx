@@ -12,6 +12,12 @@ import {
   Timer,
   Server,
   Code2,
+  Target,
+  GitBranch,
+  ShieldCheck,
+  BarChart3,
+  Beaker,
+  Layers,
 } from "lucide-react";
 
 export const Route = createFileRoute("/brevo-smartwatch-sequence")({
@@ -248,6 +254,138 @@ GearUpToFit.com`,
   },
 ];
 
+// Post-purchase lifecycle (triggered when 'amazon_click' goal fires OR contact self-reports 'I bought it')
+const lifecycleEmails: EmailStep[] = [
+  {
+    day: "Day 30 post-purchase",
+    subject: "Your first 30 days with the {{ contact.TOP_MATCH_MODEL }} — three settings to change tonight",
+    preheader: "Default settings are conservative. These three unlock the watch you actually paid for.",
+    goal: "Activation. Drive deeper feature use → higher retention, fewer returns, more affiliate trust.",
+    body: `You've had it a month. Here are the three settings 90% of buyers never touch — and that change the experience the most:
+
+1. **GPS mode → Multi-band / All-Systems**. Default is usually 'Auto'. Force it on for outdoor workouts.
+2. **HR broadcast over BLE**. Lets your watch act as a chest-strap replacement for Zwift, Peloton, gym bikes.
+3. **Sleep window + Do Not Disturb sync**. Massive accuracy jump on sleep stages and recovery.
+
+Full setup checklist for your model: ${G("review/" + "{{ contact.TOP_MATCH_SLUG }}-setup")}
+
+Alex`,
+    cta: "Open the setup checklist",
+    url: G("review/best-smartwatches-of-the-year"),
+    brevoRule:
+      "Trigger: contact has tag 'purchased' OR amazon_click event > 0. Wait 30 days from event. Skip if contact unsubscribed.",
+  },
+  {
+    day: "Day 60 post-purchase",
+    subject: "The 4 accessories actually worth buying (and the 9 that aren't)",
+    preheader: "Bands, chargers, screen protectors — what's worth it, what's a waste.",
+    goal: "Accessory revenue + practical value. Position GearUpToFit as the trusted post-purchase advisor.",
+    body: `Worth it:
+- A second band in silicone (sweat) + a nylon/leather (office). $15–30 each.
+- A genuine OEM fast charger for travel. $20–40.
+- A tempered-glass screen protector if you have AMOLED. $8–15.
+- A chest HR strap (Polar H10 or Garmin HRM-Pro) if you do intervals. $80.
+
+Not worth it: third-party "cradle" chargers, $5 bands that stain skin, sapphire screen "upgrades", magnetic clasps that pop off mid-run, USB cable extenders, novelty cases.
+
+Full accessory guide: ${G("review/best-smartwatch-accessories")}
+
+Alex`,
+    cta: "See the accessory guide",
+    url: G("review/best-smartwatch-accessories"),
+    brevoRule:
+      "Wait 60 days from purchase event. A/B test subject line variant: 'Stop wasting money on smartwatch accessories'.",
+  },
+  {
+    day: "Day 120 post-purchase",
+    subject: "Quick favor — would you leave a 1-line review?",
+    preheader: "It helps other readers more than you'd think. 30 seconds, totally optional.",
+    goal: "User-generated content for review pages → SEO + social proof loop.",
+    body: `You've had your watch ~4 months — long enough to know the truth.
+
+If you have 30 seconds, hit reply with one line: what you love, what annoys you, would you buy it again?
+
+I publish reader quotes (first name only) on the review page. It's the single most-trusted thing on the page — way more than my own writing.
+
+No reply needed if you're not into it. Either way, thanks for reading.
+
+Alex`,
+    cta: "Reply with one line",
+    url: "mailto:hello@gearuptofit.com?subject=My%20watch%20review",
+    brevoRule:
+      "Wait 120 days from purchase. Tag replies with 'ugc_submitted'. Reply-to must be monitored. Single send — do not nag.",
+  },
+  {
+    day: "Month 12 post-purchase",
+    subject: "One year in — should you upgrade, or wait?",
+    preheader: "An honest framework. Most years, the answer is wait.",
+    goal: "Re-engagement at the natural upgrade moment. High-intent affiliate window without being pushy.",
+    body: `You've owned your {{ contact.TOP_MATCH_MODEL }} for a year. The honest upgrade test:
+
+- Battery still holds 80%+ of day-1? → Keep it.
+- New model adds multi-band GPS / AMOLED / 2x battery your watch lacks? → Upgrade is real.
+- New model is just a faster chip + new band colors? → Skip.
+
+If you're due, your re-take of WatchMatch is here (it remembers your last answers): https://gearuptofit.com/watch-match/
+
+If you're keeping it, here's the squeeze-more-life-out-of-it guide: ${G("review/extend-smartwatch-life")}
+
+Alex`,
+    cta: "Re-run WatchMatch",
+    url: "https://gearuptofit.com/watch-match/",
+    brevoRule:
+      "Wait 365 days. Suppress if contact already entered a new WatchMatch session in the last 60 days. Annual cadence — repeat each year while contact is engaged.",
+  },
+];
+
+const segmentationMatrix = [
+  { segment: "iPhone + Endurance + 500+", primary: "Apple Watch Ultra 2", swap: ["Garmin Fenix 8 AMOLED 47", "Coros Vertix 2S"], cadence: "Standard 8-step + post-purchase" },
+  { segment: "Android + Endurance + 500+", primary: "Garmin Fenix 8 AMOLED 47", swap: ["Coros Vertix 2S", "Suunto Vertical"], cadence: "Standard 8-step, swap email 2 to Android-first" },
+  { segment: "iPhone + Daily + 250–500", primary: "Apple Watch Series 10", swap: ["Apple Watch SE 3", "Galaxy Watch 7"], cadence: "Standard, emphasize ecosystem in email 2" },
+  { segment: "Android + Daily + 250–500", primary: "Galaxy Watch Ultra", swap: ["Pixel Watch 3", "Galaxy Watch 7"], cadence: "Standard, emphasize Wear OS in email 2" },
+  { segment: "Any + Band + <100", primary: "Xiaomi Smart Band 9", swap: ["Fitbit Inspire 3", "Amazfit Bip 5"], cadence: "Skip email 5 (sport-watch reframe), use band variant" },
+  { segment: "Any + Health-first + 250–500", primary: "Withings ScanWatch 2", swap: ["Garmin Venu 3", "Apple Watch Series 10"], cadence: "Tag 'health_focus', prioritize ECG/sleep guides" },
+];
+
+const kpiBenchmarks = [
+  { metric: "Open rate (email 1)", target: "55–70%", floor: "<40% triggers subject-line A/B", note: "Highest-intent moment in the journey" },
+  { metric: "Open rate (avg 2–8)", target: "32–45%", floor: "<22% review send time + from-name", note: "Industry avg ~21% (Mailchimp 2024)" },
+  { metric: "Click-through rate", target: "5–9%", floor: "<2.5% review CTA placement", note: "Affiliate vertical benchmark ~2.6%" },
+  { metric: "Amazon goal (purchase click)", target: "8–14%", floor: "<5%", note: "Tracked via Brevo goal on amazon.com link" },
+  { metric: "Unsubscribe rate", target: "<0.5% per email", floor: ">1.0% pause sequence", note: "Healthy long-term list signal" },
+  { metric: "Spam complaint rate", target: "<0.08%", floor: ">0.1% Gmail postmaster alert", note: "Postmaster Tools must be wired" },
+  { metric: "Bounce rate", target: "<2% hard bounce", floor: ">5% audit list hygiene", note: "Use Brevo's auto-suppression" },
+  { metric: "Sequence completion", target: "60–75%", floor: "<45%", note: "Drop-off concentrated around email 5" },
+];
+
+const abTests = [
+  { id: "T1", element: "Email 1 subject", a: "Your WatchMatch result — plus the one spec most people get wrong", b: "Don't buy your watch yet ({{ contact.TOP_MATCH_MODEL }} included)", winnerMetric: "Open rate, 24h", traffic: "50/50, min 1,000 sends" },
+  { id: "T2", element: "Email 3 send time", a: "Tue 09:00 local (Brevo send-time optimization)", b: "Sun 18:00 local", winnerMetric: "Open + CTR composite", traffic: "50/50, 2-week window" },
+  { id: "T3", element: "Email 4 CTA", a: "Single button: 'See sensor-by-sensor picks'", b: "Three inline links to ECG / senior / BP guides", winnerMetric: "CTR per recipient", traffic: "50/50, 1,500 sends" },
+  { id: "T4", element: "From name", a: "Alex from GearUpToFit", b: "GearUpToFit", winnerMetric: "Open rate across full sequence", traffic: "Hold-out 20%" },
+  { id: "T5", element: "Email 6 personalization depth", a: "Generic check-in", b: "Reference TOP_MATCH_BRAND and PRIMARY_USE", winnerMetric: "Reply rate", traffic: "50/50" },
+];
+
+const deliverabilityChecklist = [
+  "SPF, DKIM and DMARC published for gearuptofit.com (DMARC at p=quarantine, ramp to p=reject after 30d clean).",
+  "BIMI record + VMC certificate for the GearUpToFit logo to render in Gmail/Apple Mail.",
+  "Dedicated Brevo IP (or warm shared IP) — warm-up schedule: 50 → 500 → 2k → 10k over 14 days.",
+  "List-Unsubscribe + List-Unsubscribe-Post headers (RFC 8058 one-click) — Brevo enables by default; verify in raw source.",
+  "Google Postmaster Tools + Microsoft SNDS connected; alert on spam-rate >0.1% or domain reputation drop to 'Medium'.",
+  "Plain-text alternative auto-generated (Brevo handles, but verify on first send via mail-tester.com — target ≥9.5/10).",
+  "Image-to-text ratio < 60% in every email; alt text on every image; no link shorteners (bit.ly etc).",
+  "Re-engagement gate: if contact has 0 opens in last 90 days, move to sunset flow (3 'still want this?' emails, then suppress).",
+];
+
+const gdprChecklist = [
+  "Double opt-in on the WatchMatch result form (Brevo confirmation email step) — required for EU contacts.",
+  "Granular consent: separate checkbox for 'WatchMatch result emails' vs 'GearUpToFit weekly newsletter'. No pre-ticked boxes.",
+  "Consent log: store IP, timestamp, form version, and consent text in Brevo contact attributes (CONSENT_TS, CONSENT_IP, CONSENT_VERSION).",
+  "One-click unsubscribe in every email (List-Unsubscribe header + visible footer link). Honor within 10 business days max — Brevo is instant.",
+  "Right-to-erasure workflow: Brevo Contact API DELETE endpoint wired to a /privacy/erasure form on gearuptofit.com.",
+  "Data Processing Addendum (DPA) signed with Brevo (auto-available in account settings) — required for EU operations.",
+];
+
 const setupSteps = [
   {
     title: "1. Install the official Brevo WordPress plugin",
@@ -281,7 +419,7 @@ function BrevoSmartwatchSequence() {
 
   const fullText = useMemo(
     () =>
-      emails
+      [...emails, ...lifecycleEmails]
         .map(
           (e, i) =>
             `=== EMAIL ${i + 1} — ${e.day} ===
@@ -327,9 +465,11 @@ ${e.brevoRule}
             The GearUpToFit Smartwatch Email Sequence
           </h1>
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-            8 human-written emails, sent over 21 days, written for the official
-            Brevo WordPress plugin. Built for smartwatch, sport watch and fitness
-            band buyers — and for the broader GearUpToFit audience.
+            12 human-written emails across a 12-month lifecycle — pre-purchase
+            nurture (8 emails / 21 days) plus post-purchase activation, accessory,
+            UGC and annual upgrade flows. Built for the official Brevo WordPress
+            plugin with full segmentation matrix, KPI benchmarks, A/B test plan,
+            deliverability and GDPR controls.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
             <Button onClick={copyAll} className="bg-gradient-primary glow-primary-sm font-bold uppercase tracking-wider text-xs">
@@ -448,7 +588,7 @@ RewriteRule ^_build/(.*)$ https://wrist-wonderland-hub.lovable.app/_build/$1 [P,
               <Mail className="w-5 h-5 text-primary" />
             </div>
             <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
-              The 8-email sequence
+              Pre-purchase sequence (8 emails · 21 days)
             </h2>
           </div>
           <div className="space-y-4">
@@ -489,6 +629,204 @@ RewriteRule ^_build/(.*)$ https://wrist-wonderland-hub.lovable.app/_build/$1 [P,
                 </div>
               </motion.article>
             ))}
+          </div>
+        </section>
+
+        {/* Lifecycle / post-purchase */}
+        <section className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Layers className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              Post-purchase lifecycle (4 emails · 12 months)
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Triggered when the Brevo goal <code className="text-primary">amazon_click</code> fires
+            (or contact self-reports a purchase via reply to email 6). Drives activation,
+            accessory revenue, UGC, and the natural 12-month re-engagement window.
+          </p>
+          <div className="space-y-4">
+            {lifecycleEmails.map((e, i) => (
+              <motion.article
+                key={`lc-${i}`}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                className="glass rounded-2xl p-5 md:p-6 space-y-3"
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <Badge className="border-primary/25 bg-primary/10 text-primary uppercase tracking-widest text-[10px]">
+                    Lifecycle {i + 1}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground inline-flex items-center gap-1.5">
+                    <Timer className="w-3.5 h-3.5" />
+                    {e.day}
+                  </span>
+                </div>
+                <h3 className="text-lg md:text-xl font-bold leading-snug">{e.subject}</h3>
+                <p className="text-xs text-muted-foreground italic">Preheader: {e.preheader}</p>
+                <p className="text-xs text-primary/80">Goal: {e.goal}</p>
+                <pre className="whitespace-pre-wrap text-sm text-foreground/90 leading-relaxed bg-card/40 border border-border/40 rounded-lg p-4 font-sans">
+                  {e.body}
+                </pre>
+                <div className="text-xs text-muted-foreground">
+                  <strong className="text-primary">CTA:</strong> {e.cta} →{" "}
+                  <code className="text-primary/80">{e.url}</code>
+                </div>
+                <div className="text-xs text-muted-foreground border-t border-border/40 pt-3">
+                  <strong className="text-primary">Brevo rule:</strong> {e.brevoRule}
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        {/* Segmentation matrix */}
+        <section className="glass rounded-2xl p-5 md:p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <GitBranch className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              Segmentation matrix
+            </h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Brevo dynamic content blocks branch on <code className="text-primary">PHONE_OS</code>,{" "}
+            <code className="text-primary">PRIMARY_USE</code> and{" "}
+            <code className="text-primary">BUDGET_BAND</code>. Each segment swaps the hero recommendation
+            and the email-2 platform reframe.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs md:text-sm border-collapse">
+              <thead>
+                <tr className="text-left text-primary/80 uppercase tracking-wider text-[10px]">
+                  <th className="border-b border-border/40 py-2 pr-3">Segment</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Hero pick</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Swap-ins</th>
+                  <th className="border-b border-border/40 py-2">Cadence override</th>
+                </tr>
+              </thead>
+              <tbody>
+                {segmentationMatrix.map((s, i) => (
+                  <tr key={i} className="align-top">
+                    <td className="border-b border-border/20 py-2 pr-3 font-medium">{s.segment}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-primary">{s.primary}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-muted-foreground">{s.swap.join(" · ")}</td>
+                    <td className="border-b border-border/20 py-2 text-muted-foreground">{s.cadence}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* KPI benchmarks */}
+        <section className="glass rounded-2xl p-5 md:p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              KPI targets &amp; alert floors
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs md:text-sm border-collapse">
+              <thead>
+                <tr className="text-left text-primary/80 uppercase tracking-wider text-[10px]">
+                  <th className="border-b border-border/40 py-2 pr-3">Metric</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Target</th>
+                  <th className="border-b border-border/40 py-2 pr-3">Alert floor</th>
+                  <th className="border-b border-border/40 py-2">Note</th>
+                </tr>
+              </thead>
+              <tbody>
+                {kpiBenchmarks.map((k, i) => (
+                  <tr key={i} className="align-top">
+                    <td className="border-b border-border/20 py-2 pr-3 font-medium">{k.metric}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-primary">{k.target}</td>
+                    <td className="border-b border-border/20 py-2 pr-3 text-destructive/90">{k.floor}</td>
+                    <td className="border-b border-border/20 py-2 text-muted-foreground">{k.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        {/* A/B tests */}
+        <section className="glass rounded-2xl p-5 md:p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Beaker className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+              A/B test backlog (run sequentially)
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3">
+            {abTests.map((t) => (
+              <div key={t.id} className="rounded-xl border border-border/40 bg-card/40 p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-primary/15 text-primary border-primary/25 text-[10px] uppercase tracking-widest">
+                    {t.id}
+                  </Badge>
+                  <span className="text-sm font-bold">{t.element}</span>
+                </div>
+                <div className="text-xs text-muted-foreground leading-relaxed">
+                  <div><strong className="text-primary/80">A:</strong> {t.a}</div>
+                  <div><strong className="text-primary/80">B:</strong> {t.b}</div>
+                </div>
+                <div className="text-[11px] text-muted-foreground border-t border-border/30 pt-2">
+                  <Target className="inline w-3 h-3 mr-1 text-primary" />
+                  {t.winnerMetric} · {t.traffic}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Deliverability + GDPR */}
+        <section className="grid md:grid-cols-2 gap-5">
+          <div className="glass rounded-2xl p-5 md:p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg md:text-xl font-bold uppercase tracking-tight">
+                Deliverability checklist
+              </h2>
+            </div>
+            <ul className="space-y-2.5">
+              {deliverabilityChecklist.map((d, i) => (
+                <li key={i} className="flex gap-2 text-xs md:text-sm text-muted-foreground leading-relaxed">
+                  <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="glass rounded-2xl p-5 md:p-6 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+              </div>
+              <h2 className="text-lg md:text-xl font-bold uppercase tracking-tight">
+                GDPR &amp; consent
+              </h2>
+            </div>
+            <ul className="space-y-2.5">
+              {gdprChecklist.map((d, i) => (
+                <li key={i} className="flex gap-2 text-xs md:text-sm text-muted-foreground leading-relaxed">
+                  <CheckCircle className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
+                  <span>{d}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </div>
