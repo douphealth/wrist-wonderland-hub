@@ -91,16 +91,29 @@ function budgetMatch(budgets: string[], price: number): number {
 }
 
 const WEIGHTS = {
-  use: 0.20,
-  phone: 0.13,
-  form: 0.14,
-  battery: 0.09,
+  use: 0.24,
+  phone: 0.16,
+  form: 0.18,
+  battery: 0.08,
   features: 0.16,
-  wrist: 0.04,
-  style: 0.06,
-  brand: 0.06,
-  budget: 0.12,
+  wrist: 0.03,
+  style: 0.07,
+  brand: 0.04,
+  budget: 0.04,
 };
+
+function exactnessBonus(a: QuizAnswers, w: Watch, s: Record<keyof typeof WEIGHTS, number>): number {
+  let bonus = 0;
+  if (s.use === 1) bonus += 0.035;
+  if (s.form === 1) bonus += 0.04;
+  if (s.phone === 1) bonus += 0.02;
+  if (s.features === 1 && a.features.length >= 2) bonus += 0.025;
+  if (s.style === 1 && a.style) bonus += 0.015;
+  if (a.primaryUse === "health" && w.features.includes("ecg") && w.features.includes("spo2")) bonus += 0.025;
+  if (a.primaryUse === "outdoor" && w.features.includes("maps") && w.waterRating !== "IP68") bonus += 0.02;
+  if ((a.primaryUse === "running" || a.primaryUse === "multisport") && w.features.includes("gps")) bonus += 0.015;
+  return bonus;
+}
 
 export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
   return watchDatabase
@@ -133,7 +146,7 @@ export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
       const score = Object.entries(s).reduce(
         (sum, [k, v]) => sum + v * WEIGHTS[k as keyof typeof WEIGHTS],
         0,
-      );
+      ) + exactnessBonus(a, w, s);
       const reasons: string[] = [];
       if (s.use === 1) reasons.push(`Built for ${a.primaryUse}`);
       if (s.phone === 1 && a.phone !== "both") reasons.push(`Full ${a.phone === "iphone" ? "iPhone" : "Android"} integration`);
@@ -144,8 +157,8 @@ export function scoreWatches(a: QuizAnswers): ScoredWatch[] {
       if (s.budget === 1) reasons.push("Fits your budget perfectly");
       return {
         watch: w,
-        score,
-        matchPercent: Math.round(score * 100),
+        score: Math.min(score, 0.995),
+        matchPercent: Math.round(Math.min(score, 0.995) * 100),
         reasons,
       };
     })
