@@ -25,3 +25,18 @@ export function amazonURL(watch: Pick<Watch, "brand" | "model" | "asin">) {
 export function gutfURL(path: string) {
   return `https://gearuptofit.com/${path.replace(/^\//, "")}`;
 }
+
+/**
+ * Official Amazon product image, served by the Amazon Associates image widget.
+ * Returns a real product photo for any verified ASIN (no PA-API required) and
+ * carries the affiliate tag so the impression is attributed correctly.
+ * Returns undefined when there is no ASIN — caller should render a fallback.
+ */
+export function amazonImage(
+  watch: Pick<Watch, "asin" | "imageURL">,
+  size: 160 | 250 | 500 = 250
+): string | undefined {
+  if (watch.imageURL) return watch.imageURL;
+  if (!watch.asin) return undefined;
+  return `https://ws-na.amazon-adsystem.com/widgets/q?_encoding=UTF8&MarketPlace=US&ASIN=${watch.asin}&ServiceVersion=20070822&ID=AsinImage&WS=1&Format=_SL${size}_&tag=${AMAZON_TAG}`;
+}
