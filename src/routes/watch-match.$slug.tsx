@@ -13,6 +13,7 @@ import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
 import { amazonURL, categoryImage, gutfURL } from "@/lib/amazon";
+import { getAmazonProducts, type AmazonProduct } from "@/lib/amazon-product.functions";
 import catSmartwatch from "@/assets/cat-smartwatch.jpg";
 import catSportwatch from "@/assets/cat-sportwatch.jpg";
 import catBand from "@/assets/cat-band.jpg";
@@ -242,6 +243,39 @@ function WatchMatchResult() {
     refetchOnWindowFocus: false,
   });
 
+  // Resolve real Amazon product URLs + images via SerpApi for the recommended
+  // watches. Falls back to category images + tagged search URLs when SerpApi
+  // is unavailable, so the UI never renders a broken link or empty image.
+  const productLookupWatches = useMemo(() => {
+    const list = [primary.watch];
+    if (setup.alt) list.push(setup.alt.watch);
+    if (setup.budget) list.push(setup.budget.watch);
+    for (const t of top) if (!list.find((w) => w.id === t.watch.id)) list.push(t.watch);
+    return list.slice(0, 8).map((w) => ({ brand: w.brand, model: w.model, asin: w.asin }));
+  }, [primary, setup, top]);
+
+  const fetchAmazon = useServerFn(getAmazonProducts);
+  const amazonQuery = useQuery({
+    queryKey: ["amazon", productLookupWatches.map((w) => `${w.brand}-${w.model}`).join("|")],
+    queryFn: () => fetchAmazon({ data: { watches: productLookupWatches } }),
+    staleTime: 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  const productMap = useMemo(() => {
+    const m = new Map<string, AmazonProduct>();
+    for (const entry of amazonQuery.data?.products ?? []) m.set(entry.key, entry.product);
+    return m;
+  }, [amazonQuery.data]);
+
+  const productFor = (w: { brand: string; model: string }): AmazonProduct | undefined =>
+    productMap.get(`${w.brand}::${w.model}`.toLowerCase());
+
+  const resolvedImage = (w: Parameters<typeof categoryImage>[0] & { brand: string; model: string }) =>
+    productFor(w)?.image || categoryImage(w);
+  const resolvedUrl = (w: Parameters<typeof amazonURL>[0]) =>
+    productFor(w)?.url || amazonURL(w);
+
   return (
     <div className="min-h-screen pb-16 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
@@ -383,12 +417,15 @@ function WatchMatchResult() {
               <div className="md:w-2/5 mb-5 md:mb-0">
                 <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden relative">
                   <img
-                    src={categoryImage(primary.watch)}
+                    src={resolvedImage(primary.watch)}
                     alt={`${primary.watch.brand} ${primary.watch.model} — ${primary.watch.category}`}
                     loading="lazy"
                     width={896}
                     height={896}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-4"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = categoryImage(primary.watch);
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
                   <span className="absolute bottom-3 left-3 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
@@ -429,7 +466,7 @@ function WatchMatchResult() {
 
                 <div className="flex flex-wrap gap-3">
                   <a
-                    href={amazonURL(primary.watch)}
+                    href={resolvedUrl(primary.watch)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all"
@@ -457,8 +494,26 @@ function WatchMatchResult() {
 
         {/* Alt + Budget */}
         <div className="grid md:grid-cols-2 gap-4">
-          {setup.alt && <RotationCard title="Alternate Pick" subtitle="Different brand, similar match" item={setup.alt} icon="🎯" />}
-          {setup.budget && <RotationCard title="Budget Pick" subtitle="Best value option" item={setup.budget} icon="💸" />}
+          {setup.alt && (
+            <RotationCard
+              title="Alternate Pick"
+              subtitle="Different brand, similar match"
+              item={setup.alt}
+              icon="🎯"
+              imageUrl={resolvedImage(setup.alt.watch)}
+              buyUrl={resolvedUrl(setup.alt.watch)}
+            />
+          )}
+          {setup.budget && (
+            <RotationCard
+              title="Budget Pick"
+              subtitle="Best value option"
+              item={setup.budget}
+              icon="💸"
+              imageUrl={resolvedImage(setup.budget.watch)}
+              buyUrl={resolvedUrl(setup.budget.watch)}
+            />
+          )}
         </div>
 
         {/* Why */}
@@ -523,12 +578,15 @@ function WatchMatchResult() {
                 </div>
                 <div className="hidden sm:block w-14 h-14 rounded-lg border border-border/40 flex-shrink-0 overflow-hidden">
                   <img
-                    src={categoryImage(s.watch)}
+                    src={resolvedImage(s.watch)}
                     alt={`${s.watch.brand} ${s.watch.model}`}
                     loading="lazy"
                     width={160}
                     height={160}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain bg-card-elevated p-1"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = categoryImage(s.watch);
+                    }}
                   />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -542,7 +600,7 @@ function WatchMatchResult() {
                 <div className="text-right flex-shrink-0">
                   <div className="text-lg font-bold text-gradient tabular-nums">{s.matchPercent}%</div>
                   <a
-                    href={amazonURL(s.watch)}
+                    href={resolvedUrl(s.watch)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[10px] uppercase tracking-widest text-primary hover:underline inline-flex items-center gap-1"
@@ -725,11 +783,15 @@ function RotationCard({
   subtitle,
   item,
   icon,
+  imageUrl,
+  buyUrl,
 }: {
   title: string;
   subtitle: string;
   item: ReturnType<typeof scoreWatches>[number];
   icon: string;
+  imageUrl?: string;
+  buyUrl?: string;
 }) {
   return (
     <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-6 hover:border-primary/30 transition-all">
@@ -743,12 +805,15 @@ function RotationCard({
       </div>
       <div className="aspect-[16/9] rounded-xl border border-border/40 overflow-hidden mb-3 relative">
         <img
-          src={categoryImage(item.watch)}
+          src={imageUrl || categoryImage(item.watch)}
           alt={`${item.watch.brand} ${item.watch.model}`}
           loading="lazy"
           width={896}
           height={896}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-contain bg-card-elevated p-3"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = categoryImage(item.watch);
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
         <span className="absolute bottom-2 left-2 text-[10px] uppercase tracking-widest text-white/80 bg-black/40 backdrop-blur px-2 py-1 rounded-full">
@@ -763,7 +828,7 @@ function RotationCard({
       </div>
       <p className="text-sm text-foreground/80 mb-4 leading-relaxed line-clamp-3">{item.watch.highlight}</p>
       <a
-        href={amazonURL(item.watch)}
+        href={buyUrl || amazonURL(item.watch)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
