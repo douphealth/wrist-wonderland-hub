@@ -147,6 +147,7 @@ function WatchMatchResult() {
   const [copied, setCopied] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [downloadAfterUnlock, setDownloadAfterUnlock] = useState(false);
   const autoOpenedRef = useRef(false);
 
   // Hydrate subscribed flag and auto-open the EmailGate after a soft dwell
@@ -340,6 +341,12 @@ function WatchMatchResult() {
 
   const handleDownloadPDF = useCallback(async () => {
     if (!answers || !rec || !setup) return;
+    if (!subscribed) {
+      setDownloadAfterUnlock(true);
+      setGateOpen(true);
+      toast.info("Enter your email first — then your PDF will download automatically.");
+      return;
+    }
     toast.info("Generating your WatchMatch report…");
     const { generateWatchReportPDF } = await import("@/lib/watch-report-pdf");
     const pMap = new Map<string, { url: string; image: string | null }>();
@@ -355,7 +362,15 @@ function WatchMatchResult() {
       products: pMap,
     });
     toast.success("Your WatchMatch PDF report has been downloaded.");
-  }, [answers, rec, setup, top, radarData, amazonQuery.data]);
+  }, [answers, rec, setup, subscribed, top, radarData, amazonQuery.data]);
+
+  useEffect(() => {
+    if (!subscribed || !downloadAfterUnlock) return;
+    setDownloadAfterUnlock(false);
+    window.setTimeout(() => {
+      void handleDownloadPDF();
+    }, 250);
+  }, [downloadAfterUnlock, handleDownloadPDF, subscribed]);
   // Silent error handler — swap broken thumbnails for the category image once,
   // then detach the handler so we never enter an error loop or log to console.
   const handleImgError = (
