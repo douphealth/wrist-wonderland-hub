@@ -451,6 +451,42 @@ function WatchMatchResult() {
           </div>
         </motion.div>
 
+        {/* Featured Guides from gearuptofit.com */}
+        <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+                Hand-Picked Guides For You
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Deep-dive reviews and buyer's guides from <span className="text-primary font-semibold">GearUpToFit.com</span>
+              </p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {pickGuides(answers, 4).map((g) => (
+              <a
+                key={g.path}
+                href={gutfURL(g.path)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block p-4 rounded-xl border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+              >
+                <div className="flex items-start justify-between gap-3 mb-1.5">
+                  <h3 className="font-bold text-sm md:text-base leading-snug group-hover:text-primary transition-colors">
+                    {g.title}
+                  </h3>
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary flex-shrink-0 mt-1" />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{g.blurb}</p>
+              </a>
+            ))}
+          </div>
+        </motion.div>
+
         {/* FAQ */}
         <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
           <div className="flex items-center gap-3 mb-5">
