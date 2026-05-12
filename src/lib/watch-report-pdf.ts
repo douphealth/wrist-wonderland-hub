@@ -147,9 +147,23 @@ function drawRadar(doc: jsPDF, cx: number, cy: number, radius: number, data: { a
 }
 
 // ─── Image loading (logo + product photos) ───
-async function urlToDataUrl(url: string): Promise<{ data: string; format: "JPEG" | "PNG" } | null> {
+type LoadedImage = { data: string; format: "JPEG" | "PNG"; w: number; h: number };
+
+/**
+ * Bump Amazon CDN thumbnails to a large, square-canvas variant so SERP
+ * thumbs (often 160-320px) don't render blurry inside the PDF.
+ */
+function upgradeAmazonImage(url: string): string {
+  if (!/\.(media-)?amazon\.|ssl-images-amazon|images-na\.ssl/i.test(url)) return url;
+  return url
+    .replace(/\._[A-Z0-9_,]+_\./i, "._AC_SL1500_.")
+    .replace(/(\/I\/[^.]+)\.(jpg|jpeg|png)/i, "$1._AC_SL1500_.$2");
+}
+
+async function urlToDataUrl(url: string): Promise<LoadedImage | null> {
   try {
-    const r = await fetch(url, { mode: "cors" });
+    const finalUrl = upgradeAmazonImage(url);
+    const r = await fetch(finalUrl, { mode: "cors" });
     if (!r.ok) return null;
     const blob = await r.blob();
     if (blob.size < 1500) return null;
@@ -160,10 +174,57 @@ async function urlToDataUrl(url: string): Promise<{ data: string; format: "JPEG"
       fr.readAsDataURL(blob);
     });
     const format: "JPEG" | "PNG" = blob.type.includes("png") ? "PNG" : "JPEG";
-    return { data, format };
+    // Measure natural dimensions so we can letterbox (contain-fit) without distortion.
+    const dims = await new Promise<{ w: number; h: number }>((resolve) => {
+      if (typeof Image === "undefined") return resolve({ w: 1, h: 1 });
+      const img = new Image();
+      img.onload = () => resolve({ w: img.naturalWidth || 1, h: img.naturalHeight || 1 });
+      img.onerror = () => resolve({ w: 1, h: 1 });
+      img.src = data;
+    });
+    return { data, format, w: dims.w, h: dims.h };
   } catch {
     return null;
   }
+}
+
+/**
+ * Draw `img` inside the box (x,y,w,h) preserving its aspect ratio (object-fit: contain).
+ * Prevents the squashed/stretched look caused by jsPDF's default stretch-to-fill.
+ */
+function drawImageContained(
+  doc: jsPDF,
+  img: LoadedImage,
+  x: number, y: number, w: number, h: number,
+) {
+  const ar = img.w / img.h;
+  const boxAr = w / h;
+  let dw = w, dh = h;
+  if (ar > boxAr) {
+    dw = w;
+    dh = w / ar;
+  } else {
+    dh = h;
+    dw = h * ar;
+  }
+  const dx = x + (w - dw) / 2;
+  const dy = y + (h - dh) / 2;
+  doc.addImage(img.data, img.format, dx, dy, dw, dh, undefined, "SLOW");
+}
+
+/** Tiny external-link glyph drawn as vector (a square with an arrow). */
+function drawLinkIcon(doc: jsPDF, x: number, y: number, size = 2.2, color: RGB = C.red) {
+  doc.setDrawColor(color[0], color[1], color[2]);
+  doc.setLineWidth(0.25);
+  // square (open at top-right)
+  doc.line(x, y, x, y + size);
+  doc.line(x, y + size, x + size, y + size);
+  doc.line(x + size, y + size, x + size, y + size * 0.45);
+  // arrow shaft
+  doc.line(x + size * 0.45, y + size * 0.55, x + size + 0.6, y - 0.2);
+  // arrow head
+  doc.line(x + size + 0.6, y - 0.2, x + size * 0.55, y - 0.2);
+  doc.line(x + size + 0.6, y - 0.2, x + size + 0.6, y + size * 0.55);
 }
 
 // ─── Page chrome ───
