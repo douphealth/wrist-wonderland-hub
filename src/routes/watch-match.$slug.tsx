@@ -10,6 +10,8 @@ import {
 import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
+import { amazonURL, gutfURL } from "@/lib/amazon";
+import { pickGuides } from "@/lib/featured-guides";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -40,6 +42,7 @@ import {
   Target,
   Watch as WatchIcon,
   Zap,
+  BookOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -57,7 +60,22 @@ export const Route = createFileRoute("/watch-match/$slug")({
       {
         name: "description",
         content:
-          "Personalized smartwatch recommendation with rotation, battery plan and full spec breakdown.",
+          "Personalized smartwatch recommendation from GearUpToFit — rotation pick, battery plan, full spec breakdown and verified Amazon links.",
+      },
+      {
+        property: "og:title",
+        content: `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`,
+      },
+      {
+        property: "og:description",
+        content:
+          "Take the 9-question WatchMatch AI quiz on GearUpToFit and find the smartwatch that actually fits your wrist, sport and life.",
+      },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: `https://gearuptofit.com/watch-match/${params.slug}`,
       },
     ],
   }),
@@ -76,11 +94,6 @@ const fadeUp = {
   whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, margin: "-50px" },
 };
-
-function amazonSearchUrl(brand: string, model: string) {
-  const q = encodeURIComponent(`${brand} ${model}`);
-  return `https://www.amazon.com/s?k=${q}&tag=gearuptofit-20`;
-}
 
 function WatchMatchResult() {
   const { slug } = Route.useParams();
@@ -342,7 +355,7 @@ function WatchMatchResult() {
 
                 <div className="flex flex-wrap gap-3">
                   <a
-                    href={amazonSearchUrl(primary.watch.brand, primary.watch.model)}
+                    href={amazonURL(primary.watch)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-gradient-primary glow-primary-sm hover:opacity-90 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary-foreground transition-all"
@@ -351,6 +364,17 @@ function WatchMatchResult() {
                     Check Price on Amazon
                     <ExternalLink className="w-3 h-3" />
                   </a>
+                  {primary.watch.reviewPath && (
+                    <a
+                      href={gutfURL(primary.watch.reviewPath)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 border border-primary/30 hover:bg-primary/10 px-5 h-11 rounded-xl font-bold uppercase tracking-wider text-xs text-primary transition-all"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Read Full Review
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -442,6 +466,42 @@ function WatchMatchResult() {
           </div>
         </motion.div>
 
+        {/* Featured Guides from gearuptofit.com */}
+        <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <BookOpen className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+                Hand-Picked Guides For You
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Deep-dive reviews and buyer's guides from <span className="text-primary font-semibold">GearUpToFit.com</span>
+              </p>
+            </div>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {pickGuides(answers, 4).map((g) => (
+              <a
+                key={g.path}
+                href={gutfURL(g.path)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block p-4 rounded-xl border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+              >
+                <div className="flex items-start justify-between gap-3 mb-1.5">
+                  <h3 className="font-bold text-sm md:text-base leading-snug group-hover:text-primary transition-colors">
+                    {g.title}
+                  </h3>
+                  <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary flex-shrink-0 mt-1" />
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{g.blurb}</p>
+              </a>
+            ))}
+          </div>
+        </motion.div>
+
         {/* FAQ */}
         <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
           <div className="flex items-center gap-3 mb-5">
@@ -460,7 +520,7 @@ function WatchMatchResult() {
               },
               {
                 q: "Is WatchMatch AI free?",
-                a: "Yes. No signup, no email required, no paywall. Some product links are Amazon affiliate links — GearUpToFit may earn a commission at no extra cost to you.",
+                a: "Yes — no signup, no email required, no paywall. Product links are Amazon affiliate links (tag: papalex-20) — GearUpToFit may earn a small commission at no extra cost to you. That's what keeps the quiz, the database and the reviews free.",
               },
               {
                 q: "Can I use any smartwatch with my iPhone or Android?",
@@ -542,7 +602,7 @@ function RotationCard({
       </div>
       <p className="text-sm text-foreground/80 mb-4 leading-relaxed line-clamp-3">{item.watch.highlight}</p>
       <a
-        href={amazonSearchUrl(item.watch.brand, item.watch.model)}
+        href={amazonURL(item.watch)}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline"
