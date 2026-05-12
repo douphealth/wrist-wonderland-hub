@@ -504,8 +504,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal"],
     highlight: "Fitbit's newest lightweight band — focused wellness tracking with a crisp AMOLED display.",
-    asin: "B0GTMTZF3V",
-    imageURL: "https://m.media-amazon.com/images/I/71dV40OwhgL._AC_SL1500_.jpg"
+    asin: "B0GTMNC3YG",
+    imageURL: "https://m.media-amazon.com/images/I/81jw3cF49lL._AC_SL1500_.jpg"
   },
   {
     id: "xiaomi-smart-band-9",
