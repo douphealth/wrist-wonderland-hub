@@ -151,7 +151,7 @@ async function resolveProduct(
   // Fallback to curated ASIN if available.
   if (fallbackAsin) {
     const product: AmazonProduct = {
-      url: searchUrl(brand, model), // safer than /dp/ with possibly-stale ASIN
+      url: dpUrl(fallbackAsin),
       image: null,
       asin: fallbackAsin,
       title: null,
@@ -176,7 +176,7 @@ async function resolveProduct(
 function sanitizeImage(src: string | undefined | null): string | null {
   if (!src || typeof src !== "string") return null;
   if (!/^https:\/\//i.test(src)) return null;
-  return src;
+  return src.replace(/\._[A-Z0-9_,]+_\./i, "._AC_SL1500_.");
 }
 
 function safeFallback(brand: string, model: string, asin?: string): AmazonProduct {
