@@ -67,6 +67,12 @@ const searchSchema = z.object({
  * fully-qualified URLs — relative asset paths are silently ignored.
  */
 const OG_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+const PUBLIC_APP_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+
+function publicWatchMatchURL(slug: string, data?: string): string {
+  const query = data ? `?d=${encodeURIComponent(data)}` : "";
+  return `${PUBLIC_APP_ORIGIN}/watch-match/${encodeURIComponent(slug)}${query}`;
+}
 
 function ogImageForSlug(slug: string): string {
   // Slug shape: `${primaryUse}-${phone}-${form}-${style}` (see generateSlug).
@@ -147,6 +153,7 @@ function WatchMatchResult() {
   const [copied, setCopied] = useState(false);
   const [gateOpen, setGateOpen] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [downloadAfterUnlock, setDownloadAfterUnlock] = useState(false);
   const autoOpenedRef = useRef(false);
 
   // Hydrate subscribed flag and auto-open the EmailGate after a soft dwell
@@ -185,6 +192,7 @@ function WatchMatchResult() {
 
   const closeGate = useCallback(() => {
     setGateOpen(false);
+    setDownloadAfterUnlock(false);
     try {
       sessionStorage.setItem("wm_gate_dismissed_v1", "1");
     } catch {
@@ -208,6 +216,7 @@ function WatchMatchResult() {
   const rec = useMemo(() => (answers ? generateRecommendation(answers) : null), [answers]);
   const setup = useMemo(() => (answers ? buildSetup(answers) : null), [answers]);
   const top = useMemo(() => (answers ? scoreWatches(answers).slice(0, 5) : []), [answers]);
+  const publicReportURL = useMemo(() => publicWatchMatchURL(slug, d), [d, slug]);
 
   const radarData = useMemo(() => {
     if (!answers) return [];
@@ -246,7 +255,7 @@ function WatchMatchResult() {
 
   const handleShare = async () => {
     try {
-      await navigator.clipboard.writeText(window.location.href);
+      await navigator.clipboard.writeText(publicReportURL);
       setCopied(true);
       toast.success("Link copied to clipboard!");
       setTimeout(() => setCopied(false), 2000);
@@ -340,6 +349,12 @@ function WatchMatchResult() {
 
   const handleDownloadPDF = useCallback(async () => {
     if (!answers || !rec || !setup) return;
+    if (!subscribed) {
+      setDownloadAfterUnlock(true);
+      setGateOpen(true);
+      toast.info("Enter your email first — then your PDF will download automatically.");
+      return;
+    }
     toast.info("Generating your WatchMatch report…");
     const { generateWatchReportPDF } = await import("@/lib/watch-report-pdf");
     const pMap = new Map<string, { url: string; image: string | null }>();
@@ -355,7 +370,15 @@ function WatchMatchResult() {
       products: pMap,
     });
     toast.success("Your WatchMatch PDF report has been downloaded.");
-  }, [answers, rec, setup, top, radarData, amazonQuery.data]);
+  }, [answers, rec, setup, subscribed, top, radarData, amazonQuery.data]);
+
+  useEffect(() => {
+    if (!subscribed || !downloadAfterUnlock) return;
+    setDownloadAfterUnlock(false);
+    window.setTimeout(() => {
+      void handleDownloadPDF();
+    }, 250);
+  }, [downloadAfterUnlock, handleDownloadPDF, subscribed]);
   // Silent error handler — swap broken thumbnails for the category image once,
   // then detach the handler so we never enter an error loop or log to console.
   const handleImgError = (
@@ -433,7 +456,7 @@ function WatchMatchResult() {
                 className="bg-gradient-primary glow-primary font-bold uppercase tracking-wider px-6 md:px-8 h-12 rounded-xl text-sm group"
               >
                 <Download className="w-4 h-4 mr-2 group-hover:animate-bounce" />
-                Download PDF Report
+                {subscribed ? "Download PDF Report" : "Email & Download PDF Report"}
               </Button>
               {!subscribed && (
                 <Button
@@ -901,7 +924,7 @@ function WatchMatchResult() {
         category={rec.profile.category}
         phoneOS={answers.phone}
         batteryPref={answers.battery}
-        watchMatchURL={typeof window !== "undefined" ? window.location.href : undefined}
+        watchMatchURL={publicReportURL}
         source="quiz_gate"
       />
     </div>

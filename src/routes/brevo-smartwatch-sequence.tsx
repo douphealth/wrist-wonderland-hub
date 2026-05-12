@@ -57,203 +57,231 @@ const G = (p: string) => `https://gearuptofit.com/${p.replace(/^\//, "")}`;
 const emails: EmailStep[] = [
   {
     day: "Immediately (T+0)",
-    subject: "Your WatchMatch result — plus the one spec most people get wrong",
-    preheader: "Open this before you buy. A 90-second read that will save you a return.",
-    goal: "Deliver the promise (their match), set the relationship tone, route them back to the result page.",
+    subject: "{{ contact.FIRSTNAME | default: \"Hi\" }}, your WatchMatch report is ready",
+    preheader: "Your top match, the three checks I would make before buying, and the report link.",
+    goal: "Deliver the promised report immediately, explain the recommendation like a trusted expert, and route the reader to a public result URL.",
     body: `Hi {{ contact.FIRSTNAME | default: "there" }},
 
-Thanks for trusting GearUpToFit to help you choose your next watch.
+I finished your WatchMatch report.
 
-Your top match was the {{ contact.TOP_MATCH_BRAND }} {{ contact.TOP_MATCH_MODEL }} — based on your sport, phone, wrist size and battery preference.
+Your top match is the {{ contact.TOP_MATCH_BRAND }} {{ contact.TOP_MATCH_MODEL }} — chosen around your phone, wrist, sport profile, battery preference, and the kind of watch you said you actually want to wear.
 
-Before you click "buy", one quick warning. The single spec most buyers regret ignoring is not battery life, screen size, or sensors. It is **GPS architecture**. A watch with single-frequency GPS will drift 30–80m on tree-lined trails or city blocks. Multi-band (L1+L5) holds within 5m. If you run, hike, or cycle outside a track, this is the spec that decides whether your splits are real.
+Before you buy anything, I would check three things in this order:
 
-If your match has multi-band, you're set. If not, I sent you a near-equivalent in the result page that does — scroll to "Alternate Pick".
+1. **Case fit.** Specs do not matter if the case overhangs your wrist or catches on sleeves. If your wrist is under 160 mm, read the case-size note carefully.
+2. **GPS mode.** If you run, hike, cycle, or train around tall buildings, multi-band/all-systems GPS matters more than most health widgets.
+3. **Real battery.** Always-on display, SpO2, music, and GPS can cut the advertised number dramatically. Judge battery by your routine, not the box.
 
-When you're ready, your full personalized recommendation is here:
+Your full report is here:
 
 {{ contact.WATCHMATCH_URL }}
 
-Talk soon,
-Alex
-GearUpToFit.com
+If you are torn between your match and another model, reply with both names. I will tell you which one I would buy and why.
 
-P.S. If your wrist is under 160 mm, look at the case-size note in your result. A 49 mm case on a 150 mm wrist is the second most common return reason after GPS disappointment.`,
-    cta: "View my full WatchMatch result",
+Alex
+GearUpToFit
+
+P.S. Do not rush the purchase because one retailer says "deal". Smartwatch prices move constantly. Fit and ecosystem are harder to fix than price.`,
+    cta: "Open my WatchMatch report",
     url: "{{ contact.WATCHMATCH_URL }}",
     brevoRule:
-      "Trigger: form submission on /watch-match/ result page. Save TOP_MATCH_BRAND, TOP_MATCH_MODEL, WATCHMATCH_URL, PRIMARY_USE, PHONE_OS, BUDGET_BAND as Brevo contact attributes via the Brevo WP plugin's Form mapping.",
+      "Trigger immediately after WatchMatch opt-in. Store WATCHMATCH_URL as the public lovable.app or gearuptofit.com URL only — never a preview/editor URL.",
   },
   {
     day: "Day 2",
-    subject: "iPhone vs Android: the watch decision that locks you in for years",
-    preheader: "If you switch phones, your watch may not come with you. Read this first.",
-    goal: "Educate on platform lock-in; segment by PHONE_OS for future emails.",
-    body: `Quick one today.
+    subject: "The phone compatibility mistake that creates expensive returns",
+    preheader: "A beautiful watch is useless if your phone cannot unlock its best features.",
+    goal: "Help the reader avoid platform lock-in and make the recommendation feel personalized, not generic.",
+    body: `Quick but important.
 
-Apple Watch only pairs with iPhone. Galaxy Watch (Wear OS) needs Android for full features (calls, ECG, Samsung Pay). Garmin, Coros, Polar, Suunto, Fitbit and Amazfit work with both.
+A lot of smartwatch regret starts with phone compatibility, not hardware.
 
-If you might switch phone platforms in the next 2–3 years, lean toward a cross-platform brand. If you're settled — Apple or Samsung gives you the deepest integration (notifications, contactless pay, voice assistant).
+Here is the simple version:
 
-Three reads that will save you guesswork:
-- Apple Watch vs Garmin (the real-world comparison): ${G("review/apple-watch-vs-garmin")}
+- **Apple Watch** is for iPhone. If you may switch to Android soon, do not buy one unless you are comfortable replacing the watch too.
+- **Galaxy Watch / Wear OS** is best on Android. Some features are reduced or unavailable outside the intended ecosystem.
+- **Garmin, Coros, Polar, Suunto, Fitbit, Amazfit** are more platform-flexible. They are usually the safer choice if you care more about training data than phone-style features.
+
+My rule: if your watch is mostly for calls, texts, payments, and apps, choose the watch built for your phone. If it is mostly for training, sleep, hiking, or battery life, start with the sport-first brands.
+
+Helpful comparisons:
+- Apple Watch vs Garmin: ${G("review/apple-watch-vs-garmin")}
 - Best smartwatches for Android: ${G("review/best-smartwatches-for-android")}
 - Best smartwatches for iPhone: ${G("review/best-smartwatches-for-iphone")}
 
-If your match was an Apple Watch and you have an Android, hit reply — I'll re-run your profile.
+If your WatchMatch result looks wrong for your phone, reply and I will sanity-check it.
 
 Alex`,
-    cta: "See platform-specific picks",
+    cta: "Check platform-specific picks",
     url: G("review/apple-watch-vs-garmin"),
     brevoRule:
-      "Conditional content block: if PHONE_OS = iphone, surface Apple-side guides; if android, Samsung/Garmin guides. Save click on either link as a 'platform_engaged' event.",
+      "Branch by PHONE_OS when possible: iPhone contacts see Apple/Garmin context first; Android contacts see Wear OS/Garmin context first.",
   },
   {
     day: "Day 4",
-    subject: "Battery life is lying to you (here is the real number)",
-    preheader: "Why a '14-day' watch lasts 4 days in real use — and how to plan around it.",
-    goal: "Build credibility through a contrarian, technically-honest take.",
-    body: `Manufacturer battery numbers are technically true and practically useless.
+    subject: "Battery claims are not fake — but they are not your battery life",
+    preheader: "The honest way to compare 18 hours, 36 hours, 14 days, and 40 days.",
+    goal: "Build trust by explaining the battery trade-off with specific, buyer-useful context.",
+    body: `Battery numbers are not exactly lies. They are controlled-lab promises.
 
-A "14-day" smartwatch number assumes: GPS off, always-on display off, SpO2 off, music off, screen brightness 30%, no third-party apps, light notifications.
+A brand can advertise "14 days" because the test often assumes GPS off, always-on display off, SpO2 off, music off, low brightness, light notifications, and no long workouts.
 
-Turn on multi-band GPS for a long run? That same watch drains in 24–36 hours. Always-on AMOLED? Halve everything.
+Real life is different.
 
-Here is the honest table to use when you compare:
+Use this translation when comparing watches:
 
-- Apple Watch Ultra 2: 36 h normal, 12 h GPS, 60 h low-power
-- Garmin Fenix 8 (47 mm AMOLED): 16 days smart, 32 h GPS multi-band
-- Garmin Instinct 3 Solar: 24+ days smart, 32 h GPS
-- Coros Vertix 2S: 40 days smart, 118 h GPS
-- Apple Watch Series 10: 18 h normal, 36 h low-power
-- Galaxy Watch Ultra: 60 h normal, 14 h GPS
+- **Daily smartwatch battery**: Apple Watch / Pixel Watch territory. Great features, frequent charging.
+- **2–5 day battery**: premium AMOLED sport watches with many features switched on.
+- **1–3 week battery**: sport-first watches, often Garmin/Coros/Suunto/Amazfit depending on display and GPS settings.
+- **Ultra endurance battery**: usually fewer smartwatch luxuries, but far less charging anxiety.
 
-Read the full battery deep-dive: ${G("review/best-smartwatches-with-long-battery-life")}
+The buying question is not "Which watch lasts longest?" It is: **Will this watch still last long enough with the features I will actually use?**
 
-Alex`,
+Read the deeper battery guide here:
+${G("review/best-smartwatches-with-long-battery-life")}
+
+Alex
+
+P.S. If you travel often, prioritize charging speed and charger availability too. A proprietary cable you forget at home can ruin a great watch.`,
     cta: "Compare real-world battery",
     url: G("review/best-smartwatches-with-long-battery-life"),
     brevoRule:
-      "If contact opens this email but does not click within 48h, send a one-line follow-up: 'Did the battery numbers help — anything I can clarify?'",
+      "If BATTERY_PREF_DAYS is high, emphasize sport watches and low-power GPS modes in the email template variant.",
   },
   {
     day: "Day 6",
-    subject: "ECG, SpO2, body composition — which sensors actually change how you train",
-    preheader: "Three sensors are useful. The rest are nice-to-have. Here is the breakdown.",
-    goal: "Reduce decision paralysis on health features; route to specific guides.",
-    body: `Modern watches now ship with 8–12 sensors. Most are noise. These three actually matter:
+    subject: "The sensors worth paying for — and the ones I would not chase",
+    preheader: "Health features are useful, but not all of them should change your buying decision.",
+    goal: "Reduce overwhelm and help health-focused users separate meaningful sensors from marketing noise.",
+    body: `Modern watches can look like tiny medical dashboards. That does not mean every sensor deserves your money.
 
-1. **Optical HR + HRV.** Drives training load, recovery scores, and Zone 2 accuracy. Garmin, Polar and Apple are class-leading.
-2. **ECG (single lead).** Detects atrial fibrillation. Worth it if you are 50+, hypertensive, or have a family history. Apple, Samsung, Garmin Venu 3 and Withings ScanWatch all offer it.
-3. **Multi-band GNSS.** Discussed in email 1 — this is the sport sensor that changes data quality.
+Here is how I would rank them:
 
-The rest (SpO2, skin temperature, body composition, EDA) are useful as trends, unreliable as absolutes. Do not pay a $100+ premium for them alone.
+1. **Optical heart rate + HRV** — the foundation for training load, recovery, sleep trends, and Zone 2 work. Accuracy varies by fit, skin tone, temperature, and movement.
+2. **ECG** — useful if you specifically care about atrial fibrillation screening. It is not a full heart check, but it can be meaningful for the right person.
+3. **Multi-band GNSS** — technically a location sensor, but for runners/cyclists/hikers it may matter more than another wellness metric.
+4. **SpO2 / skin temp / EDA / body composition** — useful for trends, weaker as absolute measurements. I would not pay a large premium for these alone.
 
-If health is your priority, start here:
-- Best smartwatches with ECG: ${G("review/best-smartwatches-with-ecg")}
-- Best smartwatches for seniors: ${G("review/best-smartwatches-for-seniors")}
-- Best smartwatches for blood pressure: ${G("review/best-smartwatches-with-blood-pressure-monitor")}
+If health is your primary reason for buying, start with reliability and comfort. A slightly less flashy watch you wear every night beats a premium one you charge on the nightstand.
+
+Useful guides:
+- ECG watches: ${G("review/best-smartwatches-with-ecg")}
+- Watches for seniors: ${G("review/best-smartwatches-for-seniors")}
+- Blood pressure watch guide: ${G("review/best-smartwatches-with-blood-pressure-monitor")}
 
 Alex`,
     cta: "See sensor-by-sensor picks",
     url: G("review/best-smartwatches-with-ecg"),
     brevoRule:
-      "If contact clicks an ECG/health link, tag 'health_focus' and prioritize health-leaning content in later emails.",
+      "Tag contacts who click health content as health_focus and prioritize ECG/sleep/recovery recommendations later.",
   },
   {
     day: "Day 9",
-    subject: "Sport watch vs smartwatch vs band — the 30-second decision tree",
-    preheader: "Stop comparing categories that solve different problems.",
-    goal: "Reframe the buying question; reduce returns.",
-    body: `If you remember nothing else, remember this:
+    subject: "Smartwatch, sport watch, band, or hybrid? The clean decision tree",
+    preheader: "Stop comparing products that were designed for different jobs.",
+    goal: "Clarify categories so the reader feels guided instead of pushed toward a single expensive product.",
+    body: `If you are still comparing very different devices, use this decision tree.
 
-- **Smartwatch** = phone-on-your-wrist + fitness. Daily charging. Best for everyday users who train 3–5 h/week.
-- **Sport watch** = built-for-athletes. 1–4 weeks battery, MIP or AMOLED, advanced training metrics, rugged. Best for runners, cyclists, triathletes, hikers.
-- **Fitness band** = activity + sleep + HR. Multi-day battery, slim, $40–$200. Best for habit-building, budget, or as a second device.
-- **Hybrid** = analog look, smart inside. Long battery, low feature surface. Best for office and discreet wear.
+Choose a **smartwatch** if you want the phone-on-wrist experience: calls, messages, payments, apps, polished screen, and good enough fitness.
 
-If you train more than 8 h/week or do long endurance, you will outgrow a pure smartwatch within a year. Plan for that now.
+Choose a **sport watch** if training matters: better battery, stronger GPS tools, physical buttons, recovery metrics, routes, and durability.
 
-Re-take the quiz with new answers any time: https://gearuptofit.com/watch-match/
+Choose a **fitness band** if you want activity, sleep, heart rate, and habit-building without a big screen or big price.
+
+Choose a **hybrid** if you want an analog-looking watch with discreet tracking and long battery.
+
+The trap is buying the category you admire instead of the category you will wear. A rugged 51 mm sport watch can be amazing and still wrong for someone who wants something slim for work. A beautiful smartwatch can be perfect and still wrong for someone training 10 hours a week.
+
+If your original answers have changed, re-run WatchMatch here:
+https://gearuptofit.com/watch-match/
 
 Alex`,
-    cta: "Re-run my WatchMatch",
+    cta: "Re-run WatchMatch",
     url: "https://gearuptofit.com/watch-match/",
     brevoRule:
-      "Suppress this email if BUDGET_BAND = under-100 (band buyer) — send the budget-band variant instead.",
+      "Use category-specific variants when WATCH_CATEGORY or PRIMARY_USE is available. Avoid pushing a premium sport watch to band-intent users.",
   },
   {
     day: "Day 12",
-    subject: "{{ contact.FIRSTNAME | default: \"Hey\" }}, did you pick one yet?",
-    preheader: "If something is holding you back, hit reply. Real human, real reply.",
-    goal: "Re-engage; surface objections; offer 1:1 help (high trust).",
+    subject: "{{ contact.FIRSTNAME | default: \"Quick check\" }} — what is holding you back?",
+    preheader: "If price, size, looks, or uncertainty is the blocker, reply and I will help.",
+    goal: "Invite a real reply and turn hesitation into a useful, human buying consultation.",
     body: `Just checking in.
 
-If you bought your match — congrats, hit reply and let me know how it feels week one. I'd love to hear.
+If you already bought the {{ contact.TOP_MATCH_MODEL | default: "watch" }}, I hope it feels like the right call. If you have not, the blocker is usually one of these:
 
-If you didn't, the three things that usually stop people are:
+1. **Price** — there is often a near-equivalent model that gives up one luxury feature and saves real money.
+2. **Size** — case diameter, thickness, and strap shape matter more than people expect.
+3. **Looks** — the best training watch is still a bad buy if you hate wearing it outside workouts.
+4. **Fear of choosing wrong** — normal. Specs are noisy, and every brand has trade-offs.
 
-1. Price — I can almost always find you a near-equivalent at a lower price.
-2. Looks — every brand now ships at least 3 case sizes and dozens of bands.
-3. "What if I switch sports" — most modern watches cover 30–100 activity profiles.
+Reply with the blocker and the two models you are considering. I will give you a straight answer.
 
-Reply with which one and I'll send you a tailored shortlist. No script.
+No script. No pressure. Just a practical second opinion.
 
-Alex
-(yes, real reply, real inbox)`,
-    cta: "Reply to this email",
-    url: "mailto:hello@gearuptofit.com",
+Alex`,
+    cta: "Reply for a second opinion",
+    url: "mailto:hello@gearuptofit.com?subject=WatchMatch%20second%20opinion",
     brevoRule:
-      "Set Reply-To: a real monitored inbox. Mark this email as 'high-value' in Brevo so replies notify the team in real time.",
+      "Set Reply-To to a monitored inbox. Treat replies as high-intent support, not a sales automation.",
   },
   {
     day: "Day 16",
-    subject: "Your watch will be obsolete in 4 years. Here's why that's fine.",
-    preheader: "How to think about the 'should I wait for next year's model' question.",
-    goal: "Defuse the wait-for-next-year objection; create urgency without being pushy.",
-    body: `If you wait for next year's model, you will wait forever. Here is the honest cycle:
+    subject: "Should you wait for the next model? My honest framework",
+    preheader: "Sometimes waiting is smart. Most of the time, it is just decision paralysis.",
+    goal: "Defuse the upgrade-cycle objection honestly without manufacturing urgency.",
+    body: `The hardest smartwatch question is not always "which one?" Sometimes it is "should I wait?"
 
-- Apple Watch: meaningful upgrade every 2 years (S6→S8, S8→S10).
-- Garmin Fenix / Forerunner: meaningful upgrade every 3 years.
-- Samsung Galaxy Watch: meaningful upgrade every 2 years.
-- Coros: meaningful upgrade every 2–3 years.
+Here is the framework I use.
 
-If your current watch is 3+ years old (or you don't have one), the gap is now real: multi-band GPS, AMOLED, faster charging, on-device AI insights, longer battery, much better sleep tracking.
+Wait if:
+- your current watch is only 1–2 years old and still works well;
+- the rumored next model fixes a specific problem you care about;
+- you are not training for anything and do not need the upgrade now.
 
-If your watch is 1–2 years old, wait. Skip a generation.
+Buy now if:
+- your current watch is unreliable, inaccurate, or dead by dinner;
+- you are missing a feature that changes daily use: better GPS, safer health alerts, longer battery, brighter display, or better phone integration;
+- the current model is discounted and already solves your problem.
 
-Browse current-gen flagships: ${G("review/best-smartwatches-of-the-year")}
+Most yearly updates are incremental. The meaningful jumps usually come every 2–4 years, depending on the brand.
 
-Alex`,
+Current flagship guide:
+${G("review/best-smartwatches-of-the-year")}
+
+Alex
+
+P.S. The best time to buy is when the watch solves a real problem you have now — not when a keynote tells you to care.`,
     cta: "See current flagships",
     url: G("review/best-smartwatches-of-the-year"),
     brevoRule:
-      "If contact has not clicked any link by this point, lower send frequency to weekly newsletter only after email 8.",
+      "Do not use false urgency. If the contact has not clicked any link, reduce frequency after this email rather than escalating pressure.",
   },
   {
     day: "Day 21",
-    subject: "Last one: the GearUpToFit weekly — opt in if you want to keep going",
-    preheader: "You'll stop hearing from me on watches unless you say yes here.",
-    goal: "Clean transition to the long-term newsletter list. Permission, not assumption.",
-    body: `This is the last email in your watch series.
+    subject: "Last WatchMatch note — keep the weekly guide only if you want it",
+    preheader: "This sequence ends here unless you choose to keep hearing from GearUpToFit.",
+    goal: "End respectfully, protect deliverability, and ask permission before moving into broader ongoing emails.",
+    body: `This is the last note in your WatchMatch series.
 
-You either bought, you're still thinking, or this isn't your time. All three are fine.
+I hope it helped you make a calmer decision — whether that meant buying your match, choosing an alternate, waiting, or realizing you do not need a new watch right now.
 
-If you'd like to keep getting one helpful email a week from GearUpToFit — covering smartwatches, running, training, recovery and gear — just click the button below to confirm.
+If you want one useful GearUpToFit email a week — watches, training gear, recovery tools, and buying advice — you can opt in here:
 
-If you don't, I'll move you off the watch list and stop emailing. No hard feelings.
+https://gearuptofit.com/newsletter/?confirm=1
 
-Thanks for letting me help you think through this.
+If not, no problem. I will stop the WatchMatch sequence here.
+
+Thanks for letting me help with the decision.
 
 Alex
-GearUpToFit.com`,
-    cta: "Yes, keep me on the weekly newsletter",
+GearUpToFit`,
+    cta: "Keep getting the weekly guide",
     url: "https://gearuptofit.com/newsletter/?confirm=1",
     brevoRule:
-      "Final email. If contact does NOT click the confirm link within 14 days, move to a quarterly low-frequency segment. Respect the choice — do not auto-resubscribe.",
+      "Final pre-purchase note. Only move contacts to weekly emails after an explicit click/confirmation; otherwise end the sequence.",
   },
 ];
-
 // Post-purchase lifecycle (triggered when 'amazon_click' goal fires OR contact self-reports 'I bought it')
 const lifecycleEmails: EmailStep[] = [
   {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, Loader2, Lock, Mail, Sparkles, X } from "lucide-react";
+import { CheckCircle2, FileDown, Loader2, Mail, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -48,9 +48,9 @@ export default function EmailGate({
   batteryPref,
   watchMatchURL,
   source = "quiz_gate",
-  title = "Unlock Your Personalized Watch Report",
-  subtitle = "Get your full match breakdown, the alternate pick, and an 8-day expert series — direct to your inbox.",
-  ctaLabel = "Email Me My Report",
+  title = "Send me the full WatchMatch report",
+  subtitle = "I’ll send the private recap, buying notes, and practical follow-up guidance to your inbox before you download the PDF.",
+  ctaLabel = "Send My Report",
 }: EmailGateProps) {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -170,7 +170,7 @@ export default function EmailGate({
                     <Sparkles className="h-6 w-6 text-primary-foreground" />
                   </div>
                   <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
-                    Free · 1-click · No spam
+                    Human-written · practical · no spam
                   </span>
                 </div>
 
@@ -187,8 +187,8 @@ export default function EmailGate({
                     topMatchBrand && topMatchModel
                       ? `Full breakdown for your match: ${topMatchBrand} ${topMatchModel}`
                       : "Full breakdown for your top match",
-                    "Alternate pick if your match is out of stock or out of budget",
-                    "8-day expert series: GPS, sensors, rotation, accessories",
+                    "Plain-English buying notes: case fit, GPS, battery, and deal-breakers",
+                    "A helpful expert follow-up series you can reply to anytime",
                   ].map((t) => (
                     <li key={t} className="flex items-start gap-2 text-foreground/90">
                       <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
@@ -228,8 +228,8 @@ export default function EmailGate({
                       className="mt-0.5 accent-[hsl(var(--primary))]"
                     />
                     <span>
-                      Yes, send me my report and the free 8-day expert series. I can unsubscribe any
-                      time. By continuing I accept the{" "}
+                      Yes, email my WatchMatch report and helpful follow-up notes. I can unsubscribe
+                      any time. By continuing I accept the{" "}
                       <a
                         href="https://gearuptofit.com/privacy-policy/"
                         target="_blank"
@@ -253,7 +253,7 @@ export default function EmailGate({
                       </>
                     ) : (
                       <>
-                        <Lock className="mr-2 h-4 w-4" /> {ctaLabel}
+                        <FileDown className="mr-2 h-4 w-4" /> {ctaLabel}
                       </>
                     )}
                   </Button>
@@ -263,7 +263,7 @@ export default function EmailGate({
                     onClick={onClose}
                     className="w-full py-1 text-[11px] text-muted-foreground/70 transition hover:text-muted-foreground"
                   >
-                    No thanks, just show my results
+                    No thanks, keep browsing online
                   </button>
                 </form>
               </>
@@ -278,7 +278,7 @@ export default function EmailGate({
                 </div>
                 <h3 className="mb-2 text-xl font-bold uppercase">Check your inbox!</h3>
                 <p className="text-sm text-muted-foreground">
-                  Your personalized report is on its way. Unlocking your full match…
+                  Your report is on its way. Preparing your PDF…
                 </p>
               </motion.div>
             )}
