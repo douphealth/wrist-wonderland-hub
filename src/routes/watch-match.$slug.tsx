@@ -253,7 +253,12 @@ function WatchMatchResult() {
     if (setup.alt) list.push(setup.alt.watch);
     if (setup.budget) list.push(setup.budget.watch);
     for (const t of top) if (!list.find((w) => w.id === t.watch.id)) list.push(t.watch);
-    return list.slice(0, 8).map((w) => ({ brand: w.brand, model: w.model, asin: w.asin }));
+    return list.slice(0, 8).map((w) => ({
+      brand: w.brand,
+      model: w.model,
+      asin: w.asin,
+      imageURL: w.imageURL,
+    }));
   }, [primary, setup, top]);
 
   const fetchAmazon = useServerFn(getAmazonProducts);
