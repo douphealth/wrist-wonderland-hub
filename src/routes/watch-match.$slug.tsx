@@ -891,6 +891,19 @@ function WatchMatchResult() {
           </Link>
         </div>
       </main>
+
+      <EmailGate
+        open={gateOpen}
+        onClose={closeGate}
+        onUnlock={onUnlock}
+        topMatchBrand={primary.watch.brand}
+        topMatchModel={primary.watch.model}
+        category={rec.profile.category}
+        phoneOS={answers.phone}
+        batteryPref={answers.battery}
+        watchMatchURL={typeof window !== "undefined" ? window.location.href : undefined}
+        source="quiz_gate"
+      />
     </div>
   );
 }
