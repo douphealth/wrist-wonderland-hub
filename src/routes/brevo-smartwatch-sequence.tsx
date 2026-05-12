@@ -12,6 +12,12 @@ import {
   Timer,
   Server,
   Code2,
+  Target,
+  GitBranch,
+  ShieldCheck,
+  BarChart3,
+  Beaker,
+  Layers,
 } from "lucide-react";
 
 export const Route = createFileRoute("/brevo-smartwatch-sequence")({
