@@ -210,6 +210,7 @@ const watchInput = z.object({
   brand: z.string().min(1).max(60),
   model: z.string().min(1).max(80),
   asin: z.string().min(8).max(20).optional(),
+  imageURL: z.string().url().optional(),
 });
 
 export const getAmazonProducts = createServerFn({ method: "POST" })
@@ -222,9 +223,22 @@ export const getAmazonProducts = createServerFn({ method: "POST" })
     // Use allSettled + per-item try/catch so a single failure never produces a 500.
     const settled = await Promise.allSettled(
       data.watches.map((w) =>
-        resolveProduct(w.brand, w.model, w.asin).catch(() =>
-          safeFallback(w.brand, w.model, w.asin),
-        ),
+        (async () => {
+          // Short-circuit: when the curated database supplies a verified image
+          // (and ideally an ASIN) we skip SerpApi entirely to conserve quota.
+          if (w.imageURL) {
+            return {
+              url: w.asin ? dpUrl(w.asin) : searchUrl(w.brand, w.model),
+              image: w.imageURL,
+              asin: w.asin ?? null,
+              title: null,
+              source: "fallback" as const,
+            };
+          }
+          return resolveProduct(w.brand, w.model, w.asin).catch(() =>
+            safeFallback(w.brand, w.model, w.asin),
+          );
+        })(),
       ),
     );
     return {

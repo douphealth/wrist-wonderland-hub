@@ -55,8 +55,9 @@ export const watchDatabase: Watch[] = [
     phones: ["iphone"],
     style: ["rugged", "sporty", "luxury"],
     highlight: "Apple's most rugged smartwatch — dive-rated, dual-frequency GPS, 36-hour battery in low-power mode.",
-    asin: "B0CHX7R6WK",
+    asin: "B0CSVG2GM8",
     reviewPath: "review/apple-watch-ultra-2",
+    imageURL: "https://m.media-amazon.com/images/I/81D7OmeXqoL._AC_SL1500_.jpg"
   },
   {
     id: "apple-watch-series-10",
@@ -75,8 +76,9 @@ export const watchDatabase: Watch[] = [
     phones: ["iphone"],
     style: ["minimal", "luxury", "sporty"],
     highlight: "The all-rounder for iPhone users — thinnest Apple Watch ever, faster charging, full health suite.",
-    asin: "B0DGHQ2Q4Z",
+    asin: "B0DGHQ2QH6",
     reviewPath: "review/apple-watch-series-10",
+    imageURL: "https://m.media-amazon.com/images/I/61bJZx1v8GL._AC_SL1500_.jpg"
   },
   {
     id: "apple-watch-se-2",
@@ -95,7 +97,8 @@ export const watchDatabase: Watch[] = [
     phones: ["iphone"],
     style: ["minimal", "sporty"],
     highlight: "Best-value Apple Watch — core fitness, calls and Apple Pay without the ECG/SpO2 premium.",
-    asin: "B0CHX79J9N",
+    asin: "B0DGJ736JM",
+    imageURL: "https://m.media-amazon.com/images/I/61eE8SSyPWL._AC_SL1500_.jpg"
   },
   {
     id: "samsung-galaxy-watch-7",
@@ -114,8 +117,9 @@ export const watchDatabase: Watch[] = [
     phones: ["android"],
     style: ["minimal", "sporty"],
     highlight: "The flagship Wear OS smartwatch for Android — body composition, sleep coaching and dual-frequency GPS.",
-    asin: "B0D5LPH7XR",
+    asin: "B0D7JZ51LW",
     reviewPath: "review/samsung-galaxy-watch-7",
+    imageURL: "https://m.media-amazon.com/images/I/61SQBMBnlhL._AC_SL1500_.jpg"
   },
   {
     id: "samsung-galaxy-watch-ultra",
@@ -134,8 +138,9 @@ export const watchDatabase: Watch[] = [
     phones: ["android"],
     style: ["rugged", "sporty"],
     highlight: "Samsung's adventure flagship — titanium case, 100m water resistance, dual-frequency GPS.",
-    asin: "B0D5LH2L4P",
+    asin: "B0D7F1LS4Q",
     reviewPath: "review/galaxy-watch-ultra",
+    imageURL: "https://m.media-amazon.com/images/I/81yuteoAxNL._AC_SL1500_.jpg"
   },
   {
     id: "google-pixel-watch-3",
@@ -154,8 +159,9 @@ export const watchDatabase: Watch[] = [
     phones: ["android"],
     style: ["minimal", "luxury"],
     highlight: "Google's most refined Pixel Watch — Fitbit-powered fitness, gorgeous 320 ppi AMOLED.",
-    asin: "B0D7HX1G4Y",
+    asin: "B0D91268TH",
     reviewPath: "review/pixel-watch-3",
+    imageURL: "https://m.media-amazon.com/images/I/61-JMO7a6%2BL._AC_SL1500_.jpg"
   },
   {
     id: "garmin-fenix-8",
@@ -174,8 +180,9 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged", "luxury"],
     highlight: "Garmin's no-compromise multisport flagship — built-in dive computer, AMOLED, multi-band GPS.",
-    asin: "B0DDH8VWQ7",
+    asin: "B0DD5S66GR",
     reviewPath: "review/garmin-fenix-8",
+    imageURL: "https://m.media-amazon.com/images/I/617Rv1XcTnL._AC_SL1500_.jpg"
   },
   {
     id: "garmin-forerunner-965",
@@ -194,8 +201,9 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["sporty"],
     highlight: "Best AMOLED running watch — full-color maps, training readiness and 23-day everyday battery.",
-    asin: "B0BTSGFGSD",
+    asin: "B0BS1XZY7T",
     reviewPath: "review/garmin-forerunner-965-review",
+    imageURL: "https://m.media-amazon.com/images/I/716+0qoy3HL._AC_SL1500_.jpg"
   },
   {
     id: "garmin-forerunner-265",
@@ -214,7 +222,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["sporty", "minimal"],
     highlight: "Mid-range runner's pick — bright AMOLED, training load focus, race predictor.",
-    asin: "B0BTSC2HW1",
+    asin: "B0BS1T7G8S",
+    imageURL: "https://m.media-amazon.com/images/I/71iSHugswGL._AC_SL1500_.jpg"
   },
   {
     id: "garmin-instinct-3",
@@ -233,8 +242,9 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged"],
     highlight: "Solar-charged tank — months of battery, MIL-STD-810 toughness, brilliant always-on MIP screen.",
-    asin: "B0DPMTC1NF",
+    asin: "B0DSG9VCRH",
     reviewPath: "review/garmin-instinct-3",
+    imageURL: "https://m.media-amazon.com/images/I/61YWK9flgBL._AC_SL1500_.jpg"
   },
   {
     id: "garmin-vivoactive-5",
@@ -253,7 +263,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal", "sporty"],
     highlight: "Most accessible Garmin AMOLED — 11-day battery, sleep coach, gym workouts and music storage.",
-    asin: "B0CGYYTVGW",
+    asin: "B0CG6NR413",
+    imageURL: "https://m.media-amazon.com/images/I/61A4yOWzGBL._AC_SL1500_.jpg"
   },
   {
     id: "coros-pace-3",
@@ -272,8 +283,9 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal", "sporty"],
     highlight: "Ultralight runner's bargain — dual-frequency GPS at 30g, 24-day battery, EvoLab analytics.",
-    asin: "B0CD1WXG5R",
+    asin: "B0CFQQ9FDL",
     reviewPath: "review/coros-pace-3-review",
+    imageURL: "https://m.media-amazon.com/images/I/61HE8zhwT7L._AC_SL1500_.jpg"
   },
   {
     id: "coros-vertix-2s",
@@ -310,7 +322,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["sporty"],
     highlight: "Lab-grade biometrics — ECG, skin-temp, wrist-based hemoglobin, training readiness.",
-    asin: "B0CKTKPN3J",
+    asin: "B0DB8ZBN46",
+    imageURL: "https://m.media-amazon.com/images/I/51Cf-tSvxHL._AC_SL1500_.jpg"
   },
   {
     id: "suunto-race",
@@ -329,7 +342,7 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged", "sporty"],
     highlight: "Finnish-built dual-frequency GPS with offline maps — rotating crown UI feels great.",
-    asin: "B0CKK48QYL",
+    imageURL: "https://m.media-amazon.com/images/I/71ceqlfJBaL._AC_SL1500_.jpg"
   },
   {
     id: "amazfit-t-rex-3",
@@ -348,8 +361,9 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged"],
     highlight: "Rugged AMOLED at half the price — dual-band GPS, offline maps, 27-day battery.",
-    asin: "B0DCB14J2B",
+    asin: "B0DCZ9PRCP",
     reviewPath: "review/amazfit-t-rex-3",
+    imageURL: "https://m.media-amazon.com/images/I/71GtgMbKvKL._AC_SL1500_.jpg"
   },
   {
     id: "amazfit-bip-5",
@@ -368,7 +382,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal", "sporty"],
     highlight: "Big AMOLED smartwatch under $100 — surprisingly capable for daily fitness tracking.",
-    asin: "B0CHKR3K1Y",
+    asin: "B0CZP6V3MN",
+    imageURL: "https://m.media-amazon.com/images/I/61kCGyZra5L._AC_SL1500_.jpg"
   },
   {
     id: "fitbit-charge-6",
@@ -387,7 +402,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal"],
     highlight: "The most full-featured fitness band — built-in GPS, ECG and Google Maps on the wrist.",
-    asin: "B0CC9CTHTH",
+    asin: "B0CHN2F11G",
+    imageURL: "https://m.media-amazon.com/images/I/619Rq2X78zL._AC_SL1500_.jpg"
   },
   {
     id: "fitbit-inspire-3",
@@ -406,7 +422,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal"],
     highlight: "Featherlight wellness band — sleep score, stress and active zone minutes.",
-    asin: "B0BCQXTZ3Z",
+    asin: "B0B5F9SZW7",
+    imageURL: "https://m.media-amazon.com/images/I/51CtR%2BquteL._AC_SL1500_.jpg"
   },
   {
     id: "xiaomi-smart-band-9",
@@ -425,7 +442,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal"],
     highlight: "21-day battery in a $50 AMOLED band — unbeatable wellness tracker for the price.",
-    asin: "B0DDTW39GZ",
+    asin: "B0D98HTWRR",
+    imageURL: "https://m.media-amazon.com/images/I/61Yk24DAW7L._AC_SL1500_.jpg"
   },
   {
     id: "huawei-watch-gt-5-pro",
@@ -444,8 +462,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["luxury", "sporty"],
     highlight: "Two-week battery in a titanium-and-sapphire luxury smartwatch.",
-    asin: "B0DDB94F89",
     reviewPath: "review/huawei-watch-gt-5-pro",
+    imageURL: "https://m.media-amazon.com/images/I/71dN-5SpyOL._AC_SL1500_.jpg"
   },
   {
     id: "withings-scanwatch-2",
@@ -464,7 +482,7 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["luxury", "minimal"],
     highlight: "Analog hybrid with medical-grade ECG and 30-day battery — looks like a real watch.",
-    asin: "B0CMDC9D7X",
+    imageURL: "https://m.media-amazon.com/images/I/61FooOnl3+L._AC_SL1500_.jpg"
   },
   {
     id: "whoop-4",
@@ -483,7 +501,7 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal"],
     highlight: "Screen-free recovery and strain coaching — the choice of pro athletes (subscription required).",
-    asin: "B09BHHX26X",
+    imageURL: "https://m.media-amazon.com/images/I/71CQ6esBqFL._AC_SL1500_.jpg"
   },
   {
     id: "mobvoi-ticwatch-pro-5",
@@ -502,7 +520,8 @@ export const watchDatabase: Watch[] = [
     phones: ["android"],
     style: ["sporty", "rugged"],
     highlight: "Dual-display Wear OS watch — premium chip and 80-hour standby thanks to its low-power overlay.",
-    asin: "B0C99DTD6Y",
+    asin: "B0BYS4KJV6",
+    imageURL: "https://m.media-amazon.com/images/I/71RTu5isl8L._AC_SL1500_.jpg"
   },
 ];
 
