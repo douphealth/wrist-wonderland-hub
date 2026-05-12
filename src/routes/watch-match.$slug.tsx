@@ -343,8 +343,20 @@ function WatchMatchResult() {
 
             <div className="md:flex md:gap-6 md:items-start">
               <div className="md:w-2/5 mb-5 md:mb-0">
-                <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden">
-                  <WatchIcon className="w-32 h-32 text-primary/40" strokeWidth={1} />
+                <div className="aspect-square rounded-2xl bg-gradient-to-br from-card-elevated to-background flex items-center justify-center border border-border/40 overflow-hidden p-6">
+                  {amazonImage(primary.watch, 500) ? (
+                    <img
+                      src={amazonImage(primary.watch, 500)}
+                      alt={`${primary.watch.brand} ${primary.watch.model} on Amazon`}
+                      loading="lazy"
+                      className="max-h-full max-w-full object-contain drop-shadow-2xl"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <WatchIcon className="w-32 h-32 text-primary/40" strokeWidth={1} />
+                  )}
                 </div>
               </div>
               <div className="flex-1">
