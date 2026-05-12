@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as BrevoSmartwatchSequenceRouteImport } from './routes/brevo-smartwatch-sequence'
 import { Route as BrevoRunningShoeSequenceRouteImport } from './routes/brevo-running-shoe-sequence'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as WatchMatchSlugRouteImport } from './routes/watch-match.$slug'
 
 const BrevoSmartwatchSequenceRoute = BrevoSmartwatchSequenceRouteImport.update({
@@ -30,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WatchSlugRoute = WatchSlugRouteImport.update({
+  id: '/watch/$slug',
+  path: '/watch/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WatchMatchSlugRoute = WatchMatchSlugRouteImport.update({
   id: '/watch-match/$slug',
   path: '/watch-match/$slug',
@@ -41,12 +47,14 @@ export interface FileRoutesByFullPath {
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
+  '/watch/$slug': typeof WatchSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
+  '/watch/$slug': typeof WatchSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -54,6 +62,7 @@ export interface FileRoutesById {
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
+  '/watch/$slug': typeof WatchSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -62,18 +71,21 @@ export interface FileRouteTypes {
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
     | '/watch-match/$slug'
+    | '/watch/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
     | '/watch-match/$slug'
+    | '/watch/$slug'
   id:
     | '__root__'
     | '/'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
     | '/watch-match/$slug'
+    | '/watch/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -81,6 +93,7 @@ export interface RootRouteChildren {
   BrevoRunningShoeSequenceRoute: typeof BrevoRunningShoeSequenceRoute
   BrevoSmartwatchSequenceRoute: typeof BrevoSmartwatchSequenceRoute
   WatchMatchSlugRoute: typeof WatchMatchSlugRoute
+  WatchSlugRoute: typeof WatchSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -106,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/watch/$slug': {
+      id: '/watch/$slug'
+      path: '/watch/$slug'
+      fullPath: '/watch/$slug'
+      preLoaderRoute: typeof WatchSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watch-match/$slug': {
       id: '/watch-match/$slug'
       path: '/watch-match/$slug'
@@ -121,6 +141,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrevoRunningShoeSequenceRoute: BrevoRunningShoeSequenceRoute,
   BrevoSmartwatchSequenceRoute: BrevoSmartwatchSequenceRoute,
   WatchMatchSlugRoute: WatchMatchSlugRoute,
+  WatchSlugRoute: WatchSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
