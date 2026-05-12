@@ -20,7 +20,6 @@ import catBand from "@/assets/cat-band.jpg";
 import catHybrid from "@/assets/cat-hybrid.jpg";
 import { pickGuides } from "@/lib/featured-guides";
 import { getRelevantGutfPosts } from "@/lib/gearuptofit-posts.functions";
-import { generateWatchReportPDF } from "@/lib/watch-report-pdf";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -203,9 +202,10 @@ function WatchMatchResult() {
     }
   };
 
-  const handleDownloadPDF = useCallback(() => {
+  const handleDownloadPDF = useCallback(async () => {
     if (!answers || !rec || !setup) return;
     toast.info("Generating your WatchMatch report…");
+    const { generateWatchReportPDF } = await import("@/lib/watch-report-pdf");
     generateWatchReportPDF({ answers, recommendation: rec, setup, top });
     toast.success("Your WatchMatch PDF report has been downloaded.");
   }, [answers, rec, setup, top]);
