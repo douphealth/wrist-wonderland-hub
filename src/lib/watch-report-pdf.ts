@@ -4,10 +4,12 @@ import type { WatchRecommendation } from "./recommendation-engine";
 import type { ScoredWatch, WatchSetup } from "./scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "./watch-database";
 
-const ink = [18, 24, 35] as const;
-const muted = [92, 103, 122] as const;
-const red = [224, 35, 46] as const;
-const panel = [245, 247, 250] as const;
+type RGB = readonly [number, number, number];
+
+const ink: RGB = [18, 24, 35];
+const muted: RGB = [92, 103, 122];
+const red: RGB = [224, 35, 46];
+const panel: RGB = [245, 247, 250];
 
 function text(doc: jsPDF, value: string, x: number, y: number, size = 10, color = ink, style: "normal" | "bold" = "normal") {
   doc.setFont("helvetica", style);
