@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -13,6 +13,7 @@ import QuizProgress from "@/components/quiz/QuizProgress";
 import QuizStepContent from "@/components/quiz/QuizStepContent";
 import QuizNavigation from "@/components/quiz/QuizNavigation";
 import { Brain } from "lucide-react";
+import { captureUTM } from "@/lib/utm";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,6 +42,12 @@ function Index() {
   const [currentStep, setCurrentStep] = useState(-1);
   const [answers, setAnswers] = useState<QuizAnswers>(defaultAnswers);
   const navigate = useNavigate();
+
+  // Capture UTM parameters on first landing so every downstream lead-capture
+  // event is tagged with the original traffic source.
+  useEffect(() => {
+    captureUTM();
+  }, []);
 
   const progress = currentStep >= 0 ? ((currentStep + 1) / quizSteps.length) * 100 : 0;
 
