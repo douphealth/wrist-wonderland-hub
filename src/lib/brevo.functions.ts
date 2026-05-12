@@ -211,6 +211,7 @@ export const subscribeLead = createServerFn({ method: "POST" })
       return { success: false, error: "Email service not configured" } as const;
     }
 
+    const reportURL = normalizeReportURL(data.watchMatchURL);
     const attributes: Record<string, unknown> = {
       FIRSTNAME: data.firstName ?? "",
       SOURCE: data.source,
@@ -219,7 +220,7 @@ export const subscribeLead = createServerFn({ method: "POST" })
       WATCH_CATEGORY: data.category ?? "",
       PHONE_OS: data.phoneOS ?? "",
       BATTERY_PREF_DAYS: data.batteryPref ?? null,
-      WATCHMATCH_URL: data.watchMatchURL ?? "",
+      WATCHMATCH_URL: reportURL,
       UTM_SOURCE: data.utm?.source ?? "",
       UTM_MEDIUM: data.utm?.medium ?? "",
       UTM_CAMPAIGN: data.utm?.campaign ?? "",
@@ -282,12 +283,13 @@ export const subscribeLead = createServerFn({ method: "POST" })
           TOP_MATCH_BRAND: data.topMatchBrand || "",
           TOP_MATCH_MODEL: data.topMatchModel || "",
           WATCH_CATEGORY: data.category || "",
-          WATCHMATCH_URL: data.watchMatchURL || "",
+          WATCHMATCH_URL: reportURL,
         };
       } else {
-        const { subject, html } = welcomeHTML(data);
+        const { subject, html, text } = welcomeHTML({ ...data, watchMatchURL: reportURL });
         sendBody.subject = subject;
         sendBody.htmlContent = html;
+        sendBody.textContent = text;
       }
       const sendRes = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
