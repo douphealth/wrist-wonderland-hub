@@ -557,6 +557,64 @@ function WatchMatchResult() {
           </div>
         </motion.div>
 
+        {/* Live posts pulled from gearuptofit.com WP REST API */}
+        <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl md:text-2xl font-bold uppercase tracking-tight">
+                Latest From GearUpToFit
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Live feed — fresh reviews and guides matched to your answers.
+              </p>
+            </div>
+          </div>
+          {livePostsQuery.isLoading && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-28 rounded-xl border border-border/40 bg-card/20 animate-pulse" />
+              ))}
+            </div>
+          )}
+          {livePostsQuery.data?.error && (
+            <p className="text-sm text-muted-foreground">{livePostsQuery.data.error}</p>
+          )}
+          {livePostsQuery.data?.posts && livePostsQuery.data.posts.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {livePostsQuery.data.posts.map((p) => (
+                <a
+                  key={p.id}
+                  href={p.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex gap-3 p-3 rounded-xl border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                >
+                  {p.image && (
+                    <img
+                      src={p.image}
+                      alt=""
+                      loading="lazy"
+                      className="w-20 h-20 rounded-lg object-cover flex-shrink-0 border border-border/30"
+                      onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = "none")}
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-bold text-sm leading-snug mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                      {p.title}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                      {p.excerpt}
+                    </p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </motion.div>
+
         {/* FAQ */}
         <motion.div {...fadeUp} className="glass rounded-2xl p-5 md:p-8">
           <div className="flex items-center gap-3 mb-5">
