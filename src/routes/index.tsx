@@ -21,7 +21,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Free AI-powered smartwatch & fitness band finder. 9 expert questions, one perfect match across Apple, Garmin, Samsung, Google, Fitbit, Polar, Coros, Suunto and more.",
+          "Free AI-powered smartwatch & fitness band finder by GearUpToFit. 9 expert questions, one perfect match across Apple, Garmin, Samsung, Google, Fitbit, Polar, Coros, Suunto and more.",
       },
       { property: "og:title", content: "WatchMatch AI — Find Your Perfect Smartwatch" },
       {
@@ -29,6 +29,9 @@ export const Route = createFileRoute("/")({
         content:
           "9 questions, one perfect smartwatch or fitness band recommendation — scored against verified specs.",
       },
+    ],
+    links: [
+      { rel: "canonical", href: "https://gearuptofit.com/watch-match/" },
     ],
   }),
   component: Index,
