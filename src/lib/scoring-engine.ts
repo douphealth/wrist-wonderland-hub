@@ -178,6 +178,7 @@ export interface WatchSetup {
 export function buildSetup(a: QuizAnswers): WatchSetup {
   const scored = scoreWatches(a);
   const primary = scored[0];
+  if (!primary) throw new Error("No watch recommendations available for these answers.");
   const alt =
     scored.find(
       (s) =>
@@ -189,7 +190,8 @@ export function buildSetup(a: QuizAnswers): WatchSetup {
       (s) =>
         s.watch.id !== primary.watch.id &&
         s.watch.id !== alt?.watch.id &&
-        s.watch.priceUSD < primary.watch.priceUSD * 0.7,
+        s.watch.priceUSD < primary.watch.priceUSD * 0.8 &&
+        s.score >= primary.score - 0.18,
     ) || null;
   return { primary, alt, budget };
 }
