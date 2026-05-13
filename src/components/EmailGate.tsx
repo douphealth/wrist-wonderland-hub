@@ -120,9 +120,13 @@ export default function EmailGate({
       // SOTA UX: even if the email service is temporarily unreachable, do
       // not punish the user. Unlock the download, but only remember the lead
       // locally after the Day-0 email is actually accepted for sending.
-      if (!res || !res.success) {
-        toast.message("We saved your request — your PDF is downloading now.", {
-          description: "Email delivery is briefly unavailable; we'll send the full report shortly.",
+      if (!res?.success) {
+        toast.message("Your PDF is unlocking now.", {
+          description: "Email delivery was not confirmed. Please submit again in a minute so we can resend it.",
+        });
+      } else if (!res.welcomeSent) {
+        toast.message("Your PDF is unlocking now.", {
+          description: "Your email was saved, but delivery was not confirmed yet. Try again if it does not arrive.",
         });
       }
       if (res?.welcomeSent) {
@@ -145,10 +149,6 @@ export default function EmailGate({
       }
       if (res?.welcomeSent) {
         setDone(true);
-      } else {
-        toast.message("Your PDF is unlocking now.", {
-          description: "If the email does not arrive in a few minutes, submit once more and we’ll resend it.",
-        });
       }
       setTimeout(() => onUnlock(), 1100);
     } catch (err) {
