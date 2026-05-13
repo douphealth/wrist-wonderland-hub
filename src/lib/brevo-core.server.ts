@@ -94,7 +94,8 @@ async function postBrevo(path: string, body: unknown, apiKey: string): Promise<R
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const lovableApiKey = process.env.LOVABLE_API_KEY;
-  const url = lovableApiKey ? `${BREVO_GATEWAY_URL}${path}` : `${BREVO_API_URL}${path}`;
+  const useConnectorGateway = Boolean(lovableApiKey && apiKey.startsWith("lovc_"));
+  const url = useConnectorGateway ? `${BREVO_GATEWAY_URL}${path}` : `${BREVO_API_URL}${path}`;
 
   try {
     return await fetch(url, {
