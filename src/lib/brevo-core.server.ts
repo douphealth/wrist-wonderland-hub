@@ -79,7 +79,7 @@ function escapeHTML(s: string): string {
 
 function brevoHeaders(apiKey: string): HeadersInit {
   const lovableApiKey = process.env.LOVABLE_API_KEY;
-  if (lovableApiKey) {
+  if (lovableApiKey && apiKey.startsWith("lovc_")) {
     return {
       Authorization: `Bearer ${lovableApiKey}`,
       "X-Connection-Api-Key": apiKey,
