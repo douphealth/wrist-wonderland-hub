@@ -191,16 +191,16 @@ export async function runBrevoSubscribe(data: BrevoSubscribeInput): Promise<Subs
   };
 
   try {
-    const upsertRes = await fetch("https://api.brevo.com/v3/contacts", {
-      method: "POST",
-      headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({
+    const upsertRes = await postBrevo(
+      "/contacts",
+      {
         email: data.email,
         attributes,
         listIds: [listIdFor(data.source)],
         updateEnabled: true,
-      }),
-    });
+      },
+      apiKey,
+    );
     const txt = await upsertRes.text();
     let json: unknown = null;
     try { json = txt ? JSON.parse(txt) : null; } catch { /* ignore */ }
@@ -239,11 +239,7 @@ export async function runBrevoSubscribe(data: BrevoSubscribeInput): Promise<Subs
       sendBody.htmlContent = html;
       sendBody.textContent = text;
     }
-    const sendRes = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify(sendBody),
-    });
+    const sendRes = await postBrevo("/smtp/email", sendBody, apiKey);
     welcomeSent = sendRes.ok;
     if (!sendRes.ok) {
       const errTxt = await sendRes.text();
