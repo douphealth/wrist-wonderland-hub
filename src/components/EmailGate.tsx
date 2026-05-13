@@ -118,17 +118,19 @@ export default function EmailGate({
       }
 
       // SOTA UX: even if the email service is temporarily unreachable, do
-      // not punish the user. Mark them as captured locally and unlock the
-      // download — they still get their PDF, and we surface a soft notice.
+      // not punish the user. Unlock the download, but only remember the lead
+      // locally after the Day-0 email is actually accepted for sending.
       if (!res || !res.success) {
         toast.message("We saved your request — your PDF is downloading now.", {
           description: "Email delivery is briefly unavailable; we'll send the full report shortly.",
         });
       }
-      try {
-        localStorage.setItem(STORAGE_KEY, trimmed);
-      } catch {
-        /* ignore */
+      if (res?.welcomeSent) {
+        try {
+          localStorage.setItem(STORAGE_KEY, trimmed);
+        } catch {
+          /* ignore */
+        }
       }
       try {
         (window as unknown as { dataLayer?: Array<Record<string, unknown>> }).dataLayer?.push({
@@ -152,7 +154,6 @@ export default function EmailGate({
     } catch (err) {
       console.error(err);
       // Last-resort safety net: still let the user proceed to their PDF.
-      try { localStorage.setItem(STORAGE_KEY, trimmed); } catch { /* ignore */ }
       toast.message("We couldn't reach the email service — unlocking your PDF anyway.", {
         description: "Try again in a minute and we'll send the full report to your inbox.",
       });
