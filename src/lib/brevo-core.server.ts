@@ -77,6 +77,37 @@ function escapeHTML(s: string): string {
   );
 }
 
+function brevoHeaders(apiKey: string): HeadersInit {
+  const lovableApiKey = process.env.LOVABLE_API_KEY;
+  if (lovableApiKey) {
+    return {
+      Authorization: `Bearer ${lovableApiKey}`,
+      "X-Connection-Api-Key": apiKey,
+      "content-type": "application/json",
+      accept: "application/json",
+    };
+  }
+  return { "api-key": apiKey, "content-type": "application/json", accept: "application/json" };
+}
+
+async function postBrevo(path: string, body: unknown, apiKey: string): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const lovableApiKey = process.env.LOVABLE_API_KEY;
+  const url = lovableApiKey ? `${BREVO_GATEWAY_URL}${path}` : `${BREVO_API_URL}${path}`;
+
+  try {
+    return await fetch(url, {
+      method: "POST",
+      headers: brevoHeaders(apiKey),
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function welcomeHTML(input: BrevoSubscribeInput) {
   const name = input.firstName?.trim() || "there";
   const brand = input.topMatchBrand ?? "your match";
