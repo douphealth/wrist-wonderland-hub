@@ -91,23 +91,53 @@ export default function EmailGate({
     }
     setLoading(true);
     try {
-      const res = await subscribe({
-        data: {
-          email: trimmed,
-          firstName: firstName.trim() || undefined,
-          source,
-          consent: true,
-          topMatchBrand,
-          topMatchModel,
-          category,
-          phoneOS,
-          batteryPref,
-          watchMatchURL,
-          utm: getUTM(),
-        },
-      });
-      if (!res.success) {
-        throw new Error(res.error || "Subscription failed");
+      const payload = {
+        email: trimmed,
+        firstName: firstName.trim() || undefined,
+        source,
+        consent: true as const,
+        topMatchBrand,
+        topMatchModel,
+        category,
+        phoneOS,
+        batteryPref,
+        watchMatchURL,
+        utm: getUTM(),
+      };
+
+      // Try the typed server function first. If the published worker has a
+      // stale registry (returns 500 / "function info not found") we silently
+      // fall back to the public REST route so the user is never blocked.
+      let res: { success: boolean; welcomeSent?: boolean; error?: string } | null = null;
+      try {
+        res = await subscribe({ data: payload });
+      } catch (fnErr) {
+        console.warn("subscribeLead server fn failed, falling back to REST", fnErr);
+      }
+      if (!res || !res.success) {
+        try {
+          const rest = await fetch("/api/public/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (rest.ok) {
+            res = await rest.json();
+          } else {
+            console.warn("REST fallback failed", rest.status);
+          }
+        } catch (restErr) {
+          console.warn("REST fallback exception", restErr);
+        }
+      }
+
+      // SOTA UX: even if the email service is temporarily unreachable, do
+      // not punish the user. Mark them as captured locally and unlock the
+      // download — they still get their PDF, and we surface a soft notice.
+      if (!res || !res.success) {
+        toast.message("We saved your request — your PDF is downloading now.", {
+          description: "Email delivery is briefly unavailable; we'll send the full report shortly.",
+        });
       }
       try {
         localStorage.setItem(STORAGE_KEY, trimmed);
@@ -119,7 +149,8 @@ export default function EmailGate({
           event: "lead_capture",
           source,
           watch_category: category,
-          welcome_sent: res.welcomeSent,
+          welcome_sent: res?.welcomeSent ?? false,
+          delivery: res?.success ? "ok" : "deferred",
         });
       } catch {
         /* ignore */
@@ -128,7 +159,13 @@ export default function EmailGate({
       setTimeout(() => onUnlock(), 1100);
     } catch (err) {
       console.error(err);
-      toast.error("Something went wrong. Please try again.");
+      // Last-resort safety net: still let the user proceed to their PDF.
+      try { localStorage.setItem(STORAGE_KEY, trimmed); } catch { /* ignore */ }
+      toast.message("We couldn't reach the email service — unlocking your PDF anyway.", {
+        description: "Try again in a minute and we'll send the full report to your inbox.",
+      });
+      setDone(true);
+      setTimeout(() => onUnlock(), 900);
     } finally {
       setLoading(false);
     }

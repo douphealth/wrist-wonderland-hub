@@ -14,6 +14,7 @@ import { Route as BrevoRunningShoeSequenceRouteImport } from './routes/brevo-run
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as WatchMatchSlugRouteImport } from './routes/watch-match.$slug'
+import { Route as ApiPublicSubscribeRouteImport } from './routes/api/public/subscribe'
 
 const BrevoSmartwatchSequenceRoute = BrevoSmartwatchSequenceRouteImport.update({
   id: '/brevo-smartwatch-sequence',
@@ -41,6 +42,11 @@ const WatchMatchSlugRoute = WatchMatchSlugRouteImport.update({
   path: '/watch-match/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSubscribeRoute = ApiPublicSubscribeRouteImport.update({
+  id: '/api/public/subscribe',
+  path: '/api/public/subscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -48,6 +54,7 @@ export interface FileRoutesByFullPath {
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
+  '/api/public/subscribe': typeof ApiPublicSubscribeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -55,6 +62,7 @@ export interface FileRoutesByTo {
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
+  '/api/public/subscribe': typeof ApiPublicSubscribeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -63,6 +71,7 @@ export interface FileRoutesById {
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
+  '/api/public/subscribe': typeof ApiPublicSubscribeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/brevo-smartwatch-sequence'
     | '/watch-match/$slug'
     | '/watch/$slug'
+    | '/api/public/subscribe'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -79,6 +89,7 @@ export interface FileRouteTypes {
     | '/brevo-smartwatch-sequence'
     | '/watch-match/$slug'
     | '/watch/$slug'
+    | '/api/public/subscribe'
   id:
     | '__root__'
     | '/'
@@ -86,6 +97,7 @@ export interface FileRouteTypes {
     | '/brevo-smartwatch-sequence'
     | '/watch-match/$slug'
     | '/watch/$slug'
+    | '/api/public/subscribe'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -94,6 +106,7 @@ export interface RootRouteChildren {
   BrevoSmartwatchSequenceRoute: typeof BrevoSmartwatchSequenceRoute
   WatchMatchSlugRoute: typeof WatchMatchSlugRoute
   WatchSlugRoute: typeof WatchSlugRoute
+  ApiPublicSubscribeRoute: typeof ApiPublicSubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -133,6 +146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchMatchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/subscribe': {
+      id: '/api/public/subscribe'
+      path: '/api/public/subscribe'
+      fullPath: '/api/public/subscribe'
+      preLoaderRoute: typeof ApiPublicSubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -142,17 +162,8 @@ const rootRouteChildren: RootRouteChildren = {
   BrevoSmartwatchSequenceRoute: BrevoSmartwatchSequenceRoute,
   WatchMatchSlugRoute: WatchMatchSlugRoute,
   WatchSlugRoute: WatchSlugRoute,
+  ApiPublicSubscribeRoute: ApiPublicSubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
