@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, FileDown, Loader2, Mail, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { subscribeLead } from "@/lib/brevo.functions";
 import { getUTM } from "@/lib/utm";
 
 export interface EmailGateProps {
@@ -58,8 +56,6 @@ export default function EmailGate({
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const subscribe = useServerFn(subscribeLead);
-
   useEffect(() => {
     if (!open) {
       setDone(false);
@@ -105,30 +101,20 @@ export default function EmailGate({
         utm: getUTM(),
       };
 
-      // Try the typed server function first. If the published worker has a
-      // stale registry (returns 500 / "function info not found") we silently
-      // fall back to the public REST route so the user is never blocked.
       let res: { success: boolean; welcomeSent?: boolean; error?: string } | null = null;
       try {
-        res = await subscribe({ data: payload });
-      } catch (fnErr) {
-        console.warn("subscribeLead server fn failed, falling back to REST", fnErr);
-      }
-      if (!res || !res.success) {
-        try {
-          const rest = await fetch("/api/public/subscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          if (rest.ok) {
-            res = await rest.json();
-          } else {
-            console.warn("REST fallback failed", rest.status);
-          }
-        } catch (restErr) {
-          console.warn("REST fallback exception", restErr);
+        const rest = await fetch("/api/public/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (rest.ok) {
+          res = await rest.json();
+        } else {
+          console.warn("Subscribe request failed", rest.status);
         }
+      } catch (restErr) {
+        console.warn("Subscribe request exception", restErr);
       }
 
       // SOTA UX: even if the email service is temporarily unreachable, do
