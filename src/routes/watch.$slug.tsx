@@ -129,6 +129,9 @@ function WatchDetailPage() {
                 </Link>
               </Button>
             </div>
+            <div className="mt-4">
+              <AffiliateDisclosure variant="inline" />
+            </div>
           </div>
         </motion.div>
 
