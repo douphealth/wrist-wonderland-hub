@@ -5,6 +5,7 @@ import { amazonURL, categoryImage } from "@/lib/amazon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import AffiliateDisclosure from "@/components/AffiliateDisclosure";
 import {
   ArrowLeft,
   Battery,
@@ -128,6 +129,9 @@ function WatchDetailPage() {
                   <Sparkles className="h-4 w-4 mr-2" /> Take the quiz
                 </Link>
               </Button>
+            </div>
+            <div className="mt-4">
+              <AffiliateDisclosure variant="inline" />
             </div>
           </div>
         </motion.div>
