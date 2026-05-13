@@ -90,7 +90,7 @@ function brevoHeaders(apiKey: string): HeadersInit {
   return { "api-key": apiKey, "content-type": "application/json", accept: "application/json" };
 }
 
-async function postBrevo(path: string, body: unknown, apiKey: string): Promise<Response> {
+async function attemptBrevoPost(path: string, body: unknown, apiKey: string): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   const lovableApiKey = process.env.LOVABLE_API_KEY;
@@ -107,6 +107,22 @@ async function postBrevo(path: string, body: unknown, apiKey: string): Promise<R
   } finally {
     clearTimeout(timeout);
   }
+}
+
+async function postBrevo(path: string, body: unknown, apiKey: string): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await attemptBrevoPost(path, body, apiKey);
+      if (response.status !== 429 && response.status < 500) return response;
+      if (attempt === 1) return response;
+    } catch (err) {
+      lastError = err;
+      if (attempt === 1) throw err;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+  }
+  throw lastError instanceof Error ? lastError : new Error("Brevo request failed");
 }
 
 function welcomeHTML(input: BrevoSubscribeInput) {
