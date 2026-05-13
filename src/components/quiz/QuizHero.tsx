@@ -43,10 +43,10 @@ export default function QuizHero({ onStart }: QuizHeroProps) {
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.96 }}
           className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass border border-primary/20 text-[10px] md:text-xs font-semibold uppercase tracking-[0.18em] text-foreground/90 hover:text-primary hover:border-primary/50 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] transition-all"
-          aria-label="Return to GearUpToFit homepage"
+          aria-label="Return to GearUpToFit home"
         >
           <Home className="w-3 h-3 text-primary" />
-          <span>Homepage</span>
+          <span>Home</span>
         </motion.a>
       </div>
 
