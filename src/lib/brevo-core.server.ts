@@ -26,16 +26,19 @@ export const brevoSubscribeSchema = z.object({
   consent: z.literal(true),
   topMatchBrand: z.string().max(100).optional(),
   topMatchModel: z.string().max(150).optional(),
-  category: z.string().max(50).optional(),
+  category: z.string().max(120).optional(),
   phoneOS: z.string().max(20).optional(),
   batteryPref: z.coerce.number().int().min(0).max(120).optional(),
-  watchMatchURL: z.string().url().max(500).optional(),
+  watchMatchURL: z.string().url().max(2048).optional(),
   utm: utmSchema,
 });
 
 export type BrevoSubscribeInput = z.infer<typeof brevoSubscribeSchema>;
 
 const PUBLIC_APP_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+const BREVO_GATEWAY_URL = "https://connector-gateway.lovable.dev/brevo";
+const BREVO_API_URL = "https://api.brevo.com/v3";
+const REQUEST_TIMEOUT_MS = 12_000;
 
 function listIdFor(source: BrevoSubscribeInput["source"]): number {
   const env = process.env.BREVO_LIST_ID_QUIZ_GATE ?? process.env.BREVO_LIST_ID ?? "1";
