@@ -261,6 +261,19 @@ export async function runBrevoSubscribe(data: BrevoSubscribeInput): Promise<Subs
     if (!sendRes.ok) {
       const errTxt = await sendRes.text();
       console.error("brevo welcome send failed", sendRes.status, errTxt);
+      if (Number.isFinite(templateId) && templateId > 0) {
+        const { subject, html, text } = welcomeHTML({ ...data, watchMatchURL: reportURL });
+        const fallbackRes = await postBrevo(
+          "/smtp/email",
+          { ...sendBody, templateId: undefined, params: undefined, subject, htmlContent: html, textContent: text },
+          apiKey,
+        );
+        welcomeSent = fallbackRes.ok;
+        if (!fallbackRes.ok) {
+          const fallbackTxt = await fallbackRes.text();
+          console.error("brevo fallback welcome send failed", fallbackRes.status, fallbackTxt);
+        }
+      }
     }
   } catch (err) {
     console.error("brevo welcome send exception", err);
