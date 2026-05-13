@@ -26,16 +26,19 @@ export const brevoSubscribeSchema = z.object({
   consent: z.literal(true),
   topMatchBrand: z.string().max(100).optional(),
   topMatchModel: z.string().max(150).optional(),
-  category: z.string().max(50).optional(),
+  category: z.string().max(120).optional(),
   phoneOS: z.string().max(20).optional(),
   batteryPref: z.coerce.number().int().min(0).max(120).optional(),
-  watchMatchURL: z.string().url().max(500).optional(),
+  watchMatchURL: z.string().url().max(2048).optional(),
   utm: utmSchema,
 });
 
 export type BrevoSubscribeInput = z.infer<typeof brevoSubscribeSchema>;
 
 const PUBLIC_APP_ORIGIN = "https://wrist-wonderland-hub.lovable.app";
+const BREVO_GATEWAY_URL = "https://connector-gateway.lovable.dev/brevo";
+const BREVO_API_URL = "https://api.brevo.com/v3";
+const REQUEST_TIMEOUT_MS = 12_000;
 
 function listIdFor(source: BrevoSubscribeInput["source"]): number {
   const env = process.env.BREVO_LIST_ID_QUIZ_GATE ?? process.env.BREVO_LIST_ID ?? "1";
@@ -72,6 +75,54 @@ function escapeHTML(s: string): string {
   return s.replace(/[&<>"']/g, (c) =>
     c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === '"' ? "&quot;" : "&#39;",
   );
+}
+
+function brevoHeaders(apiKey: string): HeadersInit {
+  const lovableApiKey = process.env.LOVABLE_API_KEY;
+  if (lovableApiKey && apiKey.startsWith("lovc_")) {
+    return {
+      Authorization: `Bearer ${lovableApiKey}`,
+      "X-Connection-Api-Key": apiKey,
+      "content-type": "application/json",
+      accept: "application/json",
+    };
+  }
+  return { "api-key": apiKey, "content-type": "application/json", accept: "application/json" };
+}
+
+async function attemptBrevoPost(path: string, body: unknown, apiKey: string): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const lovableApiKey = process.env.LOVABLE_API_KEY;
+  const useConnectorGateway = Boolean(lovableApiKey && apiKey.startsWith("lovc_"));
+  const url = useConnectorGateway ? `${BREVO_GATEWAY_URL}${path}` : `${BREVO_API_URL}${path}`;
+
+  try {
+    return await fetch(url, {
+      method: "POST",
+      headers: brevoHeaders(apiKey),
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function postBrevo(path: string, body: unknown, apiKey: string): Promise<Response> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      const response = await attemptBrevoPost(path, body, apiKey);
+      if (response.status !== 429 && response.status < 500) return response;
+      if (attempt === 1) return response;
+    } catch (err) {
+      lastError = err;
+      if (attempt === 1) throw err;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+  }
+  throw lastError instanceof Error ? lastError : new Error("Brevo request failed");
 }
 
 function welcomeHTML(input: BrevoSubscribeInput) {
@@ -157,16 +208,16 @@ export async function runBrevoSubscribe(data: BrevoSubscribeInput): Promise<Subs
   };
 
   try {
-    const upsertRes = await fetch("https://api.brevo.com/v3/contacts", {
-      method: "POST",
-      headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({
+    const upsertRes = await postBrevo(
+      "/contacts",
+      {
         email: data.email,
         attributes,
         listIds: [listIdFor(data.source)],
         updateEnabled: true,
-      }),
-    });
+      },
+      apiKey,
+    );
     const txt = await upsertRes.text();
     let json: unknown = null;
     try { json = txt ? JSON.parse(txt) : null; } catch { /* ignore */ }
@@ -205,15 +256,24 @@ export async function runBrevoSubscribe(data: BrevoSubscribeInput): Promise<Subs
       sendBody.htmlContent = html;
       sendBody.textContent = text;
     }
-    const sendRes = await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
-      headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify(sendBody),
-    });
+    const sendRes = await postBrevo("/smtp/email", sendBody, apiKey);
     welcomeSent = sendRes.ok;
     if (!sendRes.ok) {
       const errTxt = await sendRes.text();
       console.error("brevo welcome send failed", sendRes.status, errTxt);
+      if (Number.isFinite(templateId) && templateId > 0) {
+        const { subject, html, text } = welcomeHTML({ ...data, watchMatchURL: reportURL });
+        const fallbackRes = await postBrevo(
+          "/smtp/email",
+          { ...sendBody, templateId: undefined, params: undefined, subject, htmlContent: html, textContent: text },
+          apiKey,
+        );
+        welcomeSent = fallbackRes.ok;
+        if (!fallbackRes.ok) {
+          const fallbackTxt = await fallbackRes.text();
+          console.error("brevo fallback welcome send failed", fallbackRes.status, fallbackTxt);
+        }
+      }
     }
   } catch (err) {
     console.error("brevo welcome send exception", err);

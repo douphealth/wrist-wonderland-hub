@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, FileDown, Loader2, Mail, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { subscribeLead } from "@/lib/brevo.functions";
 import { getUTM } from "@/lib/utm";
 
 export interface EmailGateProps {
@@ -58,8 +56,6 @@ export default function EmailGate({
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
-  const subscribe = useServerFn(subscribeLead);
-
   useEffect(() => {
     if (!open) {
       setDone(false);
@@ -105,44 +101,40 @@ export default function EmailGate({
         utm: getUTM(),
       };
 
-      // Try the typed server function first. If the published worker has a
-      // stale registry (returns 500 / "function info not found") we silently
-      // fall back to the public REST route so the user is never blocked.
       let res: { success: boolean; welcomeSent?: boolean; error?: string } | null = null;
       try {
-        res = await subscribe({ data: payload });
-      } catch (fnErr) {
-        console.warn("subscribeLead server fn failed, falling back to REST", fnErr);
-      }
-      if (!res || !res.success) {
-        try {
-          const rest = await fetch("/api/public/subscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          if (rest.ok) {
-            res = await rest.json();
-          } else {
-            console.warn("REST fallback failed", rest.status);
-          }
-        } catch (restErr) {
-          console.warn("REST fallback exception", restErr);
+        const rest = await fetch("/api/public/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (rest.ok) {
+          res = await rest.json();
+        } else {
+          console.warn("Subscribe request failed", rest.status);
         }
+      } catch (restErr) {
+        console.warn("Subscribe request exception", restErr);
       }
 
       // SOTA UX: even if the email service is temporarily unreachable, do
-      // not punish the user. Mark them as captured locally and unlock the
-      // download — they still get their PDF, and we surface a soft notice.
-      if (!res || !res.success) {
-        toast.message("We saved your request — your PDF is downloading now.", {
-          description: "Email delivery is briefly unavailable; we'll send the full report shortly.",
+      // not punish the user. Unlock the download, but only remember the lead
+      // locally after the Day-0 email is actually accepted for sending.
+      if (!res?.success) {
+        toast.message("Your PDF is unlocking now.", {
+          description: "Email delivery was not confirmed. Please submit again in a minute so we can resend it.",
+        });
+      } else if (!res.welcomeSent) {
+        toast.message("Your PDF is unlocking now.", {
+          description: "Your email was saved, but delivery was not confirmed yet. Try again if it does not arrive.",
         });
       }
-      try {
-        localStorage.setItem(STORAGE_KEY, trimmed);
-      } catch {
-        /* ignore */
+      if (res?.welcomeSent) {
+        try {
+          localStorage.setItem(STORAGE_KEY, trimmed);
+        } catch {
+          /* ignore */
+        }
       }
       try {
         (window as unknown as { dataLayer?: Array<Record<string, unknown>> }).dataLayer?.push({
@@ -155,16 +147,17 @@ export default function EmailGate({
       } catch {
         /* ignore */
       }
-      setDone(true);
+      if (res?.welcomeSent) {
+        setDone(true);
+      }
       setTimeout(() => onUnlock(), 1100);
     } catch (err) {
       console.error(err);
       // Last-resort safety net: still let the user proceed to their PDF.
-      try { localStorage.setItem(STORAGE_KEY, trimmed); } catch { /* ignore */ }
       toast.message("We couldn't reach the email service — unlocking your PDF anyway.", {
         description: "Try again in a minute and we'll send the full report to your inbox.",
       });
-      setDone(true);
+      setDone(false);
       setTimeout(() => onUnlock(), 900);
     } finally {
       setLoading(false);
