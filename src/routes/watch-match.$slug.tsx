@@ -22,6 +22,7 @@ import { pickGuides } from "@/lib/featured-guides";
 import { getRelevantGutfPosts } from "@/lib/gearuptofit-posts.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import AffiliateDisclosure from "@/components/AffiliateDisclosure";
 import {
   Accordion,
   AccordionContent,
@@ -532,6 +533,7 @@ function WatchMatchResult() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 md:space-y-8">
+        <AffiliateDisclosure variant="banner" />
         {/* #1 Recommendation */}
         <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
           <div className="glass rounded-2xl p-5 md:p-8 border-primary/20 relative overflow-hidden">
@@ -912,6 +914,10 @@ function WatchMatchResult() {
               Take the Quiz Again
             </Button>
           </Link>
+        </div>
+
+        <div className="pt-2">
+          <AffiliateDisclosure variant="footer" />
         </div>
       </main>
 
