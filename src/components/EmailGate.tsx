@@ -141,7 +141,13 @@ export default function EmailGate({
       } catch {
         /* ignore */
       }
-      setDone(true);
+      if (res?.welcomeSent) {
+        setDone(true);
+      } else {
+        toast.message("Your PDF is unlocking now.", {
+          description: "If the email does not arrive in a few minutes, submit once more and we’ll resend it.",
+        });
+      }
       setTimeout(() => onUnlock(), 1100);
     } catch (err) {
       console.error(err);
@@ -150,7 +156,7 @@ export default function EmailGate({
       toast.message("We couldn't reach the email service — unlocking your PDF anyway.", {
         description: "Try again in a minute and we'll send the full report to your inbox.",
       });
-      setDone(true);
+      setDone(false);
       setTimeout(() => onUnlock(), 900);
     } finally {
       setLoading(false);
