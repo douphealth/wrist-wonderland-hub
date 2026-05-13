@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, Watch, Battery, HeartPulse, ChevronDown } from "lucide-react";
+import { ArrowRight, Watch, Battery, HeartPulse, ChevronDown, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/hero-watches.jpg";
 
@@ -36,14 +36,18 @@ export default function QuizHero({ onStart }: QuizHeroProps) {
           </div>
           <span className="text-xs font-bold uppercase tracking-[0.2em]">WatchMatch AI</span>
         </div>
-        <a
-          href="https://gearuptofit.com/about-us/"
+        <motion.a
+          href="https://gearuptofit.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-muted-foreground hover:text-primary transition-colors"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full glass border border-primary/20 text-[10px] md:text-xs font-semibold uppercase tracking-[0.18em] text-foreground/90 hover:text-primary hover:border-primary/50 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.5)] transition-all"
+          aria-label="Return to GearUpToFit homepage"
         >
-          by GearUpToFit
-        </a>
+          <Home className="w-3 h-3 text-primary" />
+          <span>Homepage</span>
+        </motion.a>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-4 relative z-10 pb-12">
