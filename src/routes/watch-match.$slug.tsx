@@ -13,6 +13,7 @@ import { generateRecommendation } from "@/lib/recommendation-engine";
 import { scoreWatches, buildSetup } from "@/lib/scoring-engine";
 import { WATCH_DB_LAST_UPDATED } from "@/lib/watch-database";
 import { amazonURL, categoryImage, gutfURL } from "@/lib/amazon";
+import { useAmazonHost } from "@/hooks/use-amazon-host";
 import { getAmazonProducts, type AmazonProduct } from "@/lib/amazon-product.functions";
 import catSmartwatch from "@/assets/cat-smartwatch.jpg";
 import catSportwatch from "@/assets/cat-sportwatch.jpg";
@@ -343,8 +344,9 @@ function WatchMatchResult() {
 
   const resolvedImage = (w: Parameters<typeof categoryImage>[0] & { brand: string; model: string }) =>
     productFor(w)?.image || categoryImage(w);
+  const amazonHost = useAmazonHost();
   const resolvedUrl = (w: Parameters<typeof amazonURL>[0]) =>
-    productFor(w)?.url || amazonURL(w);
+    productFor(w)?.url || amazonURL(w, { host: amazonHost });
 
   const amazonLoading = amazonQuery.isLoading;
 
@@ -1004,7 +1006,7 @@ function RotationCard({
       <a
         href={buyUrl || amazonURL(item.watch)}
         target="_blank"
-        rel="noopener noreferrer"
+        rel="sponsored nofollow noopener noreferrer"
         aria-busy={loading}
         className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:underline ${loading ? "opacity-70" : ""}`}
       >
