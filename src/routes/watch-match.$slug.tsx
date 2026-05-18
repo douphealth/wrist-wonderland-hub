@@ -434,6 +434,15 @@ function WatchMatchResult() {
                 <Share2 className="w-4 h-4" />
               )}
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleEmailPartner}
+              title="Email this to my partner"
+              className="hover:bg-primary/10"
+            >
+              <Mail className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </header>
