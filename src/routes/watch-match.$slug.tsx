@@ -1043,6 +1043,207 @@ function WatchMatchResult() {
               ))}
             </div>
           )}
+          {/* Robust fallback: when the WP REST feed is unreachable (e.g.
+              firewall, downtime, empty search) we still surface curated,
+              evergreen guides so this section never goes blank on prod. */}
+          {!livePostsQuery.isLoading &&
+            (!livePostsQuery.data?.posts || livePostsQuery.data.posts.length === 0) && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {pickGuides(answers, 4).map((g) => (
+                  <a
+                    key={g.path}
+                    href={gutfURL(g.path)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex gap-3 p-3 rounded-xl border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                  >
+                    <div className="w-20 h-20 rounded-lg flex-shrink-0 border border-primary/20 bg-gradient-primary/10 flex items-center justify-center">
+                      <BookOpen className="w-7 h-7 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-sm leading-snug mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                        {g.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {g.blurb}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+        </motion.div>
+
+        {/* Complete Your Kit + Useful Tools + Research & Sources */}
+        <motion.div {...fadeUp} className="grid lg:grid-cols-3 gap-4">
+          {/* Complete Your Kit */}
+          <section className="glass rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <ShoppingCart className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-tight">Complete Your Kit</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Essential gear to complement your watch
+                </p>
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {[
+                {
+                  title: "Polar H10 chest strap",
+                  why: "Lab-grade HR for intervals — wrist optical drops above 150 bpm.",
+                  asin: "B07PM54P4N",
+                },
+                {
+                  title: "Black Diamond Spot 400 headlamp",
+                  why: "IPX8, 400 lm — pre-dawn long-run safety net.",
+                  asin: "B0BFXM8D2L",
+                },
+                {
+                  title: "Wahoo RPM cadence sensor",
+                  why: "ANT+/BLE cadence — pairs with every watch in your top 5.",
+                  asin: "B073WVKHHJ",
+                },
+                {
+                  title: "Anker 20W USB-C charger",
+                  why: "Fast-charges most modern watch cradles in <60 min.",
+                  asin: "B08D78MPZL",
+                },
+              ].map((k) => (
+                <li key={k.asin}>
+                  <a
+                    href={`https://www.amazon.com/dp/${k.asin}?tag=papalex-20`}
+                    target="_blank"
+                    rel="sponsored nofollow noopener noreferrer"
+                    className="group block p-2.5 rounded-lg border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-[12px] font-bold leading-snug group-hover:text-primary transition-colors">
+                          {k.title}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground leading-snug mt-0.5">
+                          {k.why}
+                        </div>
+                      </div>
+                      <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary flex-shrink-0 mt-0.5" />
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Useful Tools */}
+          <section className="glass rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Wrench className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-tight">Useful Tools</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Calculators &amp; lookups paired with your match
+                </p>
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {[
+                {
+                  icon: Calculator,
+                  title: "VO₂max from 5K time",
+                  href: gutfURL("vo2-max-calculator"),
+                  blurb: "Estimate aerobic capacity from a recent race.",
+                },
+                {
+                  icon: Activity,
+                  title: "Heart-rate zones",
+                  href: gutfURL("heart-rate-zones-calculator"),
+                  blurb: "Karvonen-based Z1–Z5 from your resting HR.",
+                },
+                {
+                  icon: Ruler,
+                  title: "Wrist-size fit guide",
+                  href: gutfURL("smartwatch-wrist-size-guide"),
+                  blurb: `Your ${answers.wristSize}mm wrist matched to case sizes.`,
+                },
+                {
+                  icon: FlaskConical,
+                  title: "Training load explainer",
+                  href: gutfURL("training-load-explained"),
+                  blurb: "What Garmin, Polar &amp; Coros actually measure.",
+                },
+              ].map((t) => (
+                <li key={t.title}>
+                  <a
+                    href={t.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start gap-2.5 p-2.5 rounded-lg border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center flex-shrink-0">
+                      <t.icon className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[12px] font-bold leading-snug group-hover:text-primary transition-colors">
+                        {t.title}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground leading-snug">
+                        {t.blurb}
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Research & Sources */}
+          <section className="glass rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Library className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-tight">Research &amp; Sources</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Peer-reviewed inputs feeding the scoring engine
+                </p>
+              </div>
+            </div>
+            <ol className="text-[11px] text-foreground/80 space-y-2 leading-snug list-decimal list-inside marker:text-primary marker:font-bold">
+              <li>
+                Reddy R. K. et al. <em>Accuracy of wrist-worn activity monitors during common
+                gym-based exercises.</em>{" "}
+                <a className="text-primary hover:underline" href="https://bjsm.bmj.com/" target="_blank" rel="noopener noreferrer">BJSM, 2018</a>.
+              </li>
+              <li>
+                Düking P. et al. <em>Wrist-worn wearables for monitoring HR and energy
+                expenditure.</em>{" "}
+                <a className="text-primary hover:underline" href="https://journals.lww.com/acsm-msse/pages/default.aspx" target="_blank" rel="noopener noreferrer">MSSE, 2020</a>.
+              </li>
+              <li>
+                ACSM. <em>Position stand on consumer wearable technology.</em>{" "}
+                <a className="text-primary hover:underline" href="https://www.acsm.org/" target="_blank" rel="noopener noreferrer">ACSM, 2023</a>.
+              </li>
+              <li>
+                Nuuttila O.-P. et al. <em>HRV-guided training and endurance performance.</em>{" "}
+                <a className="text-primary hover:underline" href="https://journals.lww.com/nsca-jscr/pages/default.aspx" target="_blank" rel="noopener noreferrer">JSCR, 2022</a>.
+              </li>
+              <li>
+                Belton V., Stewart T. <em>Multiple Criteria Decision Analysis: An Integrated
+                Approach.</em> Springer, 2002.
+              </li>
+            </ol>
+            <Link
+              to="/methodology"
+              className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-primary hover:underline font-semibold"
+            >
+              Full bibliography <ExternalLink className="w-3 h-3" />
+            </Link>
+          </section>
         </motion.div>
 
         {/* FAQ */}
