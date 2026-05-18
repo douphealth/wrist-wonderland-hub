@@ -594,14 +594,16 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setTextColor(C.red[0], C.red[1], C.red[2]);
     doc.setFont("helvetica", "bold");
     doc.text("WHY IT MATCHES YOU", M + 8, reasonsY);
-    setup.primary.reasons.slice(0, 2).forEach((r, i) => {
+    let rcur = reasonsY + 4;
+    setup.primary.reasons.slice(0, 2).forEach((r) => {
       doc.setFillColor(C.red[0], C.red[1], C.red[2]);
-      doc.circle(M + 10, reasonsY + 4 + i * 4.5, 0.9, "F");
+      doc.circle(M + 10, rcur, 0.9, "F");
       doc.setFontSize(6);
       doc.setTextColor(C.text[0], C.text[1], C.text[2]);
       doc.setFont("helvetica", "normal");
-      const rLines = doc.splitTextToSize(r, hlMax);
-      doc.text(rLines[0], M + 14, reasonsY + 4 + i * 4.5 + 1);
+      const rLines = (doc.splitTextToSize(r, hlMax) as string[]).slice(0, 2);
+      doc.text(rLines, M + 14, rcur + 1);
+      rcur += rLines.length * 3.4 + 1.6;
     });
 
     // Amazon CTA below image
