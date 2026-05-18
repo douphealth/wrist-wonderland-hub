@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { watchDatabase } from "@/lib/watch-database";
+import { featuredCompareSlugs } from "@/lib/compare";
 
 const BASE_URL = "https://wrist-wonderland-hub.lovable.app";
 
@@ -24,6 +25,14 @@ export const Route = createFileRoute("/sitemap.xml")({
             path: `/watch/${encodeURIComponent(w.id)}`,
             changefreq: "weekly",
             priority: "0.8",
+            lastmod: today,
+          });
+        }
+        for (const slug of featuredCompareSlugs()) {
+          entries.push({
+            path: `/compare/${slug}`,
+            changefreq: "monthly",
+            priority: "0.7",
             lastmod: today,
           });
         }

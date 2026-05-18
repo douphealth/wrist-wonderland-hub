@@ -15,6 +15,7 @@ import { Route as BrevoRunningShoeSequenceRouteImport } from './routes/brevo-run
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as WatchMatchSlugRouteImport } from './routes/watch-match.$slug'
+import { Route as CompareSlugRouteImport } from './routes/compare.$slug'
 import { Route as ApiPublicSubscribeRouteImport } from './routes/api/public/subscribe'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -48,6 +49,11 @@ const WatchMatchSlugRoute = WatchMatchSlugRouteImport.update({
   path: '/watch-match/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompareSlugRoute = CompareSlugRouteImport.update({
+  id: '/compare/$slug',
+  path: '/compare/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSubscribeRoute = ApiPublicSubscribeRouteImport.update({
   id: '/api/public/subscribe',
   path: '/api/public/subscribe',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/public/subscribe': typeof ApiPublicSubscribeRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/public/subscribe': typeof ApiPublicSubscribeRoute
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/public/subscribe': typeof ApiPublicSubscribeRoute
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
     | '/sitemap.xml'
+    | '/compare/$slug'
     | '/watch-match/$slug'
     | '/watch/$slug'
     | '/api/public/subscribe'
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
     | '/sitemap.xml'
+    | '/compare/$slug'
     | '/watch-match/$slug'
     | '/watch/$slug'
     | '/api/public/subscribe'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
     | '/sitemap.xml'
+    | '/compare/$slug'
     | '/watch-match/$slug'
     | '/watch/$slug'
     | '/api/public/subscribe'
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   BrevoRunningShoeSequenceRoute: typeof BrevoRunningShoeSequenceRoute
   BrevoSmartwatchSequenceRoute: typeof BrevoSmartwatchSequenceRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  CompareSlugRoute: typeof CompareSlugRoute
   WatchMatchSlugRoute: typeof WatchMatchSlugRoute
   WatchSlugRoute: typeof WatchSlugRoute
   ApiPublicSubscribeRoute: typeof ApiPublicSubscribeRoute
@@ -166,6 +179,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchMatchSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compare/$slug': {
+      id: '/compare/$slug'
+      path: '/compare/$slug'
+      fullPath: '/compare/$slug'
+      preLoaderRoute: typeof CompareSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/subscribe': {
       id: '/api/public/subscribe'
       path: '/api/public/subscribe'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   BrevoRunningShoeSequenceRoute: BrevoRunningShoeSequenceRoute,
   BrevoSmartwatchSequenceRoute: BrevoSmartwatchSequenceRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  CompareSlugRoute: CompareSlugRoute,
   WatchMatchSlugRoute: WatchMatchSlugRoute,
   WatchSlugRoute: WatchSlugRoute,
   ApiPublicSubscribeRoute: ApiPublicSubscribeRoute,
