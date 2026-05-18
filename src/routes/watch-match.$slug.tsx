@@ -195,49 +195,66 @@ function WatchMatchResult() {
   const [downloadAfterUnlock, setDownloadAfterUnlock] = useState(false);
   const autoOpenedRef = useRef(false);
 
+  // Per-result dismissal key — each unique quiz outcome (slug) gets one
+  // chance to prompt, instead of a single dismiss silencing every future
+  // result in the same tab. Subscribed users are never re-prompted.
+  const dismissKey = `wm_gate_dismissed_v2:${slug}`;
+
   // Hydrate subscribed flag and auto-open the EmailGate after a soft dwell
-  // (10s) on first visit. We never re-open for users who've already opted in
-  // or dismissed the modal in this session.
+  // (6s) on first visit to this specific result.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (hasSubscribed()) {
       setSubscribed(true);
       return;
     }
-    const dismissed = sessionStorage.getItem("wm_gate_dismissed_v1");
-    if (dismissed) return;
+    if (sessionStorage.getItem(dismissKey)) return;
     const t = window.setTimeout(() => {
       if (autoOpenedRef.current) return;
       autoOpenedRef.current = true;
       setGateOpen(true);
-    }, 10000);
+    }, 6000);
     return () => window.clearTimeout(t);
-  }, []);
+  }, [dismissKey]);
 
-  // Exit-intent: pointer leaving the top of the viewport (desktop only).
+  // Exit-intent on desktop + scroll-depth (55%) on mobile/touch, so we
+  // never miss a high-intent reader who scrolled past the fold but never
+  // moves the cursor toward the address bar.
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (subscribed) return;
-    if (sessionStorage.getItem("wm_gate_dismissed_v1")) return;
-    const onLeave = (e: MouseEvent) => {
-      if (e.clientY > 0) return;
+    if (sessionStorage.getItem(dismissKey)) return;
+    const trigger = () => {
       if (autoOpenedRef.current) return;
       autoOpenedRef.current = true;
       setGateOpen(true);
     };
+    const onLeave = (e: MouseEvent) => {
+      if (e.clientY > 0) return;
+      trigger();
+    };
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (max <= 0) return;
+      if (window.scrollY / max >= 0.55) trigger();
+    };
     document.addEventListener("mouseout", onLeave);
-    return () => document.removeEventListener("mouseout", onLeave);
-  }, [subscribed]);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      document.removeEventListener("mouseout", onLeave);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [subscribed, dismissKey]);
 
   const closeGate = useCallback(() => {
     setGateOpen(false);
     setDownloadAfterUnlock(false);
     try {
-      sessionStorage.setItem("wm_gate_dismissed_v1", "1");
+      sessionStorage.setItem(dismissKey, "1");
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [dismissKey]);
 
   const onUnlock = useCallback(() => {
     setSubscribed(true);
