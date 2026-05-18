@@ -224,20 +224,18 @@ export const getAmazonProducts = createServerFn({ method: "POST" })
     const settled = await Promise.allSettled(
       data.watches.map((w) =>
         (async () => {
-          // Short-circuit: when the curated database supplies a verified image
-          // (and ideally an ASIN) we skip SerpApi entirely to conserve quota.
-          if (w.imageURL) {
-            return {
-              url: w.asin ? dpUrl(w.asin) : searchUrl(w.brand, w.model),
-              image: w.imageURL,
-              asin: w.asin ?? null,
-              title: null,
-              source: "fallback" as const,
-            };
-          }
-          return resolveProduct(w.brand, w.model, w.asin).catch(() =>
-            safeFallback(w.brand, w.model, w.asin),
+          // ALWAYS resolve the buy URL live via SerpApi so the link points to
+          // the current #1 Amazon organic result — never a stale hard-coded
+          // /dp/{ASIN} that may 404 or land on a different product.
+          // Curated imageURL is kept as a visual fallback only.
+          const resolved = await resolveProduct(w.brand, w.model, w.asin).catch(
+            () => safeFallback(w.brand, w.model, w.asin),
           );
+          return {
+            ...resolved,
+            // Prefer the live SerpApi image; fall back to curated image; finally null.
+            image: resolved.image ?? w.imageURL ?? null,
+          };
         })(),
       ),
     );
