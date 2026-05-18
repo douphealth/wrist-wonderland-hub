@@ -16,8 +16,64 @@ import { Brain } from "lucide-react";
 import { captureUTM } from "@/lib/utm";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
+  head: () => {
+    const SITE = "https://wrist-wonderland-hub.lovable.app";
+    const webAppLd = {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      name: "WatchMatch AI",
+      url: SITE,
+      applicationCategory: "LifestyleApplication",
+      operatingSystem: "Any",
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+      description:
+        "Free AI-powered smartwatch and fitness band finder. 9 expert questions, one perfect match across Apple, Garmin, Samsung, Google, Fitbit, Polar, Coros and Suunto.",
+      publisher: {
+        "@type": "Organization",
+        name: "GearUpToFit",
+        url: "https://gearuptofit.com",
+      },
+    };
+    const faqLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "How does WatchMatch AI pick a watch for me?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "WatchMatch runs your 9 quiz answers through a deterministic scoring engine that weighs phone compatibility, battery, GPS, training features, case size and budget against our hand-verified watch database. The same answers always produce the same ranking — no random shuffling and no commission-weighted nudges.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Is the quiz really free?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Yes. The quiz, the match, the PDF report and the comparison pages are all free forever. We earn a small commission only if you choose to buy through one of our Amazon links — at no extra cost to you.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Do you favour brands that pay you more?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "No. The scoring engine is commission-blind: affiliate links are added after the score is computed. If the #1 match earns us nothing and the #4 match earns us $30, the #1 match still wins.",
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Which brands do you cover?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Apple, Garmin, Samsung, Google Pixel, Fitbit, Polar, Coros, Suunto, Amazfit and more — every flagship and most popular mid-range models.",
+          },
+        },
+      ],
+    };
+    return {
+      meta: [
       { title: "WatchMatch AI — Find Your Perfect Smartwatch in 2 Minutes" },
       {
         name: "description",
@@ -34,7 +90,12 @@ export const Route = createFileRoute("/")({
     links: [
       { rel: "canonical", href: "https://gearuptofit.com/watch-match/" },
     ],
-  }),
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(webAppLd) },
+        { type: "application/ld+json", children: JSON.stringify(faqLd) },
+      ],
+    };
+  },
   component: Index,
 });
 
