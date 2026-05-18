@@ -554,7 +554,7 @@ function WatchMatchResult() {
                 <ShieldCheck className="w-3 h-3 text-primary" />
                 Database verified · {WATCH_DB_LAST_UPDATED}
               </p>
-              <ReportExpiryBadge slug={params.slug} />
+              <ReportExpiryBadge slug={slug} />
             </div>
           </div>
 
