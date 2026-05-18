@@ -793,7 +793,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
   // ════════════════════════════════════════════════════
   doc.addPage();
   addHeader(doc, logoData);
-  y = 24;
+  y = 30;
 
   doc.setFontSize(18);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
@@ -924,7 +924,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
   // ════════════════════════════════════════════════════
   doc.addPage();
   addHeader(doc, logoData);
-  y = 24;
+  y = 30;
 
   doc.setFontSize(18);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
