@@ -18,6 +18,9 @@ export interface GutfPost {
 
 const WP_BASE = "https://gearuptofit.com/wp-json/wp/v2";
 const TTL_MS = 30 * 60 * 1000;
+const FETCH_TIMEOUT_MS = 8000;
+const MAX_ATTEMPTS = 3;
+const RETRY_BASE_MS = 300; // 300ms, 600ms, 1.2s
 
 interface CacheEntry {
   ts: number;
@@ -37,6 +40,61 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+/**
+ * Fetch with explicit timeout + bounded exponential backoff. Logs the full
+ * failure surface (status, attempt, latency, response body snippet) so the
+ * production "Latest From GearUpToFit" outage is diagnosable from Worker logs
+ * without needing to repro locally.
+ */
+async function fetchWithRetry(url: string, label: string): Promise<Response> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(new Error("timeout")), FETCH_TIMEOUT_MS);
+    const started = Date.now();
+    try {
+      const res = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "WatchMatchAI/1.0 (+https://wrist-wonderland-hub.lovable.app)",
+        },
+        signal: ctrl.signal,
+      });
+      const ms = Date.now() - started;
+      if (res.ok) {
+        console.log(`[gutf-feed] ok attempt=${attempt} label=${label} ${res.status} ${ms}ms`);
+        return res;
+      }
+      const body = await res.text().catch(() => "");
+      const snippet = body.slice(0, 240).replace(/\s+/g, " ");
+      console.error(
+        `[gutf-feed] http_error attempt=${attempt}/${MAX_ATTEMPTS} label=${label} status=${res.status} ${res.statusText} ${ms}ms body=${snippet}`,
+      );
+      lastErr = new Error(`WP API ${res.status} ${res.statusText}`);
+      // 4xx (except 429) won't get better with retries — fail fast.
+      if (res.status >= 400 && res.status < 500 && res.status !== 429) throw lastErr;
+    } catch (err) {
+      const ms = Date.now() - started;
+      const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+      console.error(
+        `[gutf-feed] fetch_error attempt=${attempt}/${MAX_ATTEMPTS} label=${label} ${ms}ms ${reason}`,
+      );
+      lastErr = err;
+    } finally {
+      clearTimeout(t);
+    }
+    if (attempt < MAX_ATTEMPTS) {
+      const wait = RETRY_BASE_MS * 2 ** (attempt - 1) + Math.floor(Math.random() * 150);
+      await sleep(wait);
+    }
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("WP fetch failed");
+}
+
 async function fetchPosts(search: string, perPage: number): Promise<GutfPost[]> {
   const key = `${search}::${perPage}`;
   const hit = cache.get(key);
@@ -49,10 +107,7 @@ async function fetchPosts(search: string, perPage: number): Promise<GutfPost[]> 
   if (search) url.searchParams.set("search", search);
   url.searchParams.set("orderby", "relevance");
 
-  const res = await fetch(url.toString(), {
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) throw new Error(`WP API ${res.status}`);
+  const res = await fetchWithRetry(url.toString(), `search="${search}"`);
   const raw = (await res.json()) as Array<Record<string, unknown>>;
 
   const posts: GutfPost[] = raw.map((p) => {
@@ -84,25 +139,56 @@ export const getRelevantGutfPosts = createServerFn({ method: "GET" })
     })
   )
   .handler(async ({ data }) => {
-    try {
-      // Try keyword search first; fall back to recent smartwatch posts.
-      const queries = data.keywords.length > 0 ? data.keywords : ["smartwatch"];
-      const all = new Map<number, GutfPost>();
-      for (const q of queries.slice(0, 4)) {
+    const started = Date.now();
+    const queries = data.keywords.length > 0 ? data.keywords : ["smartwatch"];
+    const all = new Map<number, GutfPost>();
+    const failures: string[] = [];
+
+    // Try every keyword independently — a single bad query (e.g. a rare brand
+    // name not indexed by WP search) must not nuke the whole feed.
+    for (const q of queries.slice(0, 4)) {
+      try {
         const posts = await fetchPosts(q, data.limit);
         for (const p of posts) all.set(p.id, p);
         if (all.size >= data.limit * 2) break;
+      } catch (err) {
+        failures.push(`${q}: ${err instanceof Error ? err.message : String(err)}`);
       }
-      if (all.size === 0) {
-        const fallback = await fetchPosts("watch", data.limit);
-        for (const p of fallback) all.set(p.id, p);
-      }
-      return {
-        posts: Array.from(all.values()).slice(0, data.limit),
-        error: null as string | null,
-      };
-    } catch (err) {
-      console.error("gearuptofit posts fetch failed", err);
-      return { posts: [] as GutfPost[], error: "Could not load latest GearUpToFit guides." };
     }
+
+    // Always-on safety net — guarantees the section never renders empty
+    // unless WP itself is fully down.
+    if (all.size === 0) {
+      for (const q of ["smartwatch", "watch", "fitness tracker"]) {
+        try {
+          const fallback = await fetchPosts(q, data.limit);
+          for (const p of fallback) all.set(p.id, p);
+          if (all.size > 0) break;
+        } catch (err) {
+          failures.push(`fallback ${q}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+    }
+
+    const ms = Date.now() - started;
+    if (all.size === 0) {
+      console.error(
+        `[gutf-feed] zero_posts total=${ms}ms failures=${failures.join(" | ")}`,
+      );
+      return {
+        posts: [] as GutfPost[],
+        error: "Could not load latest GearUpToFit guides.",
+        diagnostics: { ms, failures },
+      };
+    }
+    if (failures.length > 0) {
+      console.warn(
+        `[gutf-feed] partial total=${ms}ms got=${all.size} failures=${failures.join(" | ")}`,
+      );
+    }
+    return {
+      posts: Array.from(all.values()).slice(0, data.limit),
+      error: null as string | null,
+      diagnostics: { ms, failures },
+    };
   });
