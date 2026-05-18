@@ -18,6 +18,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as WatchMatchSlugRouteImport } from './routes/watch-match.$slug'
 import { Route as CompareSlugRouteImport } from './routes/compare.$slug'
+import { Route as ApiPublicVitalsRouteImport } from './routes/api/public/vitals'
 import { Route as ApiPublicSubscribeRouteImport } from './routes/api/public/subscribe'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -66,6 +67,11 @@ const CompareSlugRoute = CompareSlugRouteImport.update({
   path: '/compare/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicVitalsRoute = ApiPublicVitalsRouteImport.update({
+  id: '/api/public/vitals',
+  path: '/api/public/vitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSubscribeRoute = ApiPublicSubscribeRouteImport.update({
   id: '/api/public/subscribe',
   path: '/api/public/subscribe',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/public/subscribe': typeof ApiPublicSubscribeRoute
+  '/api/public/vitals': typeof ApiPublicVitalsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/public/subscribe': typeof ApiPublicSubscribeRoute
+  '/api/public/vitals': typeof ApiPublicVitalsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -108,6 +116,7 @@ export interface FileRoutesById {
   '/watch-match/$slug': typeof WatchMatchSlugRoute
   '/watch/$slug': typeof WatchSlugRoute
   '/api/public/subscribe': typeof ApiPublicSubscribeRoute
+  '/api/public/vitals': typeof ApiPublicVitalsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/watch-match/$slug'
     | '/watch/$slug'
     | '/api/public/subscribe'
+    | '/api/public/vitals'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -134,6 +144,7 @@ export interface FileRouteTypes {
     | '/watch-match/$slug'
     | '/watch/$slug'
     | '/api/public/subscribe'
+    | '/api/public/vitals'
   id:
     | '__root__'
     | '/'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/watch-match/$slug'
     | '/watch/$slug'
     | '/api/public/subscribe'
+    | '/api/public/vitals'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -159,6 +171,7 @@ export interface RootRouteChildren {
   WatchMatchSlugRoute: typeof WatchMatchSlugRoute
   WatchSlugRoute: typeof WatchSlugRoute
   ApiPublicSubscribeRoute: typeof ApiPublicSubscribeRoute
+  ApiPublicVitalsRoute: typeof ApiPublicVitalsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CompareSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/vitals': {
+      id: '/api/public/vitals'
+      path: '/api/public/vitals'
+      fullPath: '/api/public/vitals'
+      preLoaderRoute: typeof ApiPublicVitalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/subscribe': {
       id: '/api/public/subscribe'
       path: '/api/public/subscribe'
@@ -247,6 +267,7 @@ const rootRouteChildren: RootRouteChildren = {
   WatchMatchSlugRoute: WatchMatchSlugRoute,
   WatchSlugRoute: WatchSlugRoute,
   ApiPublicSubscribeRoute: ApiPublicSubscribeRoute,
+  ApiPublicVitalsRoute: ApiPublicVitalsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
