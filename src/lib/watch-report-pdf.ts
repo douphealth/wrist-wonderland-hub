@@ -718,15 +718,16 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     const descLines = doc.splitTextToSize(item.desc, textRight - (M + 8));
     doc.text(descLines[0], M + 8, cy + 33);
 
-    item.s.reasons.slice(0, 2).forEach((h, hi) => {
-      const hy = cy + 39 + hi * 4.8;
+    let hcur = cy + 39;
+    item.s.reasons.slice(0, 2).forEach((h) => {
       doc.setFillColor(item.color[0], item.color[1], item.color[2]);
-      doc.circle(M + 10, hy, 0.8, "F");
+      doc.circle(M + 10, hcur, 0.8, "F");
       doc.setFontSize(6);
       doc.setTextColor(C.text[0], C.text[1], C.text[2]);
       doc.setFont("helvetica", "normal");
-      const hLines = doc.splitTextToSize(h, textRight - (M + 14));
-      doc.text(hLines[0], M + 14, hy + 1);
+      const hLines = (doc.splitTextToSize(h, textRight - (M + 14)) as string[]).slice(0, 2);
+      doc.text(hLines, M + 14, hcur + 1);
+      hcur += hLines.length * 3.2 + 1.4;
     });
 
     const btnW = imgW;
