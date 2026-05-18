@@ -74,13 +74,17 @@ function labelValue(doc: jsPDF, x: number, y: number, label: string, value: stri
   doc.setTextColor(C.textMuted[0], C.textMuted[1], C.textMuted[2]);
   doc.setFont("helvetica", "bold");
   doc.text(label, x, y, { charSpace: 0.4 } as any);
-  doc.setFontSize(7.5);
+  // Auto-fit: shrink font progressively, then wrap to a second line if still needed.
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
   doc.setFont("helvetica", "bold");
-  let val = value;
-  while (doc.getTextWidth(val) > maxW && val.length > 4) val = val.slice(0, -1);
-  if (val !== value) val = val.slice(0, -1) + "…";
-  doc.text(val, x, y + 4.5);
+  let fs = 7.5;
+  doc.setFontSize(fs);
+  while (doc.getTextWidth(value) > maxW && fs > 6) {
+    fs -= 0.25;
+    doc.setFontSize(fs);
+  }
+  const lines = doc.splitTextToSize(value, maxW) as string[];
+  doc.text(lines.slice(0, 2), x, y + 4.5);
 }
 
 function link(doc: jsPDF, x: number, y: number, text: string, url: string, size = 6.5) {
