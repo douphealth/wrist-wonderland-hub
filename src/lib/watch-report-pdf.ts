@@ -35,6 +35,23 @@ const PH = 297;
 const M = 16;
 const CW = PW - M * 2;
 
+/**
+ * Strip combining marks (e.g. Garmin "fēnix" → "fenix") and other
+ * non-Latin-1 codepoints that jsPDF's default Helvetica can't render —
+ * those would otherwise drop out and leave visible gaps like "f nix".
+ */
+function asciiSafe(s: string): string {
+  if (!s) return s;
+  return s
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u2022/g, "*")
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
+}
+
 // ─── Primitives ───
 function rr(doc: jsPDF, x: number, y: number, w: number, h: number, r: number, fill: RGB, stroke?: RGB) {
   doc.setFillColor(fill[0], fill[1], fill[2]);
@@ -91,9 +108,12 @@ function link(doc: jsPDF, x: number, y: number, text: string, url: string, size 
   doc.setFontSize(size);
   doc.setTextColor(C.red[0], C.red[1], C.red[2]);
   doc.setFont("helvetica", "bold");
-  doc.textWithLink(text, x, y, { url });
-  const tw = doc.getTextWidth(text);
-  drawLinkIcon(doc, x + tw + 1.2, y - size * 0.32, size * 0.32);
+  const safe = asciiSafe(text);
+  doc.textWithLink(safe, x, y, { url });
+  const tw = doc.getTextWidth(safe);
+  // Lift the icon so its bottom sits comfortably above the text baseline,
+  // clear of descenders and not visually "underlining" the link.
+  drawLinkIcon(doc, x + tw + 1.2, y - size * 0.62, size * 0.32);
 }
 
 function drawRadar(doc: jsPDF, cx: number, cy: number, radius: number, data: { axis: string; value: number }[]) {
@@ -315,7 +335,7 @@ function drawWatchFrame(
   doc.text(brand.toUpperCase(), x + w / 2, y + h / 2 - 1, { align: "center" });
   doc.setFontSize(7);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
-  const lines = doc.splitTextToSize(model, w - 4);
+    const lines = doc.splitTextToSize(asciiSafe(model), w - 4);
   doc.text(lines.slice(0, 2), x + w / 2, y + h / 2 + 3, { align: "center" });
 }
 
@@ -567,7 +587,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setFontSize(13);
     doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
     doc.setFont("helvetica", "bold");
-    const nameLines = doc.splitTextToSize(`${w.brand} ${w.model}`, leftRight - (M + 23));
+    const nameLines = doc.splitTextToSize(asciiSafe(`${w.brand} ${w.model}`), leftRight - (M + 23));
     doc.text(nameLines.slice(0, 2), M + 23, y + 16);
 
     doc.setFontSize(10);
@@ -642,7 +662,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
   // ════════════════════════════════════════════════════
   doc.addPage();
   addHeader(doc, logoData);
-  y = 24;
+  y = 30;
 
   doc.setFontSize(18);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
@@ -699,7 +719,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setFontSize(13);
     doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
     doc.setFont("helvetica", "bold");
-    const nameLines = doc.splitTextToSize(`${item.s.watch.brand} ${item.s.watch.model}`, textRight - (M + 8));
+    const nameLines = doc.splitTextToSize(asciiSafe(`${item.s.watch.brand} ${item.s.watch.model}`), textRight - (M + 8));
     doc.text(nameLines.slice(0, 2), M + 8, cy + 18);
 
     doc.setFontSize(9);
@@ -773,7 +793,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
   // ════════════════════════════════════════════════════
   doc.addPage();
   addHeader(doc, logoData);
-  y = 24;
+  y = 30;
 
   doc.setFontSize(18);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
@@ -810,12 +830,12 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setFontSize(5);
     doc.setTextColor(C.textMuted[0], C.textMuted[1], C.textMuted[2]);
     doc.setFont("helvetica", "bold");
-    doc.text(s.watch.brand.toUpperCase(), tx, ry + 5, { charSpace: 0.4 } as any);
+    doc.text(asciiSafe(s.watch.brand.toUpperCase()), tx, ry + 5, { charSpace: 0.4 } as any);
 
     doc.setFontSize(9);
     doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
     doc.setFont("helvetica", "bold");
-    const name = doc.splitTextToSize(s.watch.model, 70);
+    const name = doc.splitTextToSize(asciiSafe(s.watch.model), 70);
     doc.text(name[0], tx, ry + 10);
 
     doc.setFontSize(5.5);
@@ -904,7 +924,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
   // ════════════════════════════════════════════════════
   doc.addPage();
   addHeader(doc, logoData);
-  y = 24;
+  y = 30;
 
   doc.setFontSize(18);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
