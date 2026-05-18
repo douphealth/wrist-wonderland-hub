@@ -4,7 +4,7 @@ import { z } from "zod";
 export const AMAZON_TAG = "papalex-20";
 
 export interface AmazonProduct {
-  /** Direct product URL (https://www.amazon.com/dp/ASIN?tag=...). Falls back to a tagged search URL. */
+  /** Direct product URL (https://www.amazon.com/dp/ASIN?tag=...). Falls back to a tagged search URL only when no ASIN exists. */
   url: string;
   /** Product image URL from Amazon CDN. May be null when SerpApi is unavailable. */
   image: string | null;
@@ -12,7 +12,7 @@ export interface AmazonProduct {
   asin: string | null;
   /** Verified product title from Amazon. */
   title: string | null;
-  /** "serpapi" when fetched live, "fallback" when we used the curated ASIN, "search" when nothing matched. */
+  /** "serpapi" when fetched live, "fallback" when we used the curated ASIN, "search" when no exact ASIN exists. */
   source: "serpapi" | "fallback" | "search";
 }
 
@@ -114,8 +114,8 @@ function cacheKey(brand: string, model: string) {
  *
  * Cascade:
  *   1. SerpApi `engine=amazon` (best — real product page + product image)
- *   2. Curated ASIN from the watch database (deep-link, category image fallback)
- *   3. Tagged Amazon search URL (always lands on a live results page)
+  *   2. Curated ASIN from the watch database (direct deep-link, never search)
+  *   3. Tagged Amazon search URL only when no exact ASIN exists
  */
 async function resolveProduct(
   brand: string,
@@ -165,16 +165,14 @@ async function resolveProduct(
     }
   }
 
-  // SerpApi unavailable / no match → tagged Amazon SEARCH URL. We deliberately
-  // never deep-link to a curated /dp/{ASIN} as a fallback: a stale ASIN sends
-  // the buyer to a 404 or wrong product. A search URL ALWAYS lands on a live
-  // page where the brand+model is the first organic hit (with our tag).
+  // SerpApi unavailable / no match → use curated ASIN if present so the Buy
+  // button still goes directly to the exact product page, not Amazon search.
   const product: AmazonProduct = {
-    url: searchUrl(brand, model),
+    url: fallbackAsin ? dpUrl(fallbackAsin) : searchUrl(brand, model),
     image: null,
     asin: fallbackAsin ?? null,
     title: null,
-    source: "search",
+    source: fallbackAsin ? "fallback" : "search",
   };
   cache.set(key, { ts: Date.now(), product });
   return product;
