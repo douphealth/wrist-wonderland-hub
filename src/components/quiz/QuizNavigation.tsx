@@ -19,7 +19,12 @@ export default function QuizNavigation({ onBack, onNext, canProceed, isLast, hid
         </Button>
 
         {hideNext && !isLast ? (
-          <span className="text-xs text-muted-foreground italic">Tap an option to continue →</span>
+          <span
+            className="text-xs text-muted-foreground italic"
+            aria-live="polite"
+          >
+            Tap an option to continue →
+          </span>
         ) : (
           <motion.div whileHover={{ scale: canProceed ? 1.03 : 1 }} whileTap={{ scale: canProceed ? 0.97 : 1 }}>
             <Button

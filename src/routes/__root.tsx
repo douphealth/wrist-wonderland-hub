@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
 import { useEffect } from "react";
 import { installWebVitals } from "@/lib/vitals";
+import { MotionConfig } from "framer-motion";
 
 function NotFoundComponent() {
   return (
@@ -120,6 +121,12 @@ function RootShell({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-primary-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+        >
+          Skip to main content
+        </a>
         {children}
         <Scripts />
       </body>
@@ -136,8 +143,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster />
+      <MotionConfig reducedMotion="user">
+        <div id="main">
+          <Outlet />
+        </div>
+        <Toaster />
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

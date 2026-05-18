@@ -12,6 +12,9 @@ const stepIcons = ["🎯", "📱", "⌚", "🔋", "✨", "📏", "🎨", "🏷�
 export default function QuizProgress({ currentStep, totalSteps, progress }: Props) {
   return (
     <div className="sticky top-0 z-20 glass-strong px-4 py-3 md:py-4">
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        Question {currentStep + 1} of {totalSteps}: {stepLabels[currentStep] || "Quiz"}
+      </div>
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
@@ -36,7 +39,14 @@ export default function QuizProgress({ currentStep, totalSteps, progress }: Prop
             {currentStep + 1} / {totalSteps}
           </span>
         </div>
-        <div className="relative h-2 bg-secondary/50 rounded-full overflow-hidden">
+        <div
+          className="relative h-2 bg-secondary/50 rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(progress)}
+          aria-label="Quiz progress"
+        >
           <motion.div
             className="absolute inset-y-0 left-0 bg-gradient-primary rounded-full"
             initial={false}
