@@ -979,6 +979,43 @@ function WatchMatchResult() {
         watchMatchURL={publicReportURL}
         source="quiz_gate"
       />
+
+      {/* Sticky buy bar — collapses on small screens, dismissible via scroll-to-top */}
+      <div className="fixed bottom-0 inset-x-0 z-30 px-3 pb-3 pointer-events-none">
+        <div className="max-w-5xl mx-auto pointer-events-auto">
+          <div className="glass-strong rounded-2xl border border-primary/30 shadow-2xl flex items-center gap-3 p-2.5 pl-3">
+            <div className="hidden sm:flex w-10 h-10 rounded-lg overflow-hidden border border-border/40 flex-shrink-0 bg-card-elevated">
+              <img
+                src={resolvedImage(primary.watch)}
+                alt=""
+                loading="lazy"
+                className="w-full h-full object-contain p-1"
+                onError={(e) => handleImgError(e, primary.watch)}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground leading-none mb-0.5">
+                #1 Match · {primary.matchPercent}%
+              </div>
+              <div className="text-sm font-bold truncate leading-tight">
+                {primary.watch.brand} {primary.watch.model}
+              </div>
+            </div>
+            <a
+              href={resolvedUrl(primary.watch)}
+              target="_blank"
+              rel="sponsored nofollow noopener noreferrer"
+              aria-busy={amazonLoading}
+              className={`inline-flex items-center gap-1.5 bg-gradient-primary glow-primary-sm hover:opacity-90 px-3 sm:px-4 h-10 rounded-xl font-bold uppercase tracking-wider text-[11px] text-primary-foreground transition-all flex-shrink-0 ${amazonLoading ? "animate-pulse" : ""}`}
+            >
+              <ShoppingCart className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Buy on Amazon</span>
+              <span className="sm:hidden">Buy</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
