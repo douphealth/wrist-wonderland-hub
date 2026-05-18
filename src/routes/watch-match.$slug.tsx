@@ -56,6 +56,12 @@ import {
   BookOpen,
   ShieldCheck,
   Mail,
+  Wrench,
+  FlaskConical,
+  Calculator,
+  Library,
+  Ruler,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import EmailGate, { hasSubscribed } from "@/components/EmailGate";
