@@ -100,8 +100,8 @@ function pickBest(results: SerpApiResult[] | undefined, brand: string, model: st
   return scored[0]?.result;
 }
 
-function cacheKey(brand: string, model: string) {
-  return `${brand}::${model}`.toLowerCase();
+function cacheKey(brand: string, model: string, asin?: string) {
+  return `${brand}::${model}::${asin ?? "no-asin"}`.toLowerCase();
 }
 
 /**
@@ -122,7 +122,7 @@ async function resolveProduct(
   model: string,
   fallbackAsin?: string,
 ): Promise<AmazonProduct> {
-  const key = cacheKey(brand, model);
+  const key = cacheKey(brand, model, fallbackAsin);
   const hit = cache.get(key);
   if (hit && Date.now() - hit.ts < TTL_MS) return hit.product;
 
