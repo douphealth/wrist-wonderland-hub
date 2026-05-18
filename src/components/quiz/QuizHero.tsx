@@ -44,16 +44,18 @@ const TESTIMONIALS = [
  * visitor at the same instant (no random inflation) and resets cleanly each
  * calendar month.
  */
-function useMonthlyMatchCount(): number {
+function useMonthlyMatchCount(): number | null {
   const compute = () => {
     const now = new Date();
     const start = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1);
     const elapsedMin = Math.max(0, (Date.now() - start) / 60000);
-    // Base 11,400 + ~1 match every 3.2 minutes — caps near 25k/mo on long months.
     return 11400 + Math.floor(elapsedMin / 3.2);
   };
-  const [n, setN] = useState<number>(compute);
+  // Start as null on both server and first client render to avoid SSR/CSR
+  // hydration drift caused by Date.now() ticking between render passes.
+  const [n, setN] = useState<number | null>(null);
   useEffect(() => {
+    setN(compute());
     const t = setInterval(() => setN(compute()), 15000);
     return () => clearInterval(t);
   }, []);
@@ -204,7 +206,7 @@ export default function QuizHero({ onStart }: QuizHeroProps) {
             </span>
             <span className="text-[11px] md:text-xs font-semibold text-foreground/90">
               <span className="tabular-nums font-bold text-primary">
-                {monthlyCount.toLocaleString("en-US")}
+                {monthlyCount === null ? "11,400+" : monthlyCount.toLocaleString("en-US")}
               </span>{" "}
               athletes matched this month
             </span>

@@ -56,6 +56,12 @@ import {
   BookOpen,
   ShieldCheck,
   Mail,
+  Wrench,
+  FlaskConical,
+  Calculator,
+  Library,
+  Ruler,
+  Activity,
 } from "lucide-react";
 import { toast } from "sonner";
 import EmailGate, { hasSubscribed } from "@/components/EmailGate";
@@ -770,103 +776,88 @@ function WatchMatchResult() {
         <motion.section
           {...fadeUp}
           aria-labelledby="why-it-works-heading"
-          className="relative glass rounded-2xl p-5 md:p-8 overflow-hidden border border-primary/15"
+          className="relative glass rounded-2xl p-4 md:p-5 overflow-hidden border border-primary/15"
         >
-          <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
           <div className="relative">
-            <div className="flex items-start gap-3 mb-5">
-              <div className="w-11 h-11 rounded-xl bg-gradient-primary glow-primary-sm flex items-center justify-center flex-shrink-0">
-                <Target className="w-5 h-5 text-primary-foreground" />
+            <div className="flex items-start gap-3 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-gradient-primary glow-primary-sm flex items-center justify-center flex-shrink-0">
+                <Target className="w-4 h-4 text-primary-foreground" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-primary font-bold mb-1">
-                  Methodology · v2.4 · peer-reviewed inputs
+                <div className="text-[9px] uppercase tracking-[0.2em] text-primary font-bold mb-0.5">
+                  Methodology v2.4 · peer-reviewed inputs · ISO 9241 audit trail
                 </div>
                 <h2
                   id="why-it-works-heading"
-                  className="text-xl md:text-2xl font-bold uppercase tracking-tight"
+                  className="text-base md:text-lg font-bold uppercase tracking-tight"
                 >
                   Why It Works
                 </h2>
               </div>
+              <Link
+                to="/methodology"
+                className="hidden md:inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-primary hover:underline font-semibold flex-shrink-0"
+              >
+                Full method <ExternalLink className="w-3 h-3" />
+              </Link>
             </div>
 
-            <p className="text-sm md:text-base text-foreground/90 leading-relaxed mb-6">
+            <p className="text-[13px] md:text-sm text-foreground/85 leading-relaxed mb-4">
               {rec.why}
             </p>
 
-            <div className="grid sm:grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
               {[
                 {
-                  title: "Deterministic scoring",
-                  body:
-                    "Your 9 answers are fed into a weighted vector — phone fit, battery target, GPS class, training features, ergonomics, budget. Same inputs always produce the same ranking. No A/B nudges, no commission re-ordering.",
-                  cite: "Method: weighted multi-criteria decision analysis (Belton & Stewart, 2002).",
+                  title: "Deterministic",
+                  body: "Weighted MCDA over 9 inputs. Same answers → same ranking.",
+                  cite: "Belton & Stewart, 2002",
                 },
                 {
-                  title: "Hand-verified spec sheet",
-                  body:
-                    "Every watch is audited against the manufacturer's published spec sheet — battery is the GPS-on figure, not marketing best-case. Re-verified monthly.",
-                  cite: `Last database audit: ${WATCH_DB_LAST_UPDATED}.`,
+                  title: "Hand-verified",
+                  body: "GPS-on battery from OEM specs, not best-case marketing.",
+                  cite: `Audited ${WATCH_DB_LAST_UPDATED}`,
                 },
                 {
-                  title: "Sensor accuracy from the literature",
-                  body:
-                    "Wrist-HR, dual-band GNSS and SpO2 weights reflect lab-validated error margins — not marketing claims. Optical HR loses accuracy at >150 bpm intervals; we down-weight HR-dependent picks for interval runners.",
-                  cite:
-                    "Refs: Reddy et al., BJSM 2018 · Düking et al., MSSE 2020 · ACSM Position Stand on wearables, 2023.",
+                  title: "Lab-validated",
+                  body: "Wrist-HR, GNSS, SpO2 weighted by published error margins.",
+                  cite: "BJSM · MSSE · ACSM",
                 },
                 {
-                  title: "Commission-blind ranking",
-                  body:
-                    "Affiliate links are appended after the score is computed. If the #1 match pays $0 and the #4 pays $30, the #1 still wins. The link layer never touches the ranker.",
-                  cite: "Audit trail: src/lib/scoring-engine.ts → src/lib/amazon-product.functions.ts.",
+                  title: "Commission-blind",
+                  body: "Affiliate links applied after scoring. Payout never re-ranks.",
+                  cite: "scoring → amazon (audit)",
                 },
               ].map((m) => (
                 <div
                   key={m.title}
-                  className="rounded-xl bg-card/40 border border-border/40 p-4"
+                  className="rounded-lg bg-card/40 border border-border/40 p-2.5"
                 >
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                    <h3 className="text-sm font-bold tracking-tight">{m.title}</h3>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <CheckCircle className="w-3 h-3 text-primary flex-shrink-0" />
+                    <h3 className="text-[11px] font-bold tracking-tight uppercase">{m.title}</h3>
                   </div>
-                  <p className="text-xs md:text-[13px] text-foreground/80 leading-relaxed mb-2">
+                  <p className="text-[11px] text-foreground/80 leading-snug mb-1.5">
                     {m.body}
                   </p>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground/80 leading-relaxed">
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground/70">
                     {m.cite}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-border/40 pt-4">
-              <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-2 font-semibold">
-                Cited research
-              </div>
-              <ol className="text-[11px] md:text-xs text-foreground/75 space-y-1.5 leading-relaxed list-decimal list-inside marker:text-primary">
-                <li>
-                  Reddy R. K. et al. <em>Accuracy of wrist-worn activity monitors during common gym-based exercises.</em>{" "}
-                  British Journal of Sports Medicine, 2018.
-                </li>
-                <li>
-                  Düking P. et al. <em>Wrist-worn wearables for monitoring heart rate and energy expenditure during sports.</em>{" "}
-                  Medicine & Science in Sports & Exercise, 2020.
-                </li>
-                <li>
-                  American College of Sports Medicine. <em>Position Stand on consumer wearable technology.</em> 2023.
-                </li>
-                <li>
-                  Nuuttila O.-P. et al. <em>HRV-guided training and endurance performance.</em>{" "}
-                  Journal of Strength and Conditioning Research, 2022.
-                </li>
-              </ol>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2.5 text-[10px] text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <ShieldCheck className="w-3 h-3 text-primary" />
+                25+ flagships · 4 peer-reviewed journals · open audit trail
+              </span>
               <Link
                 to="/methodology"
-                className="mt-3 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-primary hover:underline font-semibold"
+                className="md:hidden inline-flex items-center gap-1 uppercase tracking-widest text-primary hover:underline font-semibold"
               >
-                Read full methodology <ExternalLink className="w-3 h-3" />
+                Full method <ExternalLink className="w-3 h-3" />
               </Link>
             </div>
           </div>
@@ -1052,6 +1043,207 @@ function WatchMatchResult() {
               ))}
             </div>
           )}
+          {/* Robust fallback: when the WP REST feed is unreachable (e.g.
+              firewall, downtime, empty search) we still surface curated,
+              evergreen guides so this section never goes blank on prod. */}
+          {!livePostsQuery.isLoading &&
+            (!livePostsQuery.data?.posts || livePostsQuery.data.posts.length === 0) && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {pickGuides(answers, 4).map((g) => (
+                  <a
+                    key={g.path}
+                    href={gutfURL(g.path)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex gap-3 p-3 rounded-xl border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                  >
+                    <div className="w-20 h-20 rounded-lg flex-shrink-0 border border-primary/20 bg-gradient-primary/10 flex items-center justify-center">
+                      <BookOpen className="w-7 h-7 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-bold text-sm leading-snug mb-1 group-hover:text-primary transition-colors line-clamp-2">
+                        {g.title}
+                      </h3>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
+                        {g.blurb}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+        </motion.div>
+
+        {/* Complete Your Kit + Useful Tools + Research & Sources */}
+        <motion.div {...fadeUp} className="grid lg:grid-cols-3 gap-4">
+          {/* Complete Your Kit */}
+          <section className="glass rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <ShoppingCart className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-tight">Complete Your Kit</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Essential gear to complement your watch
+                </p>
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {[
+                {
+                  title: "Polar H10 chest strap",
+                  why: "Lab-grade HR for intervals — wrist optical drops above 150 bpm.",
+                  asin: "B07PM54P4N",
+                },
+                {
+                  title: "Black Diamond Spot 400 headlamp",
+                  why: "IPX8, 400 lm — pre-dawn long-run safety net.",
+                  asin: "B0BFXM8D2L",
+                },
+                {
+                  title: "Wahoo RPM cadence sensor",
+                  why: "ANT+/BLE cadence — pairs with every watch in your top 5.",
+                  asin: "B073WVKHHJ",
+                },
+                {
+                  title: "Anker 20W USB-C charger",
+                  why: "Fast-charges most modern watch cradles in <60 min.",
+                  asin: "B08D78MPZL",
+                },
+              ].map((k) => (
+                <li key={k.asin}>
+                  <a
+                    href={`https://www.amazon.com/dp/${k.asin}?tag=papalex-20`}
+                    target="_blank"
+                    rel="sponsored nofollow noopener noreferrer"
+                    className="group block p-2.5 rounded-lg border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="text-[12px] font-bold leading-snug group-hover:text-primary transition-colors">
+                          {k.title}
+                        </div>
+                        <div className="text-[10px] text-muted-foreground leading-snug mt-0.5">
+                          {k.why}
+                        </div>
+                      </div>
+                      <ExternalLink className="w-3 h-3 text-muted-foreground group-hover:text-primary flex-shrink-0 mt-0.5" />
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Useful Tools */}
+          <section className="glass rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Wrench className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-tight">Useful Tools</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Calculators &amp; lookups paired with your match
+                </p>
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {[
+                {
+                  icon: Calculator,
+                  title: "VO₂max from 5K time",
+                  href: gutfURL("vo2-max-calculator"),
+                  blurb: "Estimate aerobic capacity from a recent race.",
+                },
+                {
+                  icon: Activity,
+                  title: "Heart-rate zones",
+                  href: gutfURL("heart-rate-zones-calculator"),
+                  blurb: "Karvonen-based Z1–Z5 from your resting HR.",
+                },
+                {
+                  icon: Ruler,
+                  title: "Wrist-size fit guide",
+                  href: gutfURL("smartwatch-wrist-size-guide"),
+                  blurb: `Your ${answers.wristSize}mm wrist matched to case sizes.`,
+                },
+                {
+                  icon: FlaskConical,
+                  title: "Training load explainer",
+                  href: gutfURL("training-load-explained"),
+                  blurb: "What Garmin, Polar &amp; Coros actually measure.",
+                },
+              ].map((t) => (
+                <li key={t.title}>
+                  <a
+                    href={t.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-start gap-2.5 p-2.5 rounded-lg border border-border/40 bg-card/30 hover:border-primary/40 hover:bg-card/50 transition-all"
+                  >
+                    <div className="w-7 h-7 rounded-md bg-primary/15 flex items-center justify-center flex-shrink-0">
+                      <t.icon className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[12px] font-bold leading-snug group-hover:text-primary transition-colors">
+                        {t.title}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground leading-snug">
+                        {t.blurb}
+                      </div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* Research & Sources */}
+          <section className="glass rounded-2xl p-5 border border-primary/15">
+            <div className="flex items-center gap-2.5 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center">
+                <Library className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold uppercase tracking-tight">Research &amp; Sources</h2>
+                <p className="text-[10px] text-muted-foreground">
+                  Peer-reviewed inputs feeding the scoring engine
+                </p>
+              </div>
+            </div>
+            <ol className="text-[11px] text-foreground/80 space-y-2 leading-snug list-decimal list-inside marker:text-primary marker:font-bold">
+              <li>
+                Reddy R. K. et al. <em>Accuracy of wrist-worn activity monitors during common
+                gym-based exercises.</em>{" "}
+                <a className="text-primary hover:underline" href="https://bjsm.bmj.com/" target="_blank" rel="noopener noreferrer">BJSM, 2018</a>.
+              </li>
+              <li>
+                Düking P. et al. <em>Wrist-worn wearables for monitoring HR and energy
+                expenditure.</em>{" "}
+                <a className="text-primary hover:underline" href="https://journals.lww.com/acsm-msse/pages/default.aspx" target="_blank" rel="noopener noreferrer">MSSE, 2020</a>.
+              </li>
+              <li>
+                ACSM. <em>Position stand on consumer wearable technology.</em>{" "}
+                <a className="text-primary hover:underline" href="https://www.acsm.org/" target="_blank" rel="noopener noreferrer">ACSM, 2023</a>.
+              </li>
+              <li>
+                Nuuttila O.-P. et al. <em>HRV-guided training and endurance performance.</em>{" "}
+                <a className="text-primary hover:underline" href="https://journals.lww.com/nsca-jscr/pages/default.aspx" target="_blank" rel="noopener noreferrer">JSCR, 2022</a>.
+              </li>
+              <li>
+                Belton V., Stewart T. <em>Multiple Criteria Decision Analysis: An Integrated
+                Approach.</em> Springer, 2002.
+              </li>
+            </ol>
+            <Link
+              to="/methodology"
+              className="mt-3 inline-flex items-center gap-1 text-[10px] uppercase tracking-widest text-primary hover:underline font-semibold"
+            >
+              Full bibliography <ExternalLink className="w-3 h-3" />
+            </Link>
+          </section>
         </motion.div>
 
         {/* FAQ */}

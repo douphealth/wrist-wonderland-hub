@@ -233,8 +233,10 @@ export const getAmazonProducts = createServerFn({ method: "POST" })
           );
           return {
             ...resolved,
-            // Prefer the live SerpApi image; fall back to curated image; finally null.
-            image: resolved.image ?? w.imageURL ?? null,
+            // Prefer the hand-curated, verified product image when present —
+            // it's tied to the exact ASIN we ship. Fall back to SerpApi's
+            // live first-result image only when no curation exists.
+            image: w.imageURL ?? resolved.image ?? null,
           };
         })(),
       ),

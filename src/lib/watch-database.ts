@@ -1109,7 +1109,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged", "sporty"],
     highlight: "Sapphire-glass adventure watch with full offline topo maps, ECG and MIL-STD-810H durability.",
-    asin: "B0CXHJRWN9"
+    asin: "B0CXHYN48P",
+    imageURL: "https://www.polar.com/img/cms/a146ca8a4ad4f6c7bf05937bb7bb85a5ad305e3a-2000x2000-600.png"
   },
   {
     id: "polar-ignite-3",
