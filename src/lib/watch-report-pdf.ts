@@ -749,7 +749,9 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     y = sectionTitle(doc, y, "TRAINING & USAGE EMPHASIS");
     rec.emphasis.forEach((tip, i) => {
       if (y > PH - 28) return;
-      rr(doc, M + 3, y - 2, CW - 6, 9, 2, i % 2 === 0 ? C.bg : C.cardBg);
+      const tl = (doc.splitTextToSize(tip, CW - 22) as string[]).slice(0, 2);
+      const blockH = Math.max(9, tl.length * 3.6 + 4);
+      rr(doc, M + 3, y - 2, CW - 6, blockH, 2, i % 2 === 0 ? C.bg : C.cardBg);
       rr(doc, M + 5, y - 1, 6, 6, 3, C.red);
       doc.setFontSize(5.5);
       doc.setTextColor(255, 255, 255);
@@ -758,9 +760,8 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
       doc.setFontSize(6.5);
       doc.setTextColor(C.text[0], C.text[1], C.text[2]);
       doc.setFont("helvetica", "normal");
-      const tl = doc.splitTextToSize(tip, CW - 22);
-      doc.text(tl[0], M + 14, y + 3);
-      y += 10;
+      doc.text(tl, M + 14, y + 3);
+      y += blockH + 1;
     });
     link(doc, M, y, "Free Custom Running Plan on GearUpToFit", gutfURL("running/custom-running-plan-free/"), 6);
   }
