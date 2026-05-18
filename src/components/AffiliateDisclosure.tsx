@@ -1,4 +1,5 @@
 import { Info } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 
 interface AffiliateDisclosureProps {
   variant?: "inline" | "banner" | "footer";
@@ -27,13 +28,36 @@ const AffiliateDisclosure = ({ variant = "inline" }: AffiliateDisclosureProps) =
 
   if (variant === "footer") {
     return (
-      <p className="text-[11px] text-muted-foreground leading-relaxed max-w-2xl mx-auto text-center">
-        <span className="font-semibold">Affiliate disclosure:</span>{" "}
-        As an Amazon Associate, GearUpToFit earns from qualifying purchases.
-        Some links are affiliate links — at no extra cost to you. We never
-        recommend a watch based on commission; rankings are produced by our
-        deterministic scoring engine.
-      </p>
+      <div className="max-w-2xl mx-auto text-center space-y-2">
+        <p className="text-[11px] text-muted-foreground leading-relaxed">
+          <span className="font-semibold">Affiliate disclosure:</span>{" "}
+          As an Amazon Associate, GearUpToFit earns from qualifying purchases.
+          Some links are affiliate links — at no extra cost to you. We never
+          recommend a watch based on commission; rankings are produced by our{" "}
+          <Link to="/methodology" className="underline hover:text-primary">
+            deterministic scoring engine
+          </Link>
+          .
+        </p>
+        <p className="text-[11px] text-muted-foreground/80">
+          <Link to="/affiliate-disclosure" className="underline hover:text-primary">
+            Full disclosure
+          </Link>
+          <span className="px-1.5">·</span>
+          <Link to="/methodology" className="underline hover:text-primary">
+            Methodology
+          </Link>
+          <span className="px-1.5">·</span>
+          <a
+            href="https://gearuptofit.com/privacy-policy/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-primary"
+          >
+            Privacy
+          </a>
+        </p>
+      </div>
     );
   }
 
