@@ -165,23 +165,14 @@ async function resolveProduct(
     }
   }
 
-  // Fallback to curated ASIN if available.
-  if (fallbackAsin) {
-    const product: AmazonProduct = {
-      url: searchUrl(brand, model),
-      image: null,
-      asin: fallbackAsin,
-      title: null,
-      source: "fallback",
-    };
-    cache.set(key, { ts: Date.now(), product });
-    return product;
-  }
-
+  // SerpApi unavailable / no match → tagged Amazon SEARCH URL. We deliberately
+  // never deep-link to a curated /dp/{ASIN} as a fallback: a stale ASIN sends
+  // the buyer to a 404 or wrong product. A search URL ALWAYS lands on a live
+  // page where the brand+model is the first organic hit (with our tag).
   const product: AmazonProduct = {
     url: searchUrl(brand, model),
     image: null,
-    asin: null,
+    asin: fallbackAsin ?? null,
     title: null,
     source: "search",
   };
