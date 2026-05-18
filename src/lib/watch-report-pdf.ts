@@ -587,7 +587,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setFontSize(13);
     doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
     doc.setFont("helvetica", "bold");
-    const nameLines = doc.splitTextToSize(`${w.brand} ${w.model}`, leftRight - (M + 23));
+    const nameLines = doc.splitTextToSize(asciiSafe(`${w.brand} ${w.model}`), leftRight - (M + 23));
     doc.text(nameLines.slice(0, 2), M + 23, y + 16);
 
     doc.setFontSize(10);
@@ -719,7 +719,7 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setFontSize(13);
     doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
     doc.setFont("helvetica", "bold");
-    const nameLines = doc.splitTextToSize(`${item.s.watch.brand} ${item.s.watch.model}`, textRight - (M + 8));
+    const nameLines = doc.splitTextToSize(asciiSafe(`${item.s.watch.brand} ${item.s.watch.model}`), textRight - (M + 8));
     doc.text(nameLines.slice(0, 2), M + 8, cy + 18);
 
     doc.setFontSize(9);
@@ -830,12 +830,12 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setFontSize(5);
     doc.setTextColor(C.textMuted[0], C.textMuted[1], C.textMuted[2]);
     doc.setFont("helvetica", "bold");
-    doc.text(s.watch.brand.toUpperCase(), tx, ry + 5, { charSpace: 0.4 } as any);
+    doc.text(asciiSafe(s.watch.brand.toUpperCase()), tx, ry + 5, { charSpace: 0.4 } as any);
 
     doc.setFontSize(9);
     doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
     doc.setFont("helvetica", "bold");
-    const name = doc.splitTextToSize(s.watch.model, 70);
+    const name = doc.splitTextToSize(asciiSafe(s.watch.model), 70);
     doc.text(name[0], tx, ry + 10);
 
     doc.setFontSize(5.5);
