@@ -1358,4 +1358,4 @@ export function getWatchById(id: string): Watch | undefined {
   return watchDatabase.find((w) => w.id === id);
 }
 
-export const WATCH_DB_LAST_UPDATED = "May 2026 · 58 watches";
+export const WATCH_DB_LAST_UPDATED = "May 2026 · 67 watches";
