@@ -74,13 +74,17 @@ function labelValue(doc: jsPDF, x: number, y: number, label: string, value: stri
   doc.setTextColor(C.textMuted[0], C.textMuted[1], C.textMuted[2]);
   doc.setFont("helvetica", "bold");
   doc.text(label, x, y, { charSpace: 0.4 } as any);
-  doc.setFontSize(7.5);
+  // Auto-fit: shrink font progressively, then wrap to a second line if still needed.
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
   doc.setFont("helvetica", "bold");
-  let val = value;
-  while (doc.getTextWidth(val) > maxW && val.length > 4) val = val.slice(0, -1);
-  if (val !== value) val = val.slice(0, -1) + "…";
-  doc.text(val, x, y + 4.5);
+  let fs = 7.5;
+  doc.setFontSize(fs);
+  while (doc.getTextWidth(value) > maxW && fs > 6) {
+    fs -= 0.25;
+    doc.setFontSize(fs);
+  }
+  const lines = doc.splitTextToSize(value, maxW) as string[];
+  doc.text(lines.slice(0, 2), x, y + 4.5);
 }
 
 function link(doc: jsPDF, x: number, y: number, text: string, url: string, size = 6.5) {
@@ -495,14 +499,16 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     { l: "STYLE", v: answers.style ? answers.style[0].toUpperCase() + answers.style.slice(1) : "—" },
     { l: "SENSOR PRIORITY", v: rec.profile.sensorPriority },
   ];
-  const colW = 42;
+  // 2-column stats grid sized to leave room for the radar on the right.
+  const colW = 56;
+  const cardW = colW - 4;
   stats.forEach((s, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
     const sx = M + 4 + col * colW;
     const sy = y + row * 13;
-    rr(doc, sx, sy, colW - 4, 11, 2, C.bg);
-    labelValue(doc, sx + 3, sy + 3, s.l, s.v);
+    rr(doc, sx, sy, cardW, 12, 2, C.bg);
+    labelValue(doc, sx + 3, sy + 3, s.l, s.v, cardW - 6);
   });
 
   try { drawRadar(doc, M + CW - 36, y + 24, 22, radarData); } catch { /* ignore */ }
@@ -588,14 +594,16 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     doc.setTextColor(C.red[0], C.red[1], C.red[2]);
     doc.setFont("helvetica", "bold");
     doc.text("WHY IT MATCHES YOU", M + 8, reasonsY);
-    setup.primary.reasons.slice(0, 2).forEach((r, i) => {
+    let rcur = reasonsY + 4;
+    setup.primary.reasons.slice(0, 2).forEach((r) => {
       doc.setFillColor(C.red[0], C.red[1], C.red[2]);
-      doc.circle(M + 10, reasonsY + 4 + i * 4.5, 0.9, "F");
+      doc.circle(M + 10, rcur, 0.9, "F");
       doc.setFontSize(6);
       doc.setTextColor(C.text[0], C.text[1], C.text[2]);
       doc.setFont("helvetica", "normal");
-      const rLines = doc.splitTextToSize(r, hlMax);
-      doc.text(rLines[0], M + 14, reasonsY + 4 + i * 4.5 + 1);
+      const rLines = (doc.splitTextToSize(r, hlMax) as string[]).slice(0, 2);
+      doc.text(rLines, M + 14, rcur + 1);
+      rcur += rLines.length * 3.4 + 1.6;
     });
 
     // Amazon CTA below image
@@ -710,15 +718,16 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     const descLines = doc.splitTextToSize(item.desc, textRight - (M + 8));
     doc.text(descLines[0], M + 8, cy + 33);
 
-    item.s.reasons.slice(0, 2).forEach((h, hi) => {
-      const hy = cy + 39 + hi * 4.8;
+    let hcur = cy + 39;
+    item.s.reasons.slice(0, 2).forEach((h) => {
       doc.setFillColor(item.color[0], item.color[1], item.color[2]);
-      doc.circle(M + 10, hy, 0.8, "F");
+      doc.circle(M + 10, hcur, 0.8, "F");
       doc.setFontSize(6);
       doc.setTextColor(C.text[0], C.text[1], C.text[2]);
       doc.setFont("helvetica", "normal");
-      const hLines = doc.splitTextToSize(h, textRight - (M + 14));
-      doc.text(hLines[0], M + 14, hy + 1);
+      const hLines = (doc.splitTextToSize(h, textRight - (M + 14)) as string[]).slice(0, 2);
+      doc.text(hLines, M + 14, hcur + 1);
+      hcur += hLines.length * 3.2 + 1.4;
     });
 
     const btnW = imgW;
@@ -740,7 +749,9 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     y = sectionTitle(doc, y, "TRAINING & USAGE EMPHASIS");
     rec.emphasis.forEach((tip, i) => {
       if (y > PH - 28) return;
-      rr(doc, M + 3, y - 2, CW - 6, 9, 2, i % 2 === 0 ? C.bg : C.cardBg);
+      const tl = (doc.splitTextToSize(tip, CW - 22) as string[]).slice(0, 2);
+      const blockH = Math.max(9, tl.length * 3.6 + 4);
+      rr(doc, M + 3, y - 2, CW - 6, blockH, 2, i % 2 === 0 ? C.bg : C.cardBg);
       rr(doc, M + 5, y - 1, 6, 6, 3, C.red);
       doc.setFontSize(5.5);
       doc.setTextColor(255, 255, 255);
@@ -749,9 +760,8 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
       doc.setFontSize(6.5);
       doc.setTextColor(C.text[0], C.text[1], C.text[2]);
       doc.setFont("helvetica", "normal");
-      const tl = doc.splitTextToSize(tip, CW - 22);
-      doc.text(tl[0], M + 14, y + 3);
-      y += 10;
+      doc.text(tl, M + 14, y + 3);
+      y += blockH + 1;
     });
     link(doc, M, y, "Free Custom Running Plan on GearUpToFit", gutfURL("running/custom-running-plan-free/"), 6);
   }
