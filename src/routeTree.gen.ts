@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as BrevoSmartwatchSequenceRouteImport } from './routes/brevo-smartwatch-sequence'
 import { Route as BrevoRunningShoeSequenceRouteImport } from './routes/brevo-running-shoe-sequence'
+import { Route as AffiliateDisclosureRouteImport } from './routes/affiliate-disclosure'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchSlugRouteImport } from './routes/watch.$slug'
 import { Route as WatchMatchSlugRouteImport } from './routes/watch-match.$slug'
@@ -21,6 +23,11 @@ import { Route as ApiPublicSubscribeRouteImport } from './routes/api/public/subs
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MethodologyRoute = MethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrevoSmartwatchSequenceRoute = BrevoSmartwatchSequenceRouteImport.update({
@@ -34,6 +41,11 @@ const BrevoRunningShoeSequenceRoute =
     path: '/brevo-running-shoe-sequence',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AffiliateDisclosureRoute = AffiliateDisclosureRouteImport.update({
+  id: '/affiliate-disclosure',
+  path: '/affiliate-disclosure',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -62,8 +74,10 @@ const ApiPublicSubscribeRoute = ApiPublicSubscribeRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/affiliate-disclosure': typeof AffiliateDisclosureRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
+  '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
@@ -72,8 +86,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/affiliate-disclosure': typeof AffiliateDisclosureRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
+  '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
@@ -83,8 +99,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/affiliate-disclosure': typeof AffiliateDisclosureRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
+  '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
@@ -95,8 +113,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/affiliate-disclosure'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
+    | '/methodology'
     | '/sitemap.xml'
     | '/compare/$slug'
     | '/watch-match/$slug'
@@ -105,8 +125,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/affiliate-disclosure'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
+    | '/methodology'
     | '/sitemap.xml'
     | '/compare/$slug'
     | '/watch-match/$slug'
@@ -115,8 +137,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/affiliate-disclosure'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
+    | '/methodology'
     | '/sitemap.xml'
     | '/compare/$slug'
     | '/watch-match/$slug'
@@ -126,8 +150,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AffiliateDisclosureRoute: typeof AffiliateDisclosureRoute
   BrevoRunningShoeSequenceRoute: typeof BrevoRunningShoeSequenceRoute
   BrevoSmartwatchSequenceRoute: typeof BrevoSmartwatchSequenceRoute
+  MethodologyRoute: typeof MethodologyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CompareSlugRoute: typeof CompareSlugRoute
   WatchMatchSlugRoute: typeof WatchMatchSlugRoute
@@ -144,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/methodology': {
+      id: '/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof MethodologyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/brevo-smartwatch-sequence': {
       id: '/brevo-smartwatch-sequence'
       path: '/brevo-smartwatch-sequence'
@@ -156,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/brevo-running-shoe-sequence'
       fullPath: '/brevo-running-shoe-sequence'
       preLoaderRoute: typeof BrevoRunningShoeSequenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/affiliate-disclosure': {
+      id: '/affiliate-disclosure'
+      path: '/affiliate-disclosure'
+      fullPath: '/affiliate-disclosure'
+      preLoaderRoute: typeof AffiliateDisclosureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -198,8 +238,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AffiliateDisclosureRoute: AffiliateDisclosureRoute,
   BrevoRunningShoeSequenceRoute: BrevoRunningShoeSequenceRoute,
   BrevoSmartwatchSequenceRoute: BrevoSmartwatchSequenceRoute,
+  MethodologyRoute: MethodologyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CompareSlugRoute: CompareSlugRoute,
   WatchMatchSlugRoute: WatchMatchSlugRoute,
