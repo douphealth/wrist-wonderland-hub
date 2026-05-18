@@ -913,12 +913,9 @@ export const watchDatabase: Watch[] = [
     imageURL: "https://m.media-amazon.com/images/I/612VXoI9XmL._AC_SL1500_.jpg"
   },
   // ──────────────────────────────────────────────────────────────────────────
-  // Expanded 2023–2025 line-up. Entries below intentionally omit hard-coded
-  // ASIN / imageURL — `amazonURL()` always builds tagged Amazon SEARCH URLs
-  // (never a stale /dp/{ASIN} 404), and the SerpApi resolver in
-  // amazon-product.functions.ts fetches the live first-result product image
-  // at runtime. This guarantees correct affiliate attribution AND fresh,
-  // matching product imagery without manual maintenance.
+  // Expanded 2023–2025 line-up. Add verified ASIN / imageURL whenever an exact
+  // Amazon product page is confirmed. Entries without ASIN still use SerpApi to
+  // resolve a live product page; search URLs are last-resort only.
   // ──────────────────────────────────────────────────────────────────────────
   {
     id: "garmin-epix-pro-gen2-47",
