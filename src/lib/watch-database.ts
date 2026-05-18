@@ -1044,7 +1044,9 @@ export const watchDatabase: Watch[] = [
     bestFor: ["multisport", "outdoor", "running"],
     phones: ["both"],
     style: ["rugged", "sporty"],
-    highlight: "Titanium dual-frequency GPS with offline global maps — 30-day battery for ultra athletes."
+    highlight: "Titanium dual-frequency GPS with offline global maps — 30-day battery for ultra athletes.",
+    asin: "B0BKTS4SGG",
+    imageURL: "https://m.media-amazon.com/images/I/61k3xyQMb5L._AC_SL1200_.jpg"
   },
   {
     id: "coros-pace-2",
