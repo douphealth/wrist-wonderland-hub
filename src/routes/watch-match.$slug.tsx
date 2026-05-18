@@ -404,7 +404,7 @@ function WatchMatchResult() {
   };
 
   return (
-    <div className="min-h-screen pb-16 bg-gradient-dark">
+    <div className="min-h-screen pb-28 md:pb-24 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Link
