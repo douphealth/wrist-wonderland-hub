@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { watchDatabase, type Watch } from "@/lib/watch-database";
 import { amazonURL, categoryImage } from "@/lib/amazon";
 import { useAmazonHost } from "@/hooks/use-amazon-host";
+import { suggestRivals, buildCompareSlug } from "@/lib/compare";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,6 +20,7 @@ import {
   Weight,
   Smartphone,
   Calendar,
+  Swords,
 } from "lucide-react";
 
 export const Route = createFileRoute("/watch/$slug")({
@@ -228,8 +230,44 @@ function WatchDetailPage() {
             ))}
           </div>
         </section>
+
+        <CompareWithSection watch={watch} />
       </div>
     </div>
+  );
+}
+
+function CompareWithSection({ watch }: { watch: Watch }) {
+  const rivals = suggestRivals(watch, 3);
+  if (rivals.length === 0) return null;
+  return (
+    <section className="mt-12">
+      <h2 className="text-2xl font-semibold mb-4 inline-flex items-center gap-2">
+        <Swords className="h-5 w-5 text-primary" />
+        Compare {watch.brand} {watch.model} with…
+      </h2>
+      <div className="grid sm:grid-cols-3 gap-4">
+        {rivals.map((r) => (
+          <Link
+            key={r.id}
+            to="/compare/$slug"
+            params={{ slug: buildCompareSlug(watch.id, r.id) }}
+            className="group rounded-xl border bg-card p-4 hover:border-primary/60 transition-colors"
+          >
+            <div className="text-xs uppercase tracking-wider text-muted-foreground">
+              {watch.brand} {watch.model}
+            </div>
+            <div className="font-bold text-sm">vs</div>
+            <div className="font-bold text-base text-foreground group-hover:text-primary transition-colors">
+              {r.brand} {r.model}
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              ${r.priceUSD} · {r.batteryDays}d battery · {r.display}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
