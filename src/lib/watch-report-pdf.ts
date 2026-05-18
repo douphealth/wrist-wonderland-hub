@@ -499,14 +499,16 @@ export async function generateWatchReportPDF(data: WatchPDFData) {
     { l: "STYLE", v: answers.style ? answers.style[0].toUpperCase() + answers.style.slice(1) : "—" },
     { l: "SENSOR PRIORITY", v: rec.profile.sensorPriority },
   ];
-  const colW = 42;
+  // 2-column stats grid sized to leave room for the radar on the right.
+  const colW = 56;
+  const cardW = colW - 4;
   stats.forEach((s, i) => {
     const col = i % 2;
     const row = Math.floor(i / 2);
     const sx = M + 4 + col * colW;
     const sy = y + row * 13;
-    rr(doc, sx, sy, colW - 4, 11, 2, C.bg);
-    labelValue(doc, sx + 3, sy + 3, s.l, s.v);
+    rr(doc, sx, sy, cardW, 12, 2, C.bg);
+    labelValue(doc, sx + 3, sy + 3, s.l, s.v, cardW - 6);
   });
 
   try { drawRadar(doc, M + CW - 36, y + 24, 22, radarData); } catch { /* ignore */ }
