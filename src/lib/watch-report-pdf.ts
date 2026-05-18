@@ -335,7 +335,7 @@ function drawWatchFrame(
   doc.text(brand.toUpperCase(), x + w / 2, y + h / 2 - 1, { align: "center" });
   doc.setFontSize(7);
   doc.setTextColor(C.dark[0], C.dark[1], C.dark[2]);
-  const lines = doc.splitTextToSize(model, w - 4);
+    const lines = doc.splitTextToSize(asciiSafe(model), w - 4);
   doc.text(lines.slice(0, 2), x + w / 2, y + h / 2 + 3, { align: "center" });
 }
 
