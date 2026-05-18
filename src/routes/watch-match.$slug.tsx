@@ -372,9 +372,8 @@ function WatchMatchResult() {
     refetchOnWindowFocus: false,
   });
 
-  // Resolve real Amazon product URLs + images via SerpApi for the recommended
-  // watches. Falls back to category images + tagged search URLs when SerpApi
-  // is unavailable, so the UI never renders a broken link or empty image.
+  // Resolve real Amazon product URLs + images via SerpApi for recommended
+  // watches. Curated ASINs stay direct product links; search is last-resort only.
   const productLookupWatches = useMemo(() => {
     const list = [primary.watch];
     if (setup.alt) list.push(setup.alt.watch);
