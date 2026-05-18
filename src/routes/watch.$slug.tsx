@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { watchDatabase, type Watch } from "@/lib/watch-database";
 import { amazonURL, categoryImage } from "@/lib/amazon";
+import { useAmazonHost } from "@/hooks/use-amazon-host";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,13 +32,60 @@ export const Route = createFileRoute("/watch/$slug")({
     if (!w) return { meta: [{ title: "Watch not found" }] };
     const title = `${w.brand} ${w.model} — Specs, Battery & Features`;
     const description = w.highlight;
+    const canonical = `https://wrist-wonderland-hub.lovable.app/watch/${encodeURIComponent(w.id)}`;
+    const productLd = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: `${w.brand} ${w.model}`,
+      brand: { "@type": "Brand", name: w.brand },
+      description: w.highlight,
+      category: w.category,
+      ...(w.imageURL ? { image: w.imageURL } : {}),
+      offers: {
+        "@type": "Offer",
+        priceCurrency: "USD",
+        price: String(w.priceUSD),
+        availability: "https://schema.org/InStock",
+        url: canonical,
+      },
+      additionalProperty: [
+        { "@type": "PropertyValue", name: "Battery (days)", value: w.batteryDays },
+        { "@type": "PropertyValue", name: "Case size (mm)", value: w.caseSizeMM },
+        { "@type": "PropertyValue", name: "Weight (g)", value: w.weightGrams },
+        { "@type": "PropertyValue", name: "Display", value: w.display },
+        { "@type": "PropertyValue", name: "Water rating", value: w.waterRating },
+      ],
+    };
+    const breadcrumbLd = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: "https://wrist-wonderland-hub.lovable.app/" },
+        { "@type": "ListItem", position: 2, name: `${w.brand} ${w.model}`, item: canonical },
+      ],
+    };
     return {
       meta: [
         { title },
         { name: "description", content: description },
+        { property: "og:type", content: "product" },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
-        ...(w.imageURL ? [{ property: "og:image", content: w.imageURL }] : []),
+        { property: "og:url", content: canonical },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        ...(w.imageURL
+          ? [
+              { property: "og:image", content: w.imageURL },
+              { name: "twitter:image", content: w.imageURL },
+            ]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: canonical }],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(productLd) },
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbLd) },
       ],
     };
   },
@@ -76,7 +124,8 @@ const FEATURE_LABELS: Record<string, string> = {
 function WatchDetailPage() {
   const { watch } = Route.useLoaderData() as { watch: Watch };
   const img = categoryImage(watch);
-  const buyUrl = amazonURL(watch);
+  const host = useAmazonHost();
+  const buyUrl = amazonURL(watch, { host });
 
   return (
     <div className="min-h-screen bg-background">
@@ -118,9 +167,9 @@ function WatchDetailPage() {
 
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <a href={buyUrl} target="_blank" rel="noopener noreferrer sponsored">
+                <a href={buyUrl} target="_blank" rel="sponsored nofollow noopener noreferrer">
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Buy on Amazon
+                  Buy on Amazon{host !== "com" ? `.${host}` : ""}
                   <ExternalLink className="h-4 w-4 ml-2" />
                 </a>
               </Button>
