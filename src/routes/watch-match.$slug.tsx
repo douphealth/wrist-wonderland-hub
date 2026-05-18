@@ -554,6 +554,32 @@ function WatchMatchResult() {
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 md:space-y-8">
         <AffiliateDisclosure variant="banner" />
+        {/* Trust strip */}
+        <motion.div
+          {...fadeUp}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3"
+          aria-label="Why trust this match"
+        >
+          {[
+            { icon: ShieldCheck, label: "Deterministic engine", sub: "Same answers, same pick" },
+            { icon: Star, label: "25+ flagships", sub: "Hand-verified specs" },
+            { icon: Zap, label: "Live Amazon pricing", sub: "Updated each visit" },
+            { icon: Heart, label: "Free forever", sub: "No paywall, no signup" },
+          ].map((t) => (
+            <div
+              key={t.label}
+              className="glass rounded-xl p-3 flex items-center gap-3"
+            >
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <t.icon className="w-4 h-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold uppercase tracking-wider truncate">{t.label}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{t.sub}</div>
+              </div>
+            </div>
+          ))}
+        </motion.div>
         {/* #1 Recommendation */}
         <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
           <div className="glass rounded-2xl p-5 md:p-8 border-primary/20 relative overflow-hidden">
