@@ -73,18 +73,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Smartwatch Coach guides users to select and utilize smartwatches for fitness and health tracking." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Smartwatch Coach guides users to select and utilize smartwatches for fitness and health tracking." },
+      { title: "WatchMatch AI — Find your perfect smartwatch in 60 seconds" },
+      {
+        name: "description",
+        content:
+          "Take the WatchMatch quiz and get a personalized smartwatch, sportwatch or fitness band recommendation backed by real specs and expert review notes.",
+      },
+      { name: "author", content: "GearUpToFit" },
+      { name: "theme-color", content: "#0a0a0a" },
+      { property: "og:site_name", content: "WatchMatch AI" },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Smartwatch Coach guides users to select and utilize smartwatches for fitness and health tracking." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c675bdef-fed5-4510-bdee-15bd8481a4f0/id-preview-e9861780--0f475fbe-6fef-4d32-9906-32618b3303ca.lovable.app-1778576176547.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c675bdef-fed5-4510-bdee-15bd8481a4f0/id-preview-e9861780--0f475fbe-6fef-4d32-9906-32618b3303ca.lovable.app-1778576176547.png" },
+      { property: "og:title", content: "WatchMatch AI — Find your perfect smartwatch" },
+      {
+        property: "og:description",
+        content:
+          "60-second quiz. Real specs. Honest picks. Get matched with the right smartwatch for your wrist, your phone and your training.",
+      },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gearuptofit" },
+      { name: "twitter:title", content: "WatchMatch AI — Find your perfect smartwatch" },
+      {
+        name: "twitter:description",
+        content:
+          "60-second quiz. Real specs. Honest picks. Get matched with the right smartwatch for your wrist, your phone and your training.",
+      },
     ],
     links: [
       {
