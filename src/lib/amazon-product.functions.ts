@@ -4,7 +4,7 @@ import { z } from "zod";
 export const AMAZON_TAG = "papalex-20";
 
 export interface AmazonProduct {
-  /** Direct product URL (https://www.amazon.com/dp/ASIN?tag=...). Falls back to a tagged search URL. */
+  /** Direct product URL (https://www.amazon.com/dp/ASIN?tag=...). Falls back to a tagged search URL only when no ASIN exists. */
   url: string;
   /** Product image URL from Amazon CDN. May be null when SerpApi is unavailable. */
   image: string | null;
@@ -12,7 +12,7 @@ export interface AmazonProduct {
   asin: string | null;
   /** Verified product title from Amazon. */
   title: string | null;
-  /** "serpapi" when fetched live, "fallback" when we used the curated ASIN, "search" when nothing matched. */
+  /** "serpapi" when fetched live, "fallback" when we used the curated ASIN, "search" when no exact ASIN exists. */
   source: "serpapi" | "fallback" | "search";
 }
 
@@ -100,8 +100,8 @@ function pickBest(results: SerpApiResult[] | undefined, brand: string, model: st
   return scored[0]?.result;
 }
 
-function cacheKey(brand: string, model: string) {
-  return `${brand}::${model}`.toLowerCase();
+function cacheKey(brand: string, model: string, asin?: string) {
+  return `${brand}::${model}::${asin ?? "no-asin"}`.toLowerCase();
 }
 
 /**
@@ -114,17 +114,29 @@ function cacheKey(brand: string, model: string) {
  *
  * Cascade:
  *   1. SerpApi `engine=amazon` (best — real product page + product image)
- *   2. Curated ASIN from the watch database (deep-link, category image fallback)
- *   3. Tagged Amazon search URL (always lands on a live results page)
+  *   2. Curated ASIN from the watch database (direct deep-link, never search)
+  *   3. Tagged Amazon search URL only when no exact ASIN exists
  */
 async function resolveProduct(
   brand: string,
   model: string,
   fallbackAsin?: string,
 ): Promise<AmazonProduct> {
-  const key = cacheKey(brand, model);
+  const key = cacheKey(brand, model, fallbackAsin);
   const hit = cache.get(key);
   if (hit && Date.now() - hit.ts < TTL_MS) return hit.product;
+
+  if (fallbackAsin) {
+    const product: AmazonProduct = {
+      url: dpUrl(fallbackAsin),
+      image: null,
+      asin: fallbackAsin,
+      title: null,
+      source: "fallback",
+    };
+    cache.set(key, { ts: Date.now(), product });
+    return product;
+  }
 
   const apiKey = process.env.SERPAPI_API_KEY;
   if (apiKey) {
@@ -165,16 +177,14 @@ async function resolveProduct(
     }
   }
 
-  // SerpApi unavailable / no match → tagged Amazon SEARCH URL. We deliberately
-  // never deep-link to a curated /dp/{ASIN} as a fallback: a stale ASIN sends
-  // the buyer to a 404 or wrong product. A search URL ALWAYS lands on a live
-  // page where the brand+model is the first organic hit (with our tag).
+  // SerpApi unavailable / no match → use curated ASIN if present so the Buy
+  // button still goes directly to the exact product page, not Amazon search.
   const product: AmazonProduct = {
-    url: searchUrl(brand, model),
+    url: fallbackAsin ? dpUrl(fallbackAsin) : searchUrl(brand, model),
     image: null,
     asin: fallbackAsin ?? null,
     title: null,
-    source: "search",
+    source: fallbackAsin ? "fallback" : "search",
   };
   cache.set(key, { ts: Date.now(), product });
   return product;
@@ -189,11 +199,11 @@ function sanitizeImage(src: string | undefined | null): string | null {
 
 function safeFallback(brand: string, model: string, asin?: string): AmazonProduct {
   return {
-    url: searchUrl(brand, model),
+    url: asin ? dpUrl(asin) : searchUrl(brand, model),
     image: null,
     asin: asin ?? null,
     title: null,
-    source: "search",
+    source: asin ? "fallback" : "search",
   };
 }
 
@@ -215,10 +225,9 @@ export const getAmazonProducts = createServerFn({ method: "POST" })
     const settled = await Promise.allSettled(
       data.watches.map((w) =>
         (async () => {
-          // ALWAYS resolve the buy URL live via SerpApi so the link points to
-          // the current #1 Amazon organic result — never a stale hard-coded
-          // /dp/{ASIN} that may 404 or land on a different product.
-          // Curated imageURL is kept as a visual fallback only.
+          // Resolve live via SerpApi when available; if not, use the curated
+          // exact ASIN direct product URL rather than sending buyers to search.
+          // Curated imageURL is kept as a visual fallback.
           const resolved = await resolveProduct(w.brand, w.model, w.asin).catch(
             () => safeFallback(w.brand, w.model, w.asin),
           );

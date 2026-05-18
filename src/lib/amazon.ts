@@ -80,12 +80,9 @@ export function amazonHostForLocale(locale?: string | null): string {
 /**
  * Build an Amazon URL for a watch.
  *
- * We deliberately use Amazon's search endpoint (not /dp/{ASIN}) for EVERY
- * link. ASINs change, get retired, or differ by region — a hard-coded /dp/
- * link can return a 404 / "Page Not Found" page. A search URL with the
- * brand + model name + electronics category ALWAYS lands on a live Amazon
- * results page where the exact product is the first hit, with our
- * affiliate tag attributed.
+ * Prefer direct Amazon product links whenever an exact ASIN is curated.
+ * Search is only a last resort for watches that do not yet have a verified
+ * ASIN in the database.
  */
 export function amazonURL(
   watch: Pick<Watch, "brand" | "model" | "asin">,
@@ -93,6 +90,7 @@ export function amazonURL(
 ) {
   const host = opts?.host ?? "com";
   const tag = AMAZON_LOCALE_TAGS[host] ?? AMAZON_TAG;
+  if (watch.asin) return `https://www.amazon.${host}/dp/${watch.asin}?tag=${tag}`;
   const q = encodeURIComponent(`${watch.brand} ${watch.model}`.trim());
   return `https://www.amazon.${host}/s?k=${q}&i=electronics&tag=${tag}`;
 }
