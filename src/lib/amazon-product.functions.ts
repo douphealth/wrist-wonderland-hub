@@ -126,6 +126,18 @@ async function resolveProduct(
   const hit = cache.get(key);
   if (hit && Date.now() - hit.ts < TTL_MS) return hit.product;
 
+  if (fallbackAsin) {
+    const product: AmazonProduct = {
+      url: dpUrl(fallbackAsin),
+      image: null,
+      asin: fallbackAsin,
+      title: null,
+      source: "fallback",
+    };
+    cache.set(key, { ts: Date.now(), product });
+    return product;
+  }
+
   const apiKey = process.env.SERPAPI_API_KEY;
   if (apiKey) {
     try {
