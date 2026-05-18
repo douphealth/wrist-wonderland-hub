@@ -108,9 +108,12 @@ function link(doc: jsPDF, x: number, y: number, text: string, url: string, size 
   doc.setFontSize(size);
   doc.setTextColor(C.red[0], C.red[1], C.red[2]);
   doc.setFont("helvetica", "bold");
-  doc.textWithLink(text, x, y, { url });
-  const tw = doc.getTextWidth(text);
-  drawLinkIcon(doc, x + tw + 1.2, y - size * 0.32, size * 0.32);
+  const safe = asciiSafe(text);
+  doc.textWithLink(safe, x, y, { url });
+  const tw = doc.getTextWidth(safe);
+  // Lift the icon so its bottom sits comfortably above the text baseline,
+  // clear of descenders and not visually "underlining" the link.
+  drawLinkIcon(doc, x + tw + 1.2, y - size * 0.62, size * 0.32);
 }
 
 function drawRadar(doc: jsPDF, cx: number, cy: number, radius: number, data: { axis: string; value: number }[]) {
