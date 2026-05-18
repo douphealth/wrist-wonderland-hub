@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as MethodologyRouteImport } from './routes/methodology'
 import { Route as BrevoSmartwatchSequenceRouteImport } from './routes/brevo-smartwatch-sequence'
 import { Route as BrevoRunningShoeSequenceRouteImport } from './routes/brevo-running-shoe-sequence'
 import { Route as IndexRouteImport } from './routes/index'
@@ -21,6 +22,11 @@ import { Route as ApiPublicSubscribeRouteImport } from './routes/api/public/subs
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MethodologyRoute = MethodologyRouteImport.update({
+  id: '/methodology',
+  path: '/methodology',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BrevoSmartwatchSequenceRoute = BrevoSmartwatchSequenceRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
+  '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
+  '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/brevo-running-shoe-sequence': typeof BrevoRunningShoeSequenceRoute
   '/brevo-smartwatch-sequence': typeof BrevoSmartwatchSequenceRoute
+  '/methodology': typeof MethodologyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/compare/$slug': typeof CompareSlugRoute
   '/watch-match/$slug': typeof WatchMatchSlugRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
+    | '/methodology'
     | '/sitemap.xml'
     | '/compare/$slug'
     | '/watch-match/$slug'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
+    | '/methodology'
     | '/sitemap.xml'
     | '/compare/$slug'
     | '/watch-match/$slug'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/'
     | '/brevo-running-shoe-sequence'
     | '/brevo-smartwatch-sequence'
+    | '/methodology'
     | '/sitemap.xml'
     | '/compare/$slug'
     | '/watch-match/$slug'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BrevoRunningShoeSequenceRoute: typeof BrevoRunningShoeSequenceRoute
   BrevoSmartwatchSequenceRoute: typeof BrevoSmartwatchSequenceRoute
+  MethodologyRoute: typeof MethodologyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CompareSlugRoute: typeof CompareSlugRoute
   WatchMatchSlugRoute: typeof WatchMatchSlugRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/methodology': {
+      id: '/methodology'
+      path: '/methodology'
+      fullPath: '/methodology'
+      preLoaderRoute: typeof MethodologyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/brevo-smartwatch-sequence': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BrevoRunningShoeSequenceRoute: BrevoRunningShoeSequenceRoute,
   BrevoSmartwatchSequenceRoute: BrevoSmartwatchSequenceRoute,
+  MethodologyRoute: MethodologyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CompareSlugRoute: CompareSlugRoute,
   WatchMatchSlugRoute: WatchMatchSlugRoute,
@@ -209,3 +230,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
