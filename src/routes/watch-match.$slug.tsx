@@ -266,16 +266,6 @@ function WatchMatchResult() {
     }
   };
 
-  const handleEmailPartner = useCallback(() => {
-    if (!rec) return;
-    const subject = `My WatchMatch: ${rec.profile.category}`;
-    const body =
-      `I just took the WatchMatch AI quiz on GearUpToFit and my #1 pick is the ${primary.watch.brand} ${primary.watch.model} (${primary.matchPercent}% match).\n\n` +
-      `See the full breakdown: ${publicReportURL}\n\n` +
-      `— Sent from WatchMatch AI`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [primary, publicReportURL, rec]);
-
   if (!answers || !rec || !setup) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-dark">
@@ -296,6 +286,15 @@ function WatchMatchResult() {
   }
 
   const primary = setup.primary;
+
+  const handleEmailPartner = () => {
+    const subject = `My WatchMatch: ${rec.profile.category}`;
+    const body =
+      `I just took the WatchMatch AI quiz on GearUpToFit and my #1 pick is the ${primary.watch.brand} ${primary.watch.model} (${primary.matchPercent}% match).\n\n` +
+      `See the full breakdown: ${publicReportURL}\n\n` +
+      `— Sent from WatchMatch AI`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
   // Build live keyword set from the user's answers + top match — used to pull
   // the most relevant published guides from gearuptofit.com via the WP REST API.
