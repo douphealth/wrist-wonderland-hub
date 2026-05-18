@@ -344,7 +344,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["rugged", "sporty"],
     highlight: "Finnish-built dual-frequency GPS with offline maps — rotating crown UI feels great.",
-    imageURL: "https://m.media-amazon.com/images/I/71ceqlfJBaL._AC_SL1500_.jpg"
+    imageURL: "https://m.media-amazon.com/images/I/71ceqlfJBaL._AC_SL1500_.jpg",
+    asin: "B0DDSVQ55D"
   },
   {
     id: "suunto-vertical",
@@ -564,7 +565,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["luxury", "minimal"],
     highlight: "Analog hybrid with medical-grade ECG and 30-day battery — looks like a real watch.",
-    imageURL: "https://m.media-amazon.com/images/I/61FooOnl3+L._AC_SL1500_.jpg"
+    imageURL: "https://m.media-amazon.com/images/I/61FooOnl3+L._AC_SL1500_.jpg",
+    asin: "B0DJFWPCM9"
   },
   {
     id: "whoop-4",
@@ -583,7 +585,8 @@ export const watchDatabase: Watch[] = [
     phones: ["both"],
     style: ["minimal"],
     highlight: "Screen-free recovery and strain coaching — the choice of pro athletes (subscription required).",
-    imageURL: "https://m.media-amazon.com/images/I/71CQ6esBqFL._AC_SL1500_.jpg"
+    imageURL: "https://m.media-amazon.com/images/I/71CQ6esBqFL._AC_SL1500_.jpg",
+    asin: "B0BWSF6H4Q"
   },
   {
     id: "mobvoi-ticwatch-pro-5",
@@ -1255,7 +1258,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "gym"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Apple-Watch-style aluminum chassis under $200 — 1.82\" AMOLED, GPS and 100+ workout modes."
+    highlight: "Apple-Watch-style aluminum chassis under $200 — 1.82\" AMOLED, GPS and 100+ workout modes.",
+    asin: "B0CZTHGXX7"
   },
   {
     id: "xiaomi-watch-s3",
