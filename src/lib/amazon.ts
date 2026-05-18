@@ -11,6 +11,73 @@ import catHybrid from "@/assets/cat-hybrid.jpg";
 export const AMAZON_TAG = "papalex-20";
 
 /**
+ * Amazon Associates tag per locale. Affiliate programs are region-scoped —
+ * a US tag on amazon.co.uk earns nothing. We default everything to the US
+ * tag and only override when an explicit per-region tag is configured.
+ * Adding tags is a one-line change: register at affiliate-program.amazon.XX
+ * and drop the tracking id below.
+ */
+const AMAZON_LOCALE_TAGS: Record<string, string> = {
+  com: AMAZON_TAG, // US (papalex-20)
+  // "co.uk": "yourtag-21",
+  // "de": "yourtag-21",
+  // "it": "yourtag-21",
+  // "fr": "yourtag-21",
+  // "es": "yourtag-21",
+  // "ca": "yourtag-20",
+};
+
+/**
+ * Map a navigator language / country code to the closest Amazon TLD that
+ * actually serves the user. Unknown locales fall back to amazon.com.
+ */
+export function amazonHostForLocale(locale?: string | null): string {
+  if (!locale) return "com";
+  const lower = locale.toLowerCase();
+  // Match the COUNTRY portion first (e.g. en-GB → gb), then language fallback.
+  const country = lower.includes("-") ? lower.split("-")[1] : lower;
+  switch (country) {
+    case "gb":
+    case "uk":
+      return "co.uk";
+    case "de":
+    case "at":
+    case "ch":
+      return "de";
+    case "it":
+      return "it";
+    case "fr":
+    case "be":
+    case "lu":
+      return "fr";
+    case "es":
+      return "es";
+    case "nl":
+      return "nl";
+    case "se":
+      return "se";
+    case "pl":
+      return "pl";
+    case "ca":
+      return "ca";
+    case "au":
+      return "com.au";
+    case "jp":
+      return "co.jp";
+    case "mx":
+      return "com.mx";
+    case "br":
+      return "com.br";
+    case "in":
+      return "in";
+    case "ae":
+      return "ae";
+    default:
+      return "com";
+  }
+}
+
+/**
  * Build an Amazon URL for a watch.
  *
  * We deliberately use Amazon's search endpoint (not /dp/{ASIN}) for EVERY
@@ -20,9 +87,14 @@ export const AMAZON_TAG = "papalex-20";
  * results page where the exact product is the first hit, with our
  * affiliate tag attributed.
  */
-export function amazonURL(watch: Pick<Watch, "brand" | "model" | "asin">) {
+export function amazonURL(
+  watch: Pick<Watch, "brand" | "model" | "asin">,
+  opts?: { host?: string }
+) {
+  const host = opts?.host ?? "com";
+  const tag = AMAZON_LOCALE_TAGS[host] ?? AMAZON_TAG;
   const q = encodeURIComponent(`${watch.brand} ${watch.model}`.trim());
-  return `https://www.amazon.com/s?k=${q}&i=electronics&tag=${AMAZON_TAG}`;
+  return `https://www.amazon.${host}/s?k=${q}&i=electronics&tag=${tag}`;
 }
 
 /** Build a gearuptofit.com URL from a relative path (no leading slash). */
