@@ -91,10 +91,35 @@ function ogImageForSlug(slug: string): string {
 
 export const Route = createFileRoute("/watch-match/$slug")({
   validateSearch: searchSchema,
-  head: ({ params }) => ({
+  head: ({ params }) => {
+    const canonical = `${PUBLIC_APP_ORIGIN}/watch-match/${params.slug}`;
+    const title = `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`;
+    const breadcrumbsLD = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: `${PUBLIC_APP_ORIGIN}/` },
+        { "@type": "ListItem", position: 2, name: "WatchMatch Quiz", item: `${PUBLIC_APP_ORIGIN}/#quiz` },
+        { "@type": "ListItem", position: 3, name: slugTitle(params.slug), item: canonical },
+      ],
+    };
+    const quizLD = {
+      "@context": "https://schema.org",
+      "@type": "Quiz",
+      name: "WatchMatch AI Quiz",
+      about: "Personalized smartwatch recommendation",
+      educationalLevel: "beginner",
+      url: `${PUBLIC_APP_ORIGIN}/#quiz`,
+      provider: {
+        "@type": "Organization",
+        name: "GearUpToFit",
+        url: "https://gearuptofit.com",
+      },
+    };
+    return {
     meta: [
       {
-        title: `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`,
+        title,
       },
       {
         name: "description",
@@ -103,7 +128,7 @@ export const Route = createFileRoute("/watch-match/$slug")({
       },
       {
         property: "og:title",
-        content: `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`,
+        content: title,
       },
       {
         property: "og:description",
@@ -111,6 +136,7 @@ export const Route = createFileRoute("/watch-match/$slug")({
           "Take the 9-question WatchMatch AI quiz on GearUpToFit and find the smartwatch that actually fits your wrist, sport and life.",
       },
       { property: "og:type", content: "article" },
+      { property: "og:url", content: canonical },
       { property: "og:image", content: ogImageForSlug(params.slug) },
       { property: "og:image:width", content: "896" },
       { property: "og:image:height", content: "896" },
@@ -118,7 +144,7 @@ export const Route = createFileRoute("/watch-match/$slug")({
       { name: "twitter:image", content: ogImageForSlug(params.slug) },
       {
         name: "twitter:title",
-        content: `${slugTitle(params.slug)} — Your Perfect Smartwatch Match`,
+        content: title,
       },
       {
         name: "twitter:description",
@@ -129,10 +155,21 @@ export const Route = createFileRoute("/watch-match/$slug")({
     links: [
       {
         rel: "canonical",
-        href: `https://gearuptofit.com/watch-match/${params.slug}`,
+        href: canonical,
       },
     ],
-  }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(breadcrumbsLD),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify(quizLD),
+      },
+    ],
+  };
+  },
   component: WatchMatchResult,
 });
 
