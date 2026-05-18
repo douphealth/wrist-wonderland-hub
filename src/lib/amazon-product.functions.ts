@@ -187,11 +187,11 @@ function sanitizeImage(src: string | undefined | null): string | null {
 
 function safeFallback(brand: string, model: string, asin?: string): AmazonProduct {
   return {
-    url: searchUrl(brand, model),
+    url: asin ? dpUrl(asin) : searchUrl(brand, model),
     image: null,
     asin: asin ?? null,
     title: null,
-    source: "search",
+    source: asin ? "fallback" : "search",
   };
 }
 
@@ -213,10 +213,9 @@ export const getAmazonProducts = createServerFn({ method: "POST" })
     const settled = await Promise.allSettled(
       data.watches.map((w) =>
         (async () => {
-          // ALWAYS resolve the buy URL live via SerpApi so the link points to
-          // the current #1 Amazon organic result — never a stale hard-coded
-          // /dp/{ASIN} that may 404 or land on a different product.
-          // Curated imageURL is kept as a visual fallback only.
+          // Resolve live via SerpApi when available; if not, use the curated
+          // exact ASIN direct product URL rather than sending buyers to search.
+          // Curated imageURL is kept as a visual fallback.
           const resolved = await resolveProduct(w.brand, w.model, w.asin).catch(
             () => safeFallback(w.brand, w.model, w.asin),
           );
