@@ -35,6 +35,23 @@ const PH = 297;
 const M = 16;
 const CW = PW - M * 2;
 
+/**
+ * Strip combining marks (e.g. Garmin "fēnix" → "fenix") and other
+ * non-Latin-1 codepoints that jsPDF's default Helvetica can't render —
+ * those would otherwise drop out and leave visible gaps like "f nix".
+ */
+function asciiSafe(s: string): string {
+  if (!s) return s;
+  return s
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u2022/g, "*")
+    .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, "");
+}
+
 // ─── Primitives ───
 function rr(doc: jsPDF, x: number, y: number, w: number, h: number, r: number, fill: RGB, stroke?: RGB) {
   doc.setFillColor(fill[0], fill[1], fill[2]);
