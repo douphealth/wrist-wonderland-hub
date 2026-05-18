@@ -933,7 +933,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["multisport", "outdoor", "running"],
     phones: ["both"],
     style: ["rugged", "luxury", "sporty"],
-    highlight: "AMOLED multisport flagship — built-in LED flashlight, full TopoActive maps, 16-day battery."
+    highlight: "AMOLED multisport flagship — built-in LED flashlight, full TopoActive maps, 16-day battery.",
+    asin: "B0BYFBC4D9"
   },
   {
     id: "garmin-fenix-7-pro-sapphire-solar",
@@ -951,7 +952,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["multisport", "outdoor", "running"],
     phones: ["both"],
     style: ["rugged", "sporty"],
-    highlight: "Solar-extended fenix — sapphire crystal, 22-day battery, full topo maps and built-in flashlight."
+    highlight: "Solar-extended fenix — sapphire crystal, 22-day battery, full topo maps and built-in flashlight.",
+    asin: "B0BYFDZ6BM"
   },
   {
     id: "garmin-tactix-7-amoled",
@@ -969,7 +971,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["outdoor", "multisport"],
     phones: ["both"],
     style: ["rugged"],
-    highlight: "Tactical-grade fenix — night-vision compatibility, ballistics, jumpmaster, stealth GPS modes."
+    highlight: "Tactical-grade fenix — night-vision compatibility, ballistics, jumpmaster, stealth GPS modes.",
+    asin: "B0DBMB54SJ"
   },
   {
     id: "garmin-forerunner-165",
@@ -987,7 +990,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["running"],
     phones: ["both"],
     style: ["sporty", "minimal"],
-    highlight: "Most affordable Garmin AMOLED runner — training readiness, race predictor and morning report."
+    highlight: "Most affordable Garmin AMOLED runner — training readiness, race predictor and morning report.",
+    asin: "B0CT3SGHXL"
   },
   {
     id: "garmin-forerunner-55",
@@ -1005,7 +1009,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["running"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Beginner-friendly running GPS — coach-style plans, 14-day battery, refreshingly simple UI."
+    highlight: "Beginner-friendly running GPS — coach-style plans, 14-day battery, refreshingly simple UI.",
+    asin: "B0953X73TP"
   },
   {
     id: "garmin-venu-sq-2",
@@ -1023,7 +1028,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "gym", "running"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Square-faced Apple Watch alternative for Android — 11-day battery, vivid AMOLED, on-watch music."
+    highlight: "Square-faced Apple Watch alternative for Android — 11-day battery, vivid AMOLED, on-watch music.",
+    asin: "B0B5VVFKQM"
   },
   {
     id: "coros-apex-2-pro",
@@ -1061,7 +1067,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["running"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "29-gram running GPS for under $200 — long-standing budget favorite of marathoners."
+    highlight: "29-gram running GPS for under $200 — long-standing budget favorite of marathoners.",
+    asin: "B08GNV86NR"
   },
   {
     id: "polar-pacer-pro",
@@ -1079,7 +1086,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["running"],
     phones: ["both"],
     style: ["sporty", "minimal"],
-    highlight: "Lightweight running GPS with hill splitter, race pace and Polar's class-leading training load."
+    highlight: "Lightweight running GPS with hill splitter, race pace and Polar's class-leading training load.",
+    asin: "B0B57M9ZKW"
   },
   {
     id: "polar-grit-x2-pro",
@@ -1097,7 +1105,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["outdoor", "multisport", "running"],
     phones: ["both"],
     style: ["rugged", "sporty"],
-    highlight: "Sapphire-glass adventure watch with full offline topo maps, ECG and MIL-STD-810H durability."
+    highlight: "Sapphire-glass adventure watch with full offline topo maps, ECG and MIL-STD-810H durability.",
+    asin: "B0CXHJRWN9"
   },
   {
     id: "polar-ignite-3",
@@ -1115,7 +1124,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "running", "health"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Fitness watch with sleep-driven daily energy guidance and a vivid always-on AMOLED."
+    highlight: "Fitness watch with sleep-driven daily energy guidance and a vivid always-on AMOLED.",
+    asin: "B0BJVQNKQ5"
   },
   {
     id: "suunto-9-peak-pro",
@@ -1169,7 +1179,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "gym", "running"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Sub-$100 AMOLED with stainless-steel bezel, dual-band GPS and Zepp Coach training plans."
+    highlight: "Sub-$100 AMOLED with stainless-steel bezel, dual-band GPS and Zepp Coach training plans.",
+    asin: "B0DT3WZCZD"
   },
   {
     id: "amazfit-cheetah-pro",
@@ -1187,7 +1198,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["running", "multisport"],
     phones: ["both"],
     style: ["sporty", "minimal"],
-    highlight: "Lightweight running watch with dual-band GPS, on-device offline maps and AI-coached workouts."
+    highlight: "Lightweight running watch with dual-band GPS, on-device offline maps and AI-coached workouts.",
+    asin: "B0C7ZXCKK2"
   },
   {
     id: "oneplus-watch-3",
@@ -1205,7 +1217,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "health", "running"],
     phones: ["android"],
     style: ["sporty", "luxury"],
-    highlight: "Wear OS 5 with Snapdragon W5 + BES2800 dual chips — 5-day smart battery and 16-day power-saver."
+    highlight: "Wear OS 5 with Snapdragon W5 + BES2800 dual chips — 5-day smart battery and 16-day power-saver.",
+    asin: "B0FDJXQ3D4"
   },
   {
     id: "huawei-watch-ultimate",
@@ -1223,7 +1236,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["outdoor", "multisport"],
     phones: ["both"],
     style: ["luxury", "rugged"],
-    highlight: "Zirconium-based liquid-metal dive watch — 110m depth rating, dual-band GPS, sapphire bezel."
+    highlight: "Zirconium-based liquid-metal dive watch — 110m depth rating, dual-band GPS, sapphire bezel.",
+    asin: "B0BYRCHZLC"
   },
   {
     id: "huawei-watch-fit-3",
@@ -1259,7 +1273,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "gym", "running"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Swappable magnetic bezels, dual-band GPS and a 466×466 AMOLED for under $150."
+    highlight: "Swappable magnetic bezels, dual-band GPS and a 466×466 AMOLED for under $150.",
+    asin: "B0CSKR1XQR"
   },
   {
     id: "fitbit-versa-4",
@@ -1277,7 +1292,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["everyday", "gym", "running"],
     phones: ["both"],
     style: ["minimal", "sporty"],
-    highlight: "Lightweight fitness smartwatch — built-in GPS, Google Maps + Wallet and Fitbit's renowned sleep score."
+    highlight: "Lightweight fitness smartwatch — built-in GPS, Google Maps + Wallet and Fitbit's renowned sleep score.",
+    asin: "B0B4MWCFV4"
   },
   {
     id: "fitbit-sense-2",
@@ -1295,7 +1311,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["health", "everyday", "gym"],
     phones: ["both"],
     style: ["minimal"],
-    highlight: "Continuous EDA stress sensor + ECG and skin-temperature tracking — Fitbit's most health-focused watch."
+    highlight: "Continuous EDA stress sensor + ECG and skin-temperature tracking — Fitbit's most health-focused watch.",
+    asin: "B0B4N7LSM6"
   },
   {
     id: "casio-gshock-gbd-h2000",
@@ -1313,7 +1330,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["outdoor", "running", "multisport"],
     phones: ["both"],
     style: ["rugged", "sporty"],
-    highlight: "True G-Shock toughness with GPS, optical HR and solar-assist charging — bombproof training partner."
+    highlight: "True G-Shock toughness with GPS, optical HR and solar-assist charging — bombproof training partner.",
+    asin: "B0BW166KVQ"
   },
   {
     id: "withings-scanwatch-nova",
@@ -1331,7 +1349,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["health", "everyday"],
     phones: ["both"],
     style: ["luxury"],
-    highlight: "Dive-styled luxury hybrid — sapphire crystal, ceramic bezel, FDA-cleared ECG and 30-day battery."
+    highlight: "Dive-styled luxury hybrid — sapphire crystal, ceramic bezel, FDA-cleared ECG and 30-day battery.",
+    asin: "B0CP25RMM4"
   },
   {
     id: "wahoo-elemnt-rival",
@@ -1349,7 +1368,8 @@ export const watchDatabase: Watch[] = [
     bestFor: ["multisport", "running"],
     phones: ["both"],
     style: ["sporty", "minimal"],
-    highlight: "Triathlete's tool — touchless transition, multisport handoff to Wahoo bike computers, structured workouts."
+    highlight: "Triathlete's tool — touchless transition, multisport handoff to Wahoo bike computers, structured workouts.",
+    asin: "B09JMKJYZB"
   },
 ];
 
