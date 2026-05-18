@@ -287,6 +287,15 @@ function WatchMatchResult() {
 
   const primary = setup.primary;
 
+  const handleEmailPartner = () => {
+    const subject = `My WatchMatch: ${rec.profile.category}`;
+    const body =
+      `I just took the WatchMatch AI quiz on GearUpToFit and my #1 pick is the ${primary.watch.brand} ${primary.watch.model} (${primary.matchPercent}% match).\n\n` +
+      `See the full breakdown: ${publicReportURL}\n\n` +
+      `— Sent from WatchMatch AI`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
+
   // Build live keyword set from the user's answers + top match — used to pull
   // the most relevant published guides from gearuptofit.com via the WP REST API.
   const liveKeywords = useMemo(() => {
@@ -395,7 +404,7 @@ function WatchMatchResult() {
   };
 
   return (
-    <div className="min-h-screen pb-16 bg-gradient-dark">
+    <div className="min-h-screen pb-28 md:pb-24 bg-gradient-dark">
       <header className="sticky top-0 z-20 glass-strong px-4 py-3">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <Link
@@ -424,6 +433,15 @@ function WatchMatchResult() {
               ) : (
                 <Share2 className="w-4 h-4" />
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleEmailPartner}
+              title="Email this to my partner"
+              className="hover:bg-primary/10"
+            >
+              <Mail className="w-4 h-4" />
             </Button>
           </div>
         </div>
@@ -536,6 +554,32 @@ function WatchMatchResult() {
 
       <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 md:space-y-8">
         <AffiliateDisclosure variant="banner" />
+        {/* Trust strip */}
+        <motion.div
+          {...fadeUp}
+          className="grid grid-cols-2 md:grid-cols-4 gap-3"
+          aria-label="Why trust this match"
+        >
+          {[
+            { icon: ShieldCheck, label: "Deterministic engine", sub: "Same answers, same pick" },
+            { icon: Star, label: "25+ flagships", sub: "Hand-verified specs" },
+            { icon: Zap, label: "Live Amazon pricing", sub: "Updated each visit" },
+            { icon: Heart, label: "Free forever", sub: "No paywall, no signup" },
+          ].map((t) => (
+            <div
+              key={t.label}
+              className="glass rounded-xl p-3 flex items-center gap-3"
+            >
+              <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center flex-shrink-0">
+                <t.icon className="w-4 h-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold uppercase tracking-wider truncate">{t.label}</div>
+                <div className="text-[10px] text-muted-foreground truncate">{t.sub}</div>
+              </div>
+            </div>
+          ))}
+        </motion.div>
         {/* #1 Recommendation */}
         <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
           <div className="glass rounded-2xl p-5 md:p-8 border-primary/20 relative overflow-hidden">
@@ -935,6 +979,43 @@ function WatchMatchResult() {
         watchMatchURL={publicReportURL}
         source="quiz_gate"
       />
+
+      {/* Sticky buy bar — collapses on small screens, dismissible via scroll-to-top */}
+      <div className="fixed bottom-0 inset-x-0 z-30 px-3 pb-3 pointer-events-none">
+        <div className="max-w-5xl mx-auto pointer-events-auto">
+          <div className="glass-strong rounded-2xl border border-primary/30 shadow-2xl flex items-center gap-3 p-2.5 pl-3">
+            <div className="hidden sm:flex w-10 h-10 rounded-lg overflow-hidden border border-border/40 flex-shrink-0 bg-card-elevated">
+              <img
+                src={resolvedImage(primary.watch)}
+                alt=""
+                loading="lazy"
+                className="w-full h-full object-contain p-1"
+                onError={(e) => handleImgError(e, primary.watch)}
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground leading-none mb-0.5">
+                #1 Match · {primary.matchPercent}%
+              </div>
+              <div className="text-sm font-bold truncate leading-tight">
+                {primary.watch.brand} {primary.watch.model}
+              </div>
+            </div>
+            <a
+              href={resolvedUrl(primary.watch)}
+              target="_blank"
+              rel="sponsored nofollow noopener noreferrer"
+              aria-busy={amazonLoading}
+              className={`inline-flex items-center gap-1.5 bg-gradient-primary glow-primary-sm hover:opacity-90 px-3 sm:px-4 h-10 rounded-xl font-bold uppercase tracking-wider text-[11px] text-primary-foreground transition-all flex-shrink-0 ${amazonLoading ? "animate-pulse" : ""}`}
+            >
+              <ShoppingCart className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Buy on Amazon</span>
+              <span className="sm:hidden">Buy</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
